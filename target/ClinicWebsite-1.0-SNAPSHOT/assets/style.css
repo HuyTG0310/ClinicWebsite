@@ -1,0 +1,58 @@
+
+/* ===== SIDEBAR BASE ===== */
+.sidebar {
+    background-color: #0d6efd; /* Bootstrap primary */
+    color: #fff;
+}
+
+.sidebar-title {
+    font-weight: 600;
+}
+
+/* ===== MENU LINKS ===== */
+.sidebar-menu .nav-link {
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+}
+
+/* ICON */
+.sidebar-menu .nav-link i {
+    width: 20px;
+    transition: transform 0.25s ease;
+}
+
+/* ===== HOVER EFFECT ===== */
+.sidebar-menu .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    padding-left: 18px;
+}
+
+/* icon trượt nhẹ */
+.sidebar-menu .nav-link:hover i {
+    transform: translateX(3px);
+}
+
+/* ===== ACTIVE ITEM ===== */
+.sidebar-menu .nav-link.active {
+    background-color: #ffffff;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.sidebar-menu .nav-link.active i {
+    color: #0d6efd;
+}
+
+/* ===== LOGOUT ===== */
+.sidebar-menu .nav-link.logout {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.sidebar-menu .nav-link.logout:hover {
+    background-color: #bb2d3b;
+}

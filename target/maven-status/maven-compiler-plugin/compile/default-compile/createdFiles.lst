@@ -1,0 +1,7 @@
+controller\admin\AdminDashboardServlet.class
+controller\lab\LabDashboardServlet.class
+controller\auth\Logout.class
+controller\auth\Login.class
+controller\doctor\DoctorDashboardServlet.class
+controller\receptionist\ReceptionistDashboardServlet.class
+util\DBContext.class
