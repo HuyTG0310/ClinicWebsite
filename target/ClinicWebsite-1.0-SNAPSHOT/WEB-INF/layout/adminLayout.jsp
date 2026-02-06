@@ -30,12 +30,18 @@
                 <jsp:include page="adminSidebar.jsp" />
 
                 <!-- MAIN CONTENT -->
-                <div class="col-md-9 col-lg-10 p-4 bg-light min-vh-100">
-                    <jsp:include page="${contentPage}" />
+                <div class="col-md-9 col-lg-10 p-0 bg-light content-col">
+                    <div class="content-scroll p-4">
+                        <jsp:include page="${contentPage}" />
+                    </div>
                 </div>
+
 
             </div>
         </div>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
 </html>
