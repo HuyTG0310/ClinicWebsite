@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class DBContext {
 
-    protected Connection conn = null;
+    public Connection conn = null;
 
     public DBContext() {
         try {
@@ -46,3 +46,4 @@ public class DBContext {
         DBContext db = new DBContext();
     }
 }
+    
