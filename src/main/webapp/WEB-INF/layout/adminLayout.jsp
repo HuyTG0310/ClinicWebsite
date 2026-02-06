@@ -19,8 +19,9 @@
 
         <!-- Font Awesome -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
+        
     </head>
+
     <body class="bg-light">
 
         <div class="container-fluid">
