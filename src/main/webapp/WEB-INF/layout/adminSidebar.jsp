@@ -55,10 +55,18 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+            <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/RoomList">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage room
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'managePatien' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/PatientList">
+                <i class="fa-solid fa-clock-rotate-left me-2"></i>
+                Manage Patient
             </a>
         </li>
 
