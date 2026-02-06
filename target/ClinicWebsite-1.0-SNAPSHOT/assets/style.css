@@ -3,6 +3,23 @@
 .sidebar {
     background-color: #0d6efd; /* Bootstrap primary */
     color: #fff;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow: hidden; /* sidebar không scroll */
+}
+
+
+/* Cột content chiếm full chiều cao */
+.content-col {
+    height: 100vh;
+    overflow: hidden; /* chặn scroll ngoài */
+}
+
+/* CHỈ div này được scroll */
+.content-scroll {
+    height: 100%;
+    overflow-y: auto;
 }
 
 .sidebar-title {

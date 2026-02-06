@@ -63,8 +63,8 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+            <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/medicine">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage medicine
             </a>
