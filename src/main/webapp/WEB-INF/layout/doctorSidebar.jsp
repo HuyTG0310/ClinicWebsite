@@ -54,8 +54,8 @@
         </li>
         
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/tests">
+            <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/profile/view">
                 <i class="fa-solid fa-vials me-2"></i>
                 Profile
             </a>
