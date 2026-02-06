@@ -12,8 +12,8 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+            <a class="nav-link ${activePage == 'adminDashboard' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/dashboard">
                 <i class="fa-solid fa-gauge me-2"></i>
                 Dashboard
             </a>
@@ -21,7 +21,7 @@
 
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
+            <a class="nav-link ${activePage == 'manageStaff' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/lab/history">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage staff
@@ -38,8 +38,8 @@
 
         <!-- Test Requests -->
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/tests">
+            <a class="nav-link ${activePage == 'manageSpecialty' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/specialty/list">
                 <i class="fa-solid fa-vials me-2"></i>
                 Manage specialty
             </a>
@@ -84,3 +84,4 @@
     </ul>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
