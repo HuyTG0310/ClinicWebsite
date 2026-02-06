@@ -12,8 +12,8 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+            <a class="nav-link ${activePage == 'adminDashboard' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/dashboard">
                 <i class="fa-solid fa-gauge me-2"></i>
                 Dashboard
             </a>
@@ -47,8 +47,8 @@
 
         <!-- Test History -->
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+            <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/service/list">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage service
             </a>
@@ -63,8 +63,8 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+            <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/medicine">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage medicine
             </a>
