@@ -23,16 +23,15 @@ public class AdminDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setAttribute("pageTitle", "Admin Dashboard");
-        request.setAttribute("activePage", "doctorDashboard");
+        request.setAttribute("activePage", "adminDashboard");
         request.setAttribute("contentPage", "/WEB-INF/admin/adminDashboard.jsp");
 
         request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }
 
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
     }
 }
