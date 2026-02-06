@@ -1,7 +1,14 @@
 D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\admin\AdminDashboardServlet.java
 D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\lab\LabDashboardServlet.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\auth\Logout.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\admin\service\ServiceDetailServlet.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\doctor\DoctorDashboardServlet.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\admin\service\ServiceListServlet.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\admin\service\ServiceEditServlet.java
 D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\util\DBContext.java
 D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\receptionist\ReceptionistDashboardServlet.java
-D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\auth\Logout.java
 D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\auth\Login.java
-D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\doctor\DoctorDashboardServlet.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\dao\ServiceDAO.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\controller\admin\service\ServiceAddServlet.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\model\ServiceCategory.java
+D:\2025-2026\SP 26\SWP391\Assignment\ClinicWebsite\src\main\java\model\Service.java

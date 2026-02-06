@@ -1,7 +1,14 @@
-controller\admin\AdminDashboardServlet.class
+model\ServiceCategory.class
 controller\lab\LabDashboardServlet.class
-controller\auth\Logout.class
 controller\auth\Login.class
+controller\admin\service\ServiceListServlet.class
 controller\doctor\DoctorDashboardServlet.class
+controller\admin\service\ServiceEditServlet.class
 controller\receptionist\ReceptionistDashboardServlet.class
 util\DBContext.class
+model\Service.class
+controller\admin\service\ServiceAddServlet.class
+controller\admin\AdminDashboardServlet.class
+controller\admin\service\ServiceDetailServlet.class
+controller\auth\Logout.class
+dao\ServiceDAO.class
