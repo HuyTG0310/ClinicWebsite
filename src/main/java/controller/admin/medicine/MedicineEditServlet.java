@@ -12,15 +12,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
-import java.net.URLEncoder;
 
 /**
  *
  * @author TRUONGTHINHNGUYEN
  */
-@WebServlet(name = "MedicineEditServlet", urlPatterns = {"/admin/medicine/edit"})
+@WebServlet(name = "MedicineEditServlet", urlPatterns = {"/admin/medicine/edit", "/doctor/medicine/edit", "/receptionist/medicine/edit"})
 public class MedicineEditServlet extends HttpServlet {
 
     @Override
@@ -32,66 +30,80 @@ public class MedicineEditServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        request.setCharacterEncoding("UTF-8");
+
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+
+        // 1. Lấy dữ liệu
+        String idRaw = request.getParameter("id"); // ID thường để trong hidden field
         String name = request.getParameter("name");
         String unit = request.getParameter("unit");
         String ingredients = request.getParameter("ingredients");
         String usage = request.getParameter("usage");
         String contra = request.getParameter("contra");
+        String isActiveStr = request.getParameter("isActive");
 
+        // 2. Validate
         if (name == null || name.trim().isEmpty()
                 || unit == null || unit.trim().isEmpty()
                 || ingredients == null || ingredients.trim().isEmpty()
                 || usage == null || usage.trim().isEmpty()
                 || contra == null || contra.trim().isEmpty()) {
 
-//            // giữ lại dữ liệu user đã nhập
-//            Medicine m = new Medicine();
-//            m.setMedicineId(Integer.parseInt(request.getParameter("id")));
-//            m.setMedicineName(name);
-//            m.setUnit(unit);
-//            m.setIngredients(ingredients);
-//            m.setUsage(usage);
-//            m.setContraindication(contra);
-//            m.setIsActive("1".equals(request.getParameter("isActive")));
-//
-//            request.setAttribute("medicine", m);
-//            request.setAttribute("editError", "All fields are required. Please fill in all information.");
-//
-//            request.setAttribute("pageTitle", "Medicine Detail");
-//            request.setAttribute("activePage", "manageMedicine");
-//            request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineDetail.jsp");
-//            request.setAttribute("showEditPopup", true);
-//            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-//            return;
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/admin/medicine/detail?id=" + request.getParameter("id")
-                    + "&editError=" + URLEncoder.encode("All fields are required. Please fill in all information.", "UTF-8")
-            );
+            // Lỗi -> Forward lại form edit kèm thông báo
+            Medicine m = new Medicine();
+            m.setMedicineId(Integer.parseInt(idRaw));
+            m.setMedicineName(name);
+            m.setUnit(unit);
+            m.setIngredients(ingredients);
+            m.setUsage(usage);
+            m.setContraindication(contra);
+            m.setIsActive(isActiveStr != null); // Giữ trạng thái active
+
+            request.setAttribute("medicine", m);
+            request.setAttribute("error", "All fields are required!");
+
+            request.setAttribute("pageTitle", "Edit Medicine");
+            request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineForm.jsp");
+            request.getRequestDispatcher(layout).forward(request, response);
             return;
         }
 
-        // Lấy dữ liệu form
+        // 3. Update DB
         Medicine m = new Medicine();
-        m.setMedicineId(Integer.parseInt(request.getParameter("id")));
-        m.setMedicineName(request.getParameter("name"));
-        m.setUnit(request.getParameter("unit"));
-        m.setIngredients(request.getParameter("ingredients"));
-        m.setUsage(request.getParameter("usage"));
-        m.setContraindication(request.getParameter("contra"));
-        String isActiveStr = request.getParameter("isActive");
+        m.setMedicineId(Integer.parseInt(idRaw));
+        m.setMedicineName(name);
+        m.setUnit(unit);
+        m.setIngredients(ingredients);
+        m.setUsage(usage);
+        m.setContraindication(contra);
+
+        // Xử lý checkbox isActive (Nếu null là ko tick -> false)
+        // Lưu ý: Form Edit thường có checkbox Active, Form Create thì mặc định true
         m.setIsActive(isActiveStr != null);
 
-        // Update DB
         MedicineDAO dao = new MedicineDAO();
         dao.update(m);
-
-        // Quay về view detail
-        response.sendRedirect(
-                request.getContextPath()
-                + "/admin/medicine/detail?id=" + m.getMedicineId()
-        );
-
+        response.sendRedirect(basePath + "/medicine/detail?id=" + m.getMedicineId() + "&msg=updateSuccess");
     }
-
 }

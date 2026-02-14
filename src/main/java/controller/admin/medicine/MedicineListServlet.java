@@ -4,21 +4,21 @@
  */
 package controller.admin.medicine;
 
-import dao.MedicineDAO;
-import model.Medicine;
+import dao.*;
+import model.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 /**
  *
  * @author TRUONGTHINHNGUYEN
  */
-@WebServlet(name = "MedicineListServlet", urlPatterns = {"/admin/medicine"})
+@WebServlet(name = "MedicineListServlet", urlPatterns = {"/admin/medicine/list", "/doctor/medicine/list", "/receptionist/medicine/list"})
 public class MedicineListServlet extends HttpServlet {
 
     @Override
@@ -32,32 +32,46 @@ public class MedicineListServlet extends HttpServlet {
         List<Medicine> list;
 
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
-        boolean hasStatus = status != null && !status.equals("all");
+        boolean hasStatus = status != null && !"all".equals(status);
 
         if (hasKeyword || hasStatus) {
-            if (keyword == null) {
-                keyword = "";
-            }
-            if (status == null) {
-                status = "all";
-            }
-            list = dao.search(keyword, status);
+            list = dao.search(
+                    keyword == null ? "" : keyword.trim(),
+                    status == null ? "all" : status
+            );
         } else {
             list = dao.getAll();
         }
 
-        // 2. Gọi DAO
-        // 3. Đẩy dữ liệu sang JSP
         request.setAttribute("list", list);
         request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
 
-        // 4. Forward sang view     
-        request.setAttribute("pageTitle", "Manage medicine");
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+        request.setAttribute("pageTitle", "Medicine");
         request.setAttribute("activePage", "manageMedicine");
         request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineList.jsp");
-
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override

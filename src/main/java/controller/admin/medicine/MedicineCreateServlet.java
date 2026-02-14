@@ -19,39 +19,70 @@ import java.io.IOException;
  *
  * @author TRUONGTHINHNGUYEN
  */
-@WebServlet(name = "MedicineCreateServlet", urlPatterns = {"/admin/medicine/create"})
+@WebServlet(name = "MedicineCreateServlet", urlPatterns = {"/admin/medicine/create", "/doctor/medicine/create", "/receptionist/medicine/create"})
 public class MedicineCreateServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
 
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath); // Gửi sang JSP để dùng
         request.setAttribute("pageTitle", "Add medicine");
         request.setAttribute("activePage", "manageMedicine");
+
         request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineForm.jsp");
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-//        // Mở form thêm mới
-//        request.getRequestDispatcher("/WEB-INF/admin/medicine/medicineForm.jsp")
-//                .forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
 
-        /* 
-           1. LẤY DỮ LIỆU TỪ FORM
-      */
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         String name = request.getParameter("name");
         String unit = request.getParameter("unit");
         String ingredients = request.getParameter("ingredients");
         String usage = request.getParameter("usage");
         String contra = request.getParameter("contra");
 
-        /*
-           2. VALIDATE RỖNG (PHẦN MỚI THÊM)
-           */
         if (name == null || name.trim().isEmpty()
                 || unit == null || unit.trim().isEmpty()
                 || ingredients == null || ingredients.trim().isEmpty()
@@ -68,33 +99,27 @@ public class MedicineCreateServlet extends HttpServlet {
 
             // Gửi lại dữ liệu + thông báo lỗi về JSP
             request.setAttribute("medicine", m);
-            request.setAttribute("error",
-                    "All fields are required. Please fill in all information.");
+            request.setAttribute("error", "All fields are required. Please fill in all information.");
 
-            // Forward lại form create (KHÔNG insert DB)
+            request.setAttribute("basePath", basePath);
             request.setAttribute("pageTitle", "Add medicine");
             request.setAttribute("activePage", "manageMedicine");
             request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineForm.jsp");
 
-            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-            return; // ⚠️ BẮT BUỘC: dừng xử lý tại đây
+            request.getRequestDispatcher(layout).forward(request, response);
+            return;
         }
 
-        /* 
-           3. DỮ LIỆU HỢP LỆ → INSERT DB
-          */
         Medicine m = new Medicine();
         m.setMedicineName(name);
         m.setUnit(unit);
         m.setIngredients(ingredients);
         m.setUsage(usage);
         m.setContraindication(contra);
+
         MedicineDAO dao = new MedicineDAO();
         dao.insert(m);
 
-        /* 
-           4. REDIRECT VỀ DANH SÁCH
-           */
-        response.sendRedirect(request.getContextPath() + "/admin/medicine");
+        response.sendRedirect(basePath + "/medicine");
     }
 }
