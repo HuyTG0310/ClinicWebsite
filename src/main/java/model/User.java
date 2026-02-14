@@ -9,7 +9,9 @@ public class User {
     private String phone;
     private String email;
     private int roleId;
+    private String roleName;
     private boolean isActive;
+    private boolean roleActive;
 
     public User() {
     }
@@ -82,12 +84,27 @@ public class User {
         this.roleId = roleId;
     }
 
-public boolean isActive() {
+    public boolean isIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        this.isActive = active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public boolean isRoleActive() {
+        return roleActive;
+    }
+
+    public void setRoleActive(boolean roleActive) {
+        this.roleActive = roleActive;
+    }
 }

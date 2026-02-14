@@ -22,7 +22,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageStaff' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+               href="${pageContext.request.contextPath}/admin/staff/list">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage staff
             </a>
@@ -30,7 +30,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+               href="${pageContext.request.contextPath}/admin/role/list">
                 <i class="fa-solid fa-gauge me-2"></i>
                 Manage role
             </a>
@@ -61,7 +61,7 @@
                 Manage room
             </a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'managePatien' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/PatientList">
@@ -76,9 +76,6 @@
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage medicine
             </a>
-        </li>
-
-
 
         <!-- Logout -->
         <li class="nav-item mt-3">

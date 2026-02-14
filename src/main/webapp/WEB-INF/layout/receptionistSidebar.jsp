@@ -1,4 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 
 <div class="col-md-3 col-lg-2 sidebar min-vh-100 p-3">
 
@@ -11,21 +13,23 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+            <a class="nav-link ${activePage == 'receptionistDashboard' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/receptionist/dashboard">
                 <i class="fa-solid fa-gauge me-2"></i>
                 Dashboard
             </a>
         </li>
 
 
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                Manage patient
-            </a>
-        </li>
+        <c:if test="${hasPatientView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'managePatient' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/patient/list">
+                    <i class="fa-solid fa-user-injured me-2"></i>
+                    Manage patient
+                </a>
+            </li>
+        </c:if>
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
@@ -43,7 +47,7 @@
                 Manage invoice
             </a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/lab/tests">
@@ -51,8 +55,8 @@
                 Manage follow-up
             </a>
         </li>
-        
-        
+
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/lab/tests">
@@ -60,12 +64,30 @@
                 Revenue report
             </a>
         </li>
-        
+
+
+        <c:if test="${hasRoomView}">
+            <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/receptionist/room/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage room
+            </a>
+        </c:if>
+
+
+        <c:if test="${hasMedicineView}">
+            <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/receptionist/medicine/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage medicine
+            </a>
+        </c:if>
+
 
         <!-- Test History -->
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+               href="${pageContext.request.contextPath}/profile/view">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Profile
             </a>
