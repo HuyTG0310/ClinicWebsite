@@ -1,5 +1,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 
 <div class="col-md-3 col-lg-2 sidebar min-vh-100 p-3">
 
@@ -21,26 +23,28 @@
 
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'manageStaff' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                Manage staff
+            <a class="nav-link ${activePage == 'manageRole' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/role/list">
+                <i class="fa-solid fa-user-shield me-2"></i>
+                Manage role
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i>
-                Manage role
+            <a class="nav-link ${activePage == 'manageStaff' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/user/list">
+                <i class="fa-solid fa-users me-2"></i>
+                Manage staff
             </a>
         </li>
+
+
 
         <!-- Test Requests -->
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageSpecialty' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/specialty/list">
-                <i class="fa-solid fa-vials me-2"></i>
+                <i class="fa-solid fa-stethoscope me-2"></i>
                 Manage specialty
             </a>
         </li>
@@ -49,35 +53,43 @@
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/service/list">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
+                <i class="fa-solid fa-briefcase-medical me-2"></i>
                 Manage service
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/RoomList">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                Manage room
-            </a>
-        </li>
-        
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'managePatien' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/PatientList">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                Manage Patient
-            </a>
-        </li>
 
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/admin/medicine">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                Manage medicine
-            </a>
-        </li>
+        <c:if test="${hasRoomView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/room/list">
+                    <i class="fa-solid fa-door-open me-2"></i>
+                    Manage room
+                </a>
+            </li>
+        </c:if>
 
+        <c:if test="${hasPatientView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'managePatient' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/patient/list">
+                    <i class="fa-solid fa-user-injured me-2"></i>
+                    Manage patient
+                </a>
+            </li>
+        </c:if>
+
+
+
+        <c:if test="${hasMedicineView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/medicine/list">
+                    <i class="fa-solid fa-pills me-2"></i>
+                    Manage medicine
+                </a>
+            </li>
+        </c:if>
 
 
         <!-- Logout -->
@@ -85,11 +97,9 @@
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
                 <i class="fa-solid fa-right-from-bracket me-2"></i>
-                Đăng xuất
+                Log out
             </a>
         </li>
 
     </ul>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

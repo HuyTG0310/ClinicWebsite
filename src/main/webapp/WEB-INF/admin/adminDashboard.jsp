@@ -1,8 +1,4 @@
-<%-- 
-    Document   : adminDashboard
-    Created on : Feb 3, 2026, 9:08:21 PM
-    Author     : huytr
---%>
+
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -29,7 +25,7 @@
 
     <!-- STAFF -->
     <div class="col-xl-3 col-md-4 col-sm-6">
-        <a href="${pageContext.request.contextPath}/lab/history"
+        <a href="${pageContext.request.contextPath}/admin/user/list"
            class="dashboard-card text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
@@ -47,7 +43,7 @@
 
     <!-- ROLE -->
     <div class="col-xl-3 col-md-4 col-sm-6">
-        <a href="${pageContext.request.contextPath}/lab/dashboard"
+        <a href="${pageContext.request.contextPath}/admin/role/list"
            class="dashboard-card text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
@@ -65,7 +61,7 @@
 
     <!-- SPECIALTY -->
     <div class="col-xl-3 col-md-4 col-sm-6">
-        <a href="${pageContext.request.contextPath}/lab/tests"
+        <a href="${pageContext.request.contextPath}/admin/specialty/list"
            class="dashboard-card text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
@@ -101,7 +97,7 @@
 
     <!-- ROOM -->
     <div class="col-xl-3 col-md-4 col-sm-6">
-        <a href="${pageContext.request.contextPath}/lab/history"
+        <a href="${pageContext.request.contextPath}/admin/room/list"
            class="dashboard-card text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
@@ -119,7 +115,7 @@
 
     <!-- MEDICINE -->
     <div class="col-xl-3 col-md-4 col-sm-6">
-        <a href="${pageContext.request.contextPath}/lab/history"
+        <a href="${pageContext.request.contextPath}/admin/medicine/list"
            class="dashboard-card text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
@@ -134,6 +130,25 @@
             </div>
         </a>
     </div>
+
+    <div class="col-xl-3 col-md-4 col-sm-6">
+        <a href="${pageContext.request.contextPath}/admin/patient/list"
+           class="dashboard-card text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="dashboard-icon bg-warning text-dark">
+                        <i class="fa-solid fa-user-injured me-2"></i>
+                    </div>
+                    <h6 class="mt-3 mb-1">Manage Patient</h6>
+                    <p class="text-muted small mb-0">
+                        Bệnh nhân
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+
 
 </div>
 
