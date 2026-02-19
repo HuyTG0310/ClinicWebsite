@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.User;
 
@@ -38,12 +39,14 @@ public class ChangePasswordServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int userId = 1; // tạm hardcode để test
+        // 1. Lấy session hiện tại (không tạo mới)
+        HttpSession session = request.getSession(false);
 
-        UserDAO dao = new UserDAO();
-        User user = dao.getUserById(userId);
-
-        request.getSession().setAttribute("user", user);
+        // 2. Kiểm tra nếu chưa login thì đá về login ngay
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         forwardLayout(request, response, "/WEB-INF/profile/changePassword.jsp");
     }
