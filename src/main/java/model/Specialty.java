@@ -9,7 +9,8 @@ package model;
  * @author ADMIN
  */
 public class Specialty {
-     private int specialtyId;
+
+    private int specialtyId;
     private String name;
     private String description;
     private boolean isActive;
@@ -52,5 +53,5 @@ public class Specialty {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
-    
+
 }

@@ -205,3 +205,17 @@
         </c:if>
     </script>
 </div>
+
+
+<style>
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.25s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+</style>

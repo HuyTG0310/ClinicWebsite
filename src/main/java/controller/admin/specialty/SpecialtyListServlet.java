@@ -28,17 +28,12 @@ public class SpecialtyListServlet extends HttpServlet {
         List<Specialty> list;
 
         if (keyword == null || keyword.trim().isEmpty()) {
-            // 🔹 không nhập hoặc chỉ space → list all
             list = dao.getAll();
         } else {
-            // 🔹 có keyword → search
             list = dao.searchByName(keyword.trim());
         }
 
         request.setAttribute("list", list);
-//        request.getRequestDispatcher("/WEB-INF/admin/specialty/listSpecialty.jsp")
-//                .forward(request, response);
-
         request.setAttribute("pageTitle", "Manage speiclaty");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/listSpecialty.jsp");

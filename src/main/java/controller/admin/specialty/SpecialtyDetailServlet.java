@@ -1,5 +1,6 @@
 package controller.admin.specialty;
 
+import dao.RoomDAO;
 import dao.SpecialtyDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,7 +8,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Specialty;
-
 import java.io.IOException;
 
 @WebServlet("/admin/specialty/detail")
@@ -35,8 +35,6 @@ public class SpecialtyDetailServlet extends HttpServlet {
         }
 
         request.setAttribute("specialty", specialty);
-//        request.getRequestDispatcher("/WEB-INF/admin/specialty/detailSpecialty.jsp")
-//                .forward(request, response);
         request.setAttribute("pageTitle", "Manage speiclaty");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/detailSpecialty.jsp");
@@ -66,9 +64,6 @@ public class SpecialtyDetailServlet extends HttpServlet {
             request.setAttribute("error", "Name và Description không được chỉ chứa khoảng trắng.");
             request.setAttribute("openModal", true); // ⚠️ QUAN TRỌNG
             request.setAttribute("specialty", dao.getById(id));
-
-//            request.getRequestDispatcher("/WEB-INF/admin/specialty/detailSpecialty.jsp")
-//                    .forward(request, response);
             request.setAttribute("pageTitle", "Manage speiclaty");
             request.setAttribute("activePage", "manageSpecialty");
             request.setAttribute("contentPage", "/WEB-INF/admin/specialty/detailSpecialty.jsp");
@@ -83,9 +78,6 @@ public class SpecialtyDetailServlet extends HttpServlet {
             request.setAttribute("error", "Specialty name đã tồn tại.");
             request.setAttribute("openModal", true);
             request.setAttribute("specialty", dao.getById(id));
-
-//            request.getRequestDispatcher("/WEB-INF/admin/specialty/detailSpecialty.jsp")
-//                    .forward(request, response);
             request.setAttribute("pageTitle", "Manage speiclaty");
             request.setAttribute("activePage", "manageSpecialty");
             request.setAttribute("contentPage", "/WEB-INF/admin/specialty/detailSpecialty.jsp");
@@ -103,16 +95,14 @@ public class SpecialtyDetailServlet extends HttpServlet {
         s.setIsActive(isActive);
 
         dao.update(s);
+        //nếu specialty bị inactive -> inactive room
+        if (!isActive) {
+            RoomDAO roomDAO = new RoomDAO();
+            roomDAO.inactiveRoomsBySpecialty(id);
+        }
 
         // ✅ THÀNH CÔNG → redirect → popup tự đóng
-        response.sendRedirect(request.getContextPath()
-                + "/admin/specialty/detail?id=" + id);
-//        request.setAttribute("pageTitle", "Manage speiclaty");
-//        request.setAttribute("activePage", "manageSpecialty");
-//        request.setAttribute("contentPage", "/WEB-INF/admin/specialty/detailSpecialty.jsp");
-//
-//        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
+        response.sendRedirect(request.getContextPath() + "/admin/specialty/detail?id=" + id);
     }
 
 }
