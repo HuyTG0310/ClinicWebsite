@@ -1,221 +1,220 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<div class="container-fluid">
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <h4 class="fw-bold text-primary mb-0">
-                <i class="fa-solid fa-circle-info me-2"></i>
-                Specialty Detail
-            </h4>
-            <small class="text-muted">View specialty information</small>
-        </div>
-
-        <a href="${pageContext.request.contextPath}/admin/specialty/list"
-           class="btn btn-outline-secondary">
-
-            <i class="fa-solid fa-arrow-left me-2"></i>
-            Back
-        </a>
-
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-stethoscope text-primary me-2"></i>
+            Manage specialty
+        </h2>
+        <p class="text-muted mb-0">Manage and monitor all specialties</p>
     </div>
 
+    <a href="${pageContext.request.contextPath}/admin/specialty/add"
+       class="btn btn-primary">
 
-    <!-- DETAIL CARD -->
-    <div class="card border-0 shadow-sm">
+        <i class="fas fa-plus-circle me-2"></i>
+        Add New Specialty
+    </a>
 
-        <div class="card-body">
-
-            <div class="row mb-3">
-
-                <div class="col-md-6">
-                    <label class="text-muted small">ID</label>
-                    <div class="fw-semibold">#${specialty.specialtyId}</div>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="text-muted small">Status</label>
-
-                    <div>
-                        <span class="badge ${specialty.isActive ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border'}">
-
-                            <i class="fa-solid ${specialty.isActive ? 'fa-check' : 'fa-ban'} me-1"></i>
-
-                            ${specialty.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="mb-3">
-                <label class="text-muted small">Name</label>
-                <div class="fw-medium fs-5">${specialty.name}</div>
-            </div>
-
-            <div>
-                <label class="text-muted small">Description</label>
-                <div class="text-muted">
-                    ${specialty.description}
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ACTION BUTTON -->
-    <div class="mt-4">
-
-        <button class="btn btn-warning shadow-sm"
-                onclick="openEditModal(
-                                '${specialty.specialtyId}',
-                                '${specialty.name}',
-                                '${specialty.description}',
-                                '${specialty.isActive}'
-                                )">
-
-            <i class="fa-solid fa-pen-to-square me-2"></i>
-            Edit
-        </button>
-
-    </div>
-    <!-- ===== EDIT MODAL ===== -->
-
-    <div class="modal fade" id="editModal" tabindex="-1">
-
-        <div class="modal-dialog">
-
-            <form class="modal-content"
-                  method="post"
-                  action="${pageContext.request.contextPath}/admin/specialty/detail">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-pen me-2 text-primary"></i>
-                        Edit Specialty
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"></button>
-
-                </div>
-
-                <div class="modal-body">
-                    <!-- VALIDATE ERROR -->
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger">
-                            ${error}
-                        </div>
-                    </c:if>
-                    <input type="hidden"
-                           name="id"
-                           value="${specialty.specialtyId}">
-
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-
-                        <input type="text"
-                               class="form-control"
-                               name="name"
-                               value="${specialty.name}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-
-                        <textarea class="form-control"
-                                  name="description"
-                                  rows="4">${specialty.description}</textarea>
-                    </div>
-
-                    <!-- 🔥 QUAN TRỌNG -->
-                    <div class="mb-4">
-
-                        <label class="form-label fw-semibold text-muted">
-                            <i class="fa-solid fa-toggle-on me-2 text-primary"></i>
-                            Status
-                        </label>
-
-                        <select name="isActive" class="form-select shadow-sm">
-
-                            <option value="true"
-                                    ${specialty.isActive ? "selected" : ""}>
-                                🟢 Active
-                            </option>
-
-                            <option value="false"
-                                    ${!specialty.isActive ? "selected" : ""}>
-                                🔴 Inactive
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button class="btn btn-primary">
-                        <i class="fa-solid fa-floppy-disk me-2"></i>
-                        Save
-                    </button>
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-    <script>
-        function openEditModal(id, name, desc, active) {
-
-            document.querySelector('input[name="id"]').value = id;
-            document.querySelector('input[name="name"]').value = name;
-            document.querySelector('textarea[name="description"]').value = desc;
-
-            // FIX CHÍNH
-            document.querySelector('select[name="isActive"]').value = active;
-
-            new bootstrap.Modal(
-                    document.getElementById("editModal")
-                    ).show();
-        }
-
-// 🔥 AUTO OPEN MODAL WHEN VALIDATE FAIL
-        <c:if test="${openModal}">
-        openEditModal();
-        </c:if>
-    </script>
 </div>
 
 
-<style>
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.25s ease;
-    }
+<!-- SEARCH -->
+<div class="card shadow-sm mb-4">
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+    <div class="card-body">
+
+        <form method="get"
+              action="${pageContext.request.contextPath}/admin/specialty/list">
+
+            <div class="row g-3">
+
+                <div class="col-md-10">
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Search by specialty name">
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <button class="btn btn-primary w-100">
+
+                        <i class="fas fa-search me-2"></i>
+                        Search
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- TABLE -->
+<div class="card shadow-sm">
+
+    <div class="card-header bg-white py-3">
+
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2 text-primary"></i>
+            Specialty List
+        </h5>
+
+    </div>
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th class="text-center">Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <c:forEach items="${list}" var="s">
+
+                        <tr>
+
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    #${s.specialtyId}
+                                </span>
+                            </td>
+
+                            <td class="fw-semibold">
+                                ${s.name}
+                            </td>
+
+                            <td class="text-muted">
+                                ${s.description}
+                            </td>
+
+                            <td>
+
+                                <c:choose>
+
+                                    <c:when test="${s.isActive}">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Active
+                                        </span>
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>
+                                            Inactive
+                                        </span>
+                                    </c:otherwise>
+
+                                </c:choose>
+
+                            </td>
+
+                            <td class="text-center">
+
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="${pageContext.request.contextPath}/admin/specialty/detail?id=${s.specialtyId}">
+
+                                    <i class="fas fa-eye"></i> View
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    </c:forEach>
+
+                    <c:if test="${empty list}">
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted mb-0">No specialties found</p>
+                            </td>
+                        </tr>
+                    </c:if>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<style>
+
+/* hover giống room list */
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13,110,253,0.05);
+    transition: background-color 0.2s ease;
+}
+
+.card {
+    border:none;
+    border-radius:12px;
+}
+
+.card-header {
+    border-bottom:1px solid rgba(0,0,0,0.08);
+    border-radius:12px 12px 0 0 !important;
+}
+
+.badge {
+    padding:0.4em 0.8em;
+    font-weight:500;
+    border-radius:6px;
+}
+
+.btn {
+    border-radius:8px;
+    padding:0.5rem 1.2rem;
+    font-weight:500;
+    transition:all 0.25s ease;
+}
+
+.btn:hover {
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
 </style>
