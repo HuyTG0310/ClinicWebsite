@@ -10,56 +10,72 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Room;
+import model.RoomView;
 
 /**
  * RoomListServlet - Controller for Room List Management
  *
  * @author ClinicWebsite
  */
-@WebServlet(name = "RoomList", urlPatterns = {"/RoomList"})
+@WebServlet(name = "RoomListServlet", urlPatterns = {"/admin/room/list", "/receptionist/room/list", "/doctor/room/list"})
 public class RoomListServlet extends HttpServlet {
 
-    /**
-     * Handles the HTTP GET method - Display room list
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        String layout = "";
         try {
             String searchKeyword = request.getParameter("searchKeyword");
-            List<Room> roomList;
+            List<RoomView> roomList;
             RoomDAO roomDAO = new RoomDAO();
 
             if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
                 // Search rooms by name
-                roomList = roomDAO.searchRoomByName(searchKeyword.trim());
+                roomList = roomDAO.searchRoomViewByName(searchKeyword);
                 request.setAttribute("searchKeyword", searchKeyword.trim());
             } else {
                 // Get all rooms
-                roomList = roomDAO.getAllRooms();
+                roomList = roomDAO.getAllView();
             }
 
+            String uri = request.getRequestURI();
+            String ctx = request.getContextPath();
+
+            if (uri.startsWith(ctx + "/admin")) {
+                layout = "/WEB-INF/layout/adminLayout.jsp";
+            } else if (uri.startsWith(ctx + "/receptionist")) {
+                layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            } else if (uri.startsWith(ctx + "/doctor")) {
+                layout = "/WEB-INF/layout/doctorLayout.jsp";
+            } else {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+
+            String basePath;
+            if (uri.startsWith(ctx + "/admin")) {
+                basePath = ctx + "/admin";
+            } else if (uri.startsWith(ctx + "/receptionist")) {
+                basePath = ctx + "/receptionist";
+            } else if (uri.startsWith(ctx + "/doctor")) {
+                basePath = ctx + "/doctor";
+            } else {
+                basePath = ctx;
+            }
+
+            request.setAttribute("basePath", basePath);
             request.setAttribute("roomList", roomList);
-
-//            request.getRequestDispatcher("WEB-INF/admin/room/roomList.jsp").forward(request, response);
-
             request.setAttribute("pageTitle", "Manage Room");
             request.setAttribute("activePage", "manageRoom");
             request.setAttribute("contentPage", "/WEB-INF/admin/room/roomList.jsp");
 
-            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+            request.getRequestDispatcher(layout).forward(request, response);
 
         } catch (Exception e) {
             System.out.println("Error loading room list: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("error", "Error loading room list: " + e.getMessage());
-            request.getRequestDispatcher("WEB-INF/admin/room/roomList.jsp").forward(request, response);
+            request.getRequestDispatcher(layout).forward(request, response);
         }
     }
 }

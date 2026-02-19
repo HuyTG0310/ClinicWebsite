@@ -16,18 +16,32 @@ import model.Patient;
  *
  * @author ClinicWebsite
  */
-@WebServlet(name = "EditPatient", urlPatterns = { "/EditPatient" })
+@WebServlet(name = "EditPatient", urlPatterns = {"/admin/patient/edit", "/doctor/patient/edit", "/receptionist/patient/edit"})
 public class EditPatientServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         try {
             String patientIdStr = request.getParameter("id");
 
             if (patientIdStr == null || patientIdStr.trim().isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/PatientList");
+                response.sendRedirect(basePath + "/patient/list");
                 return;
             }
 
@@ -37,7 +51,7 @@ public class EditPatientServlet extends HttpServlet {
 
             if (patient == null) {
                 request.setAttribute("error", "Patient not found!");
-                response.sendRedirect(request.getContextPath() + "/PatientList");
+                response.sendRedirect(basePath + "/patient/list");
                 return;
             }
 
@@ -45,17 +59,33 @@ public class EditPatientServlet extends HttpServlet {
             request.getRequestDispatcher("WEB-INF/patient/editPatient.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/PatientList");
+            response.sendRedirect(basePath + "/patient/list");
         } catch (Exception e) {
             System.out.println("Error loading edit form: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/PatientList");
+            response.sendRedirect(basePath + "/patient/list");
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         try {
             String patientIdStr = request.getParameter("patientId");
@@ -152,7 +182,7 @@ public class EditPatientServlet extends HttpServlet {
             boolean isUpdated = patientDAO.updatePatient(patient);
 
             if (isUpdated) {
-                response.sendRedirect(request.getContextPath() + "/ViewPatient?id=" + patientId);
+                response.sendRedirect(basePath + "/patient/detail?id=" + patientId);
             } else {
                 request.setAttribute("error", "Patient update: Treatment failed. Please try again!");
                 request.setAttribute("patient", patient);
@@ -188,8 +218,4 @@ public class EditPatientServlet extends HttpServlet {
 
     }
 
-    @Override
-    public String getServletInfo() {
-        return "Edit Patient Servlet";
-    }
 }

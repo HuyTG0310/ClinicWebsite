@@ -7,19 +7,21 @@
     <div>
         <h2 class="mb-1">
             <i class="fas fa-users text-primary me-2"></i>
-            Patient Management
+            Manage patient
         </h2>
         <p class="text-muted mb-0">Manage and view all patients</p>
     </div>
-    <a href="${pageContext.request.contextPath}/AddPatient" class="btn btn-primary">
-        <i class="fas fa-plus-circle me-2"></i>Add New Patient
-    </a>
+    <c:if test="${hasPatientCreate}">
+        <a href="${basePath}/patient/create" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Add New Patient
+        </a>
+    </c:if>
 </div>
 
 <!-- Search Form -->
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form method="get" action="${pageContext.request.contextPath}/PatientList" id="searchForm">
+        <form method="get" action="${basePath}/patient/list" id="searchForm">
             <div class="row g-3">
                 <div class="col-md-10">
                     <div class="input-group">
@@ -37,7 +39,7 @@
                 </div>
                 <c:if test="${searchKeyword != null}">
                     <div class="col-12">
-                        <a href="${pageContext.request.contextPath}/PatientList" class="btn btn-outline-secondary btn-sm">
+                        <a href="${basePath}/patient/list" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-times me-2"></i>Clear Search
                         </a>
                     </div>
@@ -113,10 +115,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="${pageContext.request.contextPath}/ViewPatient?id=${patient.patientId}" 
+                                    <a href="${basePath}/patient/detail?id=${patient.patientId}" 
                                        class="btn btn-sm btn-outline-primary" 
                                        title="View Details">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="fas fa-eye me-1"></i>View
                                     </a>
                                 </div>
                             </td>

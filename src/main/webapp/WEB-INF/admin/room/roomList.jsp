@@ -6,13 +6,16 @@
     <div>
         <h2 class="mb-1">
             <i class="fas fa-door-open text-primary me-2"></i>
-            Room Management
+            Manage room
         </h2>
         <p class="text-muted mb-0">Manage and monitor all examination rooms</p>
     </div>
-    <a href="AddRoom" class="btn btn-primary">
-        <i class="fas fa-plus-circle me-2"></i>Add New Room
-    </a>
+    <c:if test="${hasRoomCreate}">
+        <a href="${basePath}/room/create" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Add New Room
+        </a>
+    </c:if>
+
 </div>
 
 <!-- Messages -->
@@ -35,7 +38,7 @@
 <!-- Search Form -->
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form action="RoomList" method="get">
+        <form action="${basePath}/room/list" method="get">
             <div class="row g-3">
                 <div class="col-md-10">
                     <div class="input-group">
@@ -53,7 +56,7 @@
                 </div>
                 <c:if test="${searchKeyword != null}">
                     <div class="col-12">
-                        <a href="RoomList" class="btn btn-outline-secondary btn-sm">
+                        <a href="${basePath}/room/list" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-times me-2"></i>Clear Search
                         </a>
                     </div>
@@ -100,14 +103,15 @@
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border">
-                                    ${room.specialtyId}
+                                    ${room.specialtyName}
                                 </span>
                             </td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${room.currentDoctorId != null}">
+                                    <c:when test="${not empty room.doctorName}">
                                         <span class="badge bg-info">
-                                            <i class="fas fa-user-check me-1"></i>${room.currentDoctorId}
+                                            <i class="fas fa-user-check me-1"></i>
+                                            ${room.doctorName}
                                         </span>
                                     </c:when>
                                     <c:otherwise>
@@ -133,16 +137,11 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="ViewRoom?id=${room.roomId}" 
+                                    <a href="${basePath}/room/detail?id=${room.roomId}" 
                                        class="btn btn-sm btn-outline-primary" 
                                        title="View Details">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="fas fa-eye"></i> View
                                     </a>
-                                    <!--<a href="EditRoom?id=${room.roomId}" 
-                                       class="btn btn-sm btn-outline-warning" 
-                                       title="Edit Room">
-                                        <i class="fas fa-edit"></i>
-                                    </a>-->
                                 </div>
                             </td>
                         </tr>

@@ -16,10 +16,11 @@
             <p class="text-muted mb-0">View detailed information of examination room</p>
         </div>
 
-        <a href="RoomList" class="btn btn-outline-secondary">
+        <a href="${basePath}/room/list" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>Back to List
         </a>
     </div>
+
 
 
     <c:choose>
@@ -68,11 +69,11 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Specialty ID</label>
+                            <label class="text-muted small">Specialty</label>
                             <div>
                                 <span class="badge bg-light text-dark border">
                                     <i class="fas fa-stethoscope me-1"></i>
-                                    ${room.specialtyId}
+                                    ${room.specialtyName}
                                 </span>
                             </div>
                         </div>
@@ -81,10 +82,10 @@
                             <label class="text-muted small">Current Doctor</label>
                             <div>
                                 <c:choose>
-                                    <c:when test="${room.currentDoctorId != null}">
+                                    <c:when test="${not empty room.doctorName}">
                                         <span class="badge bg-info">
                                             <i class="fas fa-user-md me-1"></i>
-                                            ${room.currentDoctorId}
+                                            ${room.doctorName}
                                         </span>
                                     </c:when>
                                     <c:otherwise>
@@ -102,26 +103,17 @@
 
             <!-- ACTION BUTTON -->
             <div class="d-flex gap-2">
-                <a href="RoomList" class="btn btn-secondary">
+                <a href="${basePath}/room/list" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Back
                 </a>
 
-                <button class="btn btn-warning"
-                        onclick="openEditModal(
-                                        '${room.roomId}',
-                                        '${room.roomName}',
-                                        '${room.specialtyId}',
-                                        '${room.currentDoctorId}',
-                                        '${room.isActive}'
-                                        )">
-                    <i class="fas fa-edit me-2"></i>Edit Room
-                </button>
 
-                <button class="btn btn-danger"
-                        onclick="openDeleteModal(${room.roomId}, '${room.roomName}')">
-                    <i class="fas fa-trash me-2"></i>Delete Room
-                </button>
-
+                <c:if test="${hasRoomEdit}">
+                    <button class="btn btn-warning"
+                            onclick="openEditModal(${room.roomId})">
+                        <i class="fas fa-edit me-2"></i>Edit Room
+                    </button>
+                </c:if>
             </div>
 
         </c:when>
@@ -131,7 +123,7 @@
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Room not found
             </div>
-            <a href="RoomList" class="btn btn-secondary">
+            <a href="${basePath}/room/list" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to List
             </a>
         </c:otherwise>
@@ -140,7 +132,7 @@
     <!-- ===== EDIT MODAL ===== -->
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog">
-            <form class="modal-content" method="post" action="${pageContext.request.contextPath}/EditRoom">
+            <form class="modal-content" method="post" action="${basePath}/room/edit">
 
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -152,26 +144,36 @@
 
                 <div class="modal-body">
 
-                    <input type="hidden" name="roomId">
+                    <input type="hidden" id="editRoomId" name="roomId">
 
                     <div class="mb-3">
-                        <label class="form-label">Room Name</label>
-                        <input type="text" class="form-control" name="roomName" required>
+                        <label class="form-label fw-semibold">Room Name</label>
+                        <input id="editRoomName" name="roomName" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Specialty ID</label>
-                        <input type="number" class="form-control" name="specialtyId">
+                        <label class="form-label fw-semibold">Specialty</label>
+                        <select id="editSpecialty" name="specialtyId"
+                                class="form-select"
+                                onchange="onEditSpecialtyChange(this)">
+                            <c:forEach var="s" items="${specialties}">
+                                <option value="${s.specialtyId}">
+                                    ${s.name}
+                                </option>
+                            </c:forEach>
+                        </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Current Doctor ID</label>
-                        <input type="number" class="form-control" name="currentDoctorId">
+                        <label class="form-label fw-semibold">Doctor</label>
+                        <select id="editDoctor" name="currentDoctorId" class="form-select">
+                            <option value="">-- Select Doctor --</option>
+                        </select>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Status</label>
-                        <select name="isActive" class="form-select">
+                        <select id="editIsActive" name="isActive" class="form-select">
                             <option value="true">🟢 Active</option>
                             <option value="false">🔴 Inactive</option>
                         </select>
@@ -226,26 +228,115 @@
 </div>
 
 <script>
-    function openEditModal(id, name, specialtyId, doctorId, active) {
+    function openEditModal(roomId) {
 
-        document.querySelector('input[name="roomId"]').value = id;
-        document.querySelector('input[name="roomName"]').value = name;
-        document.querySelector('input[name="specialtyId"]').value = specialtyId;
-        document.querySelector('input[name="currentDoctorId"]').value = doctorId ?? '';
-        document.querySelector('select[name="isActive"]').value = active;
+        fetch(`${pageContext.request.contextPath}/api/room-detail?id=` + roomId)
+                .then(res => res.json())
+                .then(room => {
 
-        new bootstrap.Modal(
-                document.getElementById("editModal")
-                ).show();
+                    // ===== SET BASIC DATA =====
+                    document.querySelector('#editRoomId').value = room.roomId;
+                    document.querySelector('#editRoomName').value = room.roomName;
+
+                    // ===== SET SPECIALTY =====
+                    const specialtySelect = document.querySelector('#editSpecialty');
+                    specialtySelect.value = String(room.specialtyId);
+
+                    // ===== SET STATUS (THEO SPECIALTY HIỆN TẠI) =====
+                    renderStatusSelect(room.specialtyActive, room.isActive);
+
+                    // ===== LOAD DOCTORS =====
+                    loadDoctorsForEdit(room.specialtyId, room.currentDoctorId);
+
+                    new bootstrap.Modal(
+                            document.getElementById("editModal")
+                            ).show();
+                });
     }
 
-    function openDeleteModal(roomId, roomName) {
-        document.getElementById('deleteRoomId').value = roomId;
-        document.getElementById('deleteRoomIdDisplay').textContent = roomId;
-        document.getElementById('deleteRoomName').textContent = roomName;
-        new bootstrap.Modal(document.getElementById("deleteModal")).show();
+    // ==============================
+    // LOAD DOCTORS THEO SPECIALTY
+    // ==============================
+    function loadDoctorsForEdit(specialtyId, selectedDoctorId) {
+
+        fetch(`${pageContext.request.contextPath}/api/doctors-by-specialty?specialtyId=` + specialtyId)
+                .then(res => res.json())
+                .then(doctors => {
+
+                    const select = document.querySelector('#editDoctor');
+                    select.innerHTML = '<option value="">-- Select Doctor --</option>';
+
+                    doctors.forEach(d => {
+                        const opt = document.createElement("option");
+                        opt.value = d.userId;
+                        opt.textContent = d.fullName;
+
+                        if (String(d.userId) === String(selectedDoctorId)) {
+                            opt.selected = true;
+                        }
+                        select.appendChild(opt);
+                    });
+                });
+    }
+
+    // ==============================
+    // RENDER STATUS SELECT (CHUẨN)
+    // ==============================
+    function renderStatusSelect(specialtyActive, roomIsActive) {
+
+        const statusSelect = document.querySelector('#editIsActive');
+        statusSelect.innerHTML = '';
+
+        if (!specialtyActive) {
+            // ❌ SPECIALTY INACTIVE → ROOM BẮT BUỘC INACTIVE
+            const opt = document.createElement('option');
+            opt.value = 'false';
+            opt.textContent = 'Inactive (Specialty disabled)';
+            opt.selected = true;
+            statusSelect.appendChild(opt);
+        } else {
+            // ✅ SPECIALTY ACTIVE → ROOM CÓ 2 OPTION
+            const activeOpt = document.createElement('option');
+            activeOpt.value = 'true';
+            activeOpt.textContent = '🟢 Active';
+
+            const inactiveOpt = document.createElement('option');
+            inactiveOpt.value = 'false';
+            inactiveOpt.textContent = '🔴 Inactive';
+
+            statusSelect.appendChild(activeOpt);
+            statusSelect.appendChild(inactiveOpt);
+
+            statusSelect.value = String(roomIsActive);
+        }
+    }
+
+    // ==============================
+    // KHI ADMIN ĐỔI SPECIALTY
+    // ==============================
+    function onEditSpecialtyChange(select) {
+        console.log('🔥 onEditSpecialtyChange fired');
+        console.log('specialtyId =', select.value);
+        const specialtyId = select.value;
+
+        // 1️⃣ Load doctors
+        loadDoctorsForEdit(specialtyId, null);
+
+        // 2️⃣ Load trạng thái specialty mới
+        fetch(`${pageContext.request.contextPath}/api/specialty-status?id=` + specialtyId)
+                .then(res => res.json())
+                .then(data => {
+
+                    // ⚠️ RESET TRẠNG THÁI ROOM THEO SPECIALTY MỚI
+                    if (!data.isActive) {
+                        renderStatusSelect(false, false); // chỉ Inactive
+                    } else {
+                        renderStatusSelect(true, true);   // mặc định Active
+                    }
+                });
     }
 </script>
+
 
 <style>
     .card {
@@ -277,3 +368,10 @@
 </style>
 
 
+<c:if test="${not empty param.editError}">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            openEditModal(${room.roomId});
+        });
+    </script>
+</c:if>

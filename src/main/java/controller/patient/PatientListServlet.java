@@ -11,12 +11,32 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
-@WebServlet(name = "PatientList", urlPatterns = {"/PatientList"})
+@WebServlet(name = "PatientList", urlPatterns = {"/admin/patient/list", "/doctor/patient/list", "/receptionist/patient/list"})
 public class PatientListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         String searchKeyword = request.getParameter("searchKeyword");
         List<Patient> patientList;
@@ -35,14 +55,12 @@ public class PatientListServlet extends HttpServlet {
 
         // Forward to the JSP page
 //        request.getRequestDispatcher("WEB-INF/patient/patientList.jsp").forward(request, response);
-        
         request.setAttribute("pageTitle", "Manage Patient");
-            request.setAttribute("activePage", "managePatient");
-            request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/patientList.jsp");
+        request.setAttribute("activePage", "managePatient");
+        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/patientList.jsp");
 
-            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-            
-            
+        request.getRequestDispatcher(layout).forward(request, response);
+
     }
 
     @Override

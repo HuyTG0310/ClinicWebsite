@@ -1,7 +1,7 @@
 package controller.admin.room;
 
-import dao.RoomDAO;
-import model.Room;
+import dao.*;
+import model.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,169 +10,117 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "EditRoom", urlPatterns = {"/EditRoom"})
+@WebServlet(name = "EditRoomServlet", urlPatterns = {"/admin/room/edit", "/receptionist/room/edit", "/doctor/room/edit"})
 public class EditRoomServlet extends HttpServlet {
-    
+
     /**
      * doGet - Hiển thị trang Edit riêng (giống Patient)
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            String roomIdStr = request.getParameter("id");
-            
-            if (roomIdStr == null || roomIdStr.trim().isEmpty()) {
-                response.sendRedirect("RoomList");
-                return;
-            }
 
-            int roomId = Integer.parseInt(roomIdStr);
-            RoomDAO roomDAO = new RoomDAO();
-            Room room = roomDAO.getRoomById(roomId);
-
-            if (room == null) {
-                request.setAttribute("error", "Room not found!");
-                response.sendRedirect("RoomList");
-                return;
-            }
-
-            request.setAttribute("room", room);
-            request.getRequestDispatcher("WEB-INF/admin/room/editRoom.jsp").forward(request, response);
-            
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid room ID: " + e.getMessage());
-            response.sendRedirect("RoomList");
-        } catch (Exception e) {
-            System.out.println("Error loading edit form: " + e.getMessage());
-            e.printStackTrace();
-            response.sendRedirect("RoomList");
-        }
     }
 
     /**
-     * doPost - Xử lý submit từ CẢ 2 NƠI:
-     * 1. Popup Edit trong ViewRoom
-     * 2. Trang Edit riêng
+     * doPost - Xử lý submit từ CẢ 2 NƠI: 1. Popup Edit trong ViewRoom 2. Trang
+     * Edit riêng
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
+        //NEW
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else {
+            basePath = ctx;
+        }
+
+        request.setAttribute("basePath", basePath);
+
+        //NEW
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-        
-        HttpSession session = request.getSession();
-        
+
+        RoomDAO roomDAO = new RoomDAO();
+        UserDAO userDAO = new UserDAO();
+
+        int roomId;
         try {
-            String roomIdStr = request.getParameter("roomId");
-            String roomName = request.getParameter("roomName");
-            String specialtyIdStr = request.getParameter("specialtyId");
-            String currentDoctorIdStr = request.getParameter("currentDoctorId");
-            String isActiveStr = request.getParameter("isActive");
-
-            // Validation - Room ID
-            if (roomIdStr == null || roomIdStr.trim().isEmpty()) {
-                session.setAttribute("error", "Invalid room ID");
-                response.sendRedirect("RoomList");
-                return;
-            }
-
-            int roomId = Integer.parseInt(roomIdStr);
-
-            // Validation - Room name
-            if (roomName == null || roomName.trim().isEmpty()) {
-                request.setAttribute("error", "Please fill in all required fields!");
-                request.setAttribute("patient", new RoomDAO().getRoomById(roomId));
-                request.getRequestDispatcher("WEB-INF/admin/room/viewRoom.jsp").forward(request, response);
-                return;
-            }
-
-            // Validation - SpecialtyId (BẮT BUỘC)
-            if (specialtyIdStr == null || specialtyIdStr.trim().isEmpty()) {
-                request.setAttribute("error", "Specialty ID is required");
-                request.setAttribute("patient", new RoomDAO().getRoomById(roomId));
-                request.getRequestDispatcher("WEB-INF/admin/room/viewRoom.jsp").forward(request, response);
-                return;
-            }
-
-            RoomDAO roomDAO = new RoomDAO();
-            
-            // Get existing room
-            Room room = roomDAO.getRoomById(roomId);
-            if (room == null) {
-                session.setAttribute("error", "No room found!");
-                response.sendRedirect("RoomList");
-                return;
-            }
-            
-            // Check duplicate room name (exclude current room)
-            if (roomDAO.isRoomNameExists(roomName.trim(), roomId)) {
-                request.setAttribute("error", "Room name already exists");
-                request.setAttribute("room", room);
-                request.getRequestDispatcher("WEB-INF/admin/room/viewRoom.jsp").forward(request, response);
-                return;
-            }
-
-            // Update room fields
-            room.setRoomName(roomName.trim());
-            
-            // Parse SpecialtyId (BẮT BUỘC)
-            try {
-                Integer specialtyId = Integer.parseInt(specialtyIdStr.trim());
-                room.setSpecialtyId(specialtyId);
-            } catch (NumberFormatException e) {
-                request.setAttribute("error", "Invalid specialty ID format");
-                request.setAttribute("room", room);
-                request.getRequestDispatcher("WEB-INF/admin/room/viewRoom.jsp").forward(request, response);
-                return;
-            }
-            
-            // Parse CurrentDoctorId (TÙY CHỌN)
-            if (currentDoctorIdStr != null && !currentDoctorIdStr.trim().isEmpty()) {
-                try {
-                    Integer currentDoctorId = Integer.parseInt(currentDoctorIdStr.trim());
-                    room.setCurrentDoctorId(currentDoctorId);
-                } catch (NumberFormatException e) {
-                    request.setAttribute("error", "Invalid doctor ID format");
-                    request.setAttribute("room", room);
-                    request.getRequestDispatcher("WEB-INF/admin/room/viewRoom.jsp").forward(request, response);
-                    return;
-                }
-            } else {
-                room.setCurrentDoctorId(null);
-            }
-            
-            // Set active status
-            room.setIsActive((isActiveStr != null && isActiveStr.equals("true")));
-
-            // Update database
-            boolean isUpdated = roomDAO.updateRoom(room);
-            
-            if (isUpdated) {
-                response.sendRedirect("ViewRoom?id=" + roomId);
-            } else {
-                request.setAttribute("error", "Room update failed. Please try again!");
-                request.setAttribute("room", room);
-                request.getRequestDispatcher("WEB-INF/admin/room/viewRoom.jsp").forward(request, response);
-            }
-            
+            roomId = Integer.parseInt(request.getParameter("roomId"));
         } catch (Exception e) {
-            System.out.println("Room update error: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "An error occurred while updating the room!");
-            
-            try {
-                doGet(request, response);
-            } catch (ServletException | IOException ex) {
-                ex.printStackTrace();
+            response.sendRedirect(basePath + "/room/list");
+            return;
+        }
+
+        String roomName = request.getParameter("roomName");
+        String specialtyIdStr = request.getParameter("specialtyId");
+        String doctorIdStr = request.getParameter("currentDoctorId");
+        boolean isActive = "true".equals(request.getParameter("isActive"));
+
+        if (roomName == null || roomName.isBlank()) {
+            response.sendRedirect(basePath + "/room/detail?id=" + roomId + "&editError=Room name is required");
+            return;
+        }
+
+        if (specialtyIdStr == null || specialtyIdStr.isBlank()) {
+            response.sendRedirect(basePath + "/room/detail?id=" + roomId + "&editError=Specialty is required");
+            return;
+        }
+
+        int specialtyId = Integer.parseInt(specialtyIdStr);
+
+        Integer doctorId = null;
+        if (doctorIdStr != null && !doctorIdStr.isBlank()) {
+            doctorId = Integer.parseInt(doctorIdStr);
+
+            if (!userDAO.isDoctorInSpecialty(doctorId, specialtyId)) {
+                response.sendRedirect(basePath + "/room/detail?id=" + roomId + "&editError=Doctor not in specialty");
+                return;
             }
         }
+
+        if (roomDAO.isRoomNameExists(roomName.trim(), roomId)) {
+            response.sendRedirect(basePath + "/room/detail?id=" + roomId + "&editError=Room name already exists");
+            return;
+        }
+
+        Room room = new Room();
+        room.setRoomId(roomId);
+        room.setRoomName(roomName.trim());
+        room.setSpecialtyId(specialtyId);
+        room.setCurrentDoctorId(doctorId);
+        room.setIsActive(isActive);
+
+        roomDAO.updateRoom(room);
+
+        response.sendRedirect(basePath + "/room/detail?id=" + roomId);
     }
-    
+
     @Override
     public String getServletInfo() {
         return "Edit Room Servlet";
     }
 }
-

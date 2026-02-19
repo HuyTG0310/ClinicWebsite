@@ -10,12 +10,32 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
-@WebServlet(name = "ViewPatient", urlPatterns = {"/ViewPatient"})
+@WebServlet(name = "ViewPatient", urlPatterns = {"/admin/patient/detail", "/doctor/patient/detail", "/receptionist/patient/detail"})
 public class ViewPatientServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         try {
             String patientIdStr = request.getParameter("id");
@@ -42,9 +62,8 @@ public class ViewPatientServlet extends HttpServlet {
             request.setAttribute("activePage", "managePatient");
             request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/viewPatient.jsp");
 
-            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-            
-            
+            request.getRequestDispatcher(layout).forward(request, response);
+
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/PatientList");
         } catch (Exception e) {
@@ -59,7 +78,7 @@ public class ViewPatientServlet extends HttpServlet {
         }
     }
 
-     @Override
+    @Override
     public String getServletInfo() {
         return "View Patient Details Servlet";
     }

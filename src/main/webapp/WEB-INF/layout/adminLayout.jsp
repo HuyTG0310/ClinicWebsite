@@ -1,8 +1,3 @@
-<%-- 
-    Document   : adminLayout
-    Created on : Feb 3, 2026, 8:53:52 PM
-    Author     : huytr
---%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
@@ -19,7 +14,9 @@
 
         <!-- Font Awesome -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-        
+
+        <!--Google font-->
+        <!--<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">-->
     </head>
 
     <body class="bg-light">

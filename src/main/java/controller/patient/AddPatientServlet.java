@@ -11,26 +11,59 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
-@WebServlet(name = "AddPatient", urlPatterns = {"/AddPatient"})
+@WebServlet(name = "AddPatient", urlPatterns = {"/admin/patient/create", "/doctor/patient/create", "/receptionist/patient/create"})
 public class AddPatientServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Forward to the add patient form JSP
-//
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
 
-        request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+        request.setAttribute("basePath", basePath);
+        sendData(request, response, layout);
 
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         try {
             // Get form parameters
@@ -42,6 +75,15 @@ public class AddPatientServlet extends HttpServlet {
             String medicalHistory = request.getParameter("medicalHistory");
             String allergy = request.getParameter("allergy");
 
+            Patient p = new Patient();
+            p.setFullName(fullName);
+            p.setPhone(phone);
+            p.setDateOfBirth(Date.valueOf(dateOfBirthStr));
+            p.setGender(gender);
+            p.setAddress(address);
+            p.setMedicalHistory(medicalHistory);
+            p.setAllergy(allergy);
+
             // Validate required fields
             if (fullName == null || fullName.trim().isEmpty()
                     || phone == null || phone.trim().isEmpty()
@@ -50,15 +92,8 @@ public class AddPatientServlet extends HttpServlet {
                     || address == null || address.trim().isEmpty()) {
 
                 request.setAttribute("error", "Please fill in all required fields!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
-                
-                request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
-
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
-                
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
                 return;
             }
 
@@ -68,15 +103,9 @@ public class AddPatientServlet extends HttpServlet {
             // Validate full name - only Vietnamese/English letters and spaces
             if (!fullName.matches("^[a-zA-ZÀ-ỿ\\s]*$")) {
                 request.setAttribute("error", "Full name can only contain Vietnamese/English letters and spaces!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
-                
-                request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
-                
                 return;
             }
 
@@ -86,31 +115,18 @@ public class AddPatientServlet extends HttpServlet {
             if (phoneDigitsOnly.length() != 10) {
                 request.setAttribute("error",
                         "Phone number must be exactly 10 digits according to Vietnamese standard!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
-                
-                request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
-                
                 return;
             }
 
             if (!phoneDigitsOnly.startsWith("0")) {
                 request.setAttribute("error",
                         "Phone number must start with 0 (Vietnamese standard)!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);  
-                
-                
-                request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
-                
                 return;
             }
 
@@ -121,17 +137,9 @@ public class AddPatientServlet extends HttpServlet {
             // Validate DOB - cannot be in the future
             if (dateOfBirth.getTime() > today.getTime()) {
                 request.setAttribute("error", "Date of birth cannot be in the future!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
-                
-                
-                request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
-                
-                
                 return;
             }
 
@@ -139,16 +147,9 @@ public class AddPatientServlet extends HttpServlet {
             PatientDAO patientDAO = new PatientDAO();
             if (patientDAO.isPhoneExists(phone)) {
                 request.setAttribute("error", "A patient with this phone number already exists!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
-                
-                
-                request.setAttribute("pageTitle", "Manage Patient");
-        request.setAttribute("activePage", "managePatient");
-        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
-
-                
                 return;
             }
 
@@ -167,32 +168,30 @@ public class AddPatientServlet extends HttpServlet {
 
             if (isAdded) {
                 request.setAttribute("success", "Patient added successfully!");
-                response.sendRedirect(request.getContextPath() + "/PatientList");
+                response.sendRedirect(basePath + "/patient/list");
             } else {
                 request.setAttribute("error", "Failed to add patient. Please try again!");
-//                request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
-
-                request.setAttribute("pageTitle", "Manage Patient");
-                request.setAttribute("activePage", "managePatient");
-                request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
-
-                request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+                request.setAttribute("patient", p);
+                sendData(request, response, layout);
 
             }
 
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", "Invalid date format. Please use YYYY-MM-DD!");
-            request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
+            sendData(request, response, layout);
         } catch (Exception e) {
             System.out.println("Error adding patient: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("error", "An error occurred while adding the patient: " + e.getMessage());
-            request.getRequestDispatcher("WEB-INF/patient/addPatient.jsp").forward(request, response);
+            sendData(request, response, layout);
         }
     }
 
-    @Override
-    public String getServletInfo() {
-        return "Add Patient Servlet";
+    public void sendData(HttpServletRequest request, HttpServletResponse response, String layout) throws ServletException, IOException {
+        request.setAttribute("pageTitle", "Manage Patient");
+        request.setAttribute("activePage", "managePatient");
+        request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/addPatient.jsp");
+
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 }

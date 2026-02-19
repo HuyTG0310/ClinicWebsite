@@ -16,7 +16,7 @@
             <p class="text-muted mb-0">View complete patient information</p>
         </div>
 
-        <a href="${pageContext.request.contextPath}/PatientList" class="btn btn-outline-secondary">
+        <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>Back to List
         </a>
     </div>
@@ -172,28 +172,32 @@
 
             <!-- ACTION BUTTONS -->
             <div class="d-flex gap-2">
-                <a href="${pageContext.request.contextPath}/PatientList" class="btn btn-secondary">
+                <a href="${basePath}/patient/list" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Back
                 </a>
+                <c:if test="${hasPatientEdit}">
+                    <button class="btn btn-warning"
+                            onclick="openEditModal(
+                                            '${patient.patientId}',
+                                            '${patient.fullName}',
+                                            '${patient.phone}',
+                                            '<fmt:formatDate value="${patient.dateOfBirth}" pattern="yyyy-MM-dd"/>',
+                                            '${patient.gender}',
+                                            '${patient.address}',
+                                            '${patient.medicalHistory}',
+                                            '${patient.allergy}'
+                                            )">
+                        <i class="fas fa-edit me-2"></i>Edit Patient
+                    </button>
+                </c:if>
 
-                <button class="btn btn-warning"
-                        onclick="openEditModal(
-                                '${patient.patientId}',
-                                '${patient.fullName}',
-                                '${patient.phone}',
-                                '<fmt:formatDate value="${patient.dateOfBirth}" pattern="yyyy-MM-dd"/>',
-                                '${patient.gender}',
-                                '${patient.address}',
-                                '${patient.medicalHistory}',
-                                '${patient.allergy}'
-                                )">
-                    <i class="fas fa-edit me-2"></i>Edit Patient
-                </button>
+                <c:if test="${hasPatientDelete}">
+                    <button class="btn btn-danger"
+                            onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
+                        <i class="fas fa-trash me-2"></i>Delete Patient
+                    </button>
+                </c:if>
 
-                <button class="btn btn-danger"
-                        onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
-                    <i class="fas fa-trash me-2"></i>Delete Patient
-                </button>
 
             </div>
 
@@ -204,7 +208,7 @@
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Patient not found
             </div>
-            <a href="${pageContext.request.contextPath}/PatientList" class="btn btn-secondary">
+            <a href="${basePath}/patient/list" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to List
             </a>
         </c:otherwise>
@@ -213,7 +217,7 @@
     <!-- ===== EDIT MODAL ===== -->
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <form class="modal-content" method="post" action="${pageContext.request.contextPath}/EditPatient" class="needs-validation" novalidate>
+            <form class="modal-content" method="post" action="${basePath}/patient/edit" class="needs-validation" novalidate>
 
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -311,7 +315,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form method="post" action="${pageContext.request.contextPath}/DeletePatient" style="display: inline;">
+                    <form method="post" action="${basePath}/patient/delete" style="display: inline;">
                         <input type="hidden" name="patientId" id="deletePatientId">
                         <input type="hidden" name="confirmDelete" value="yes">
                         <button type="submit" class="btn btn-danger">
@@ -336,7 +340,7 @@
         document.getElementById('editAllergy').value = allergy || '';
 
         new bootstrap.Modal(document.getElementById("editModal")).show();
-        
+
         // Initialize validation after modal is shown
         setTimeout(() => checkEditFormValidity(), 100);
     }
@@ -402,28 +406,29 @@
             const phone = input.value.trim();
 
             fetch('${pageContext.request.contextPath}/api/checkPhoneExists?phone=' + encodeURIComponent(phone) + '&excludePatientId=' + patientId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.exists) {
-                        input.classList.add('is-invalid');
-                        phoneError.textContent = 'This phone number is already registered!';
-                    } else {
-                        if (!input.classList.contains('is-invalid')) {
-                            input.classList.remove('is-invalid');
-                            phoneError.textContent = 'Please enter exactly 10 digits.';
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            input.classList.add('is-invalid');
+                            phoneError.textContent = 'This phone number is already registered!';
+                        } else {
+                            if (!input.classList.contains('is-invalid')) {
+                                input.classList.remove('is-invalid');
+                                phoneError.textContent = 'Please enter exactly 10 digits.';
+                            }
                         }
-                    }
-                    checkEditFormValidity();
-                })
-                .catch(error => {
-                    console.error('Error checking phone:', error);
-                });
+                        checkEditFormValidity();
+                    })
+                    .catch(error => {
+                        console.error('Error checking phone:', error);
+                    });
         }, 500);
     }
 
     // Validate edit date of birth - cannot be in the future
     function validateEditDateOfBirth(input) {
-        if (!input.value) return;
+        if (!input.value)
+            return;
 
         const selectedDate = new Date(input.value);
         const today = new Date();
