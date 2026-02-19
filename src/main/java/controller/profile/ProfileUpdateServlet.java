@@ -31,7 +31,7 @@ public class ProfileUpdateServlet extends HttpServlet {
                 User user = dao.getUserById(userId);
                 request.setAttribute("user", user);
                 request.setAttribute("openModal", true);
-
+                
                 request.getRequestDispatcher("/WEB-INF/profile/profileDetail.jsp")
                        .forward(request, response);
                 return;

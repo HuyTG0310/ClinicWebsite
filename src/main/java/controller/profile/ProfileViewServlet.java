@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.User;
 
@@ -16,14 +17,13 @@ public class ProfileViewServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int userId = 1;
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
 
         UserDAO dao = new UserDAO();
-        User user = dao.getUserById(userId);
+        User userr = dao.getUserById(user.getUserId());
 
-        request.setAttribute("user", user);
-//        request.getRequestDispatcher("/WEB-INF/profile/profileDetail.jsp").forward(request, response);
-
+        request.setAttribute("user", userr);
         request.setAttribute("pageTitle", "Doctor Dashboard");
         request.setAttribute("activePage", "profile");
         request.setAttribute("contentPage", "/WEB-INF/profile/profileDetail.jsp");
@@ -31,3 +31,4 @@ public class ProfileViewServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/layout/doctorLayout.jsp").forward(request, response);
     }
 }
+
