@@ -170,24 +170,6 @@ public class MedicineDAO extends DBContext {
         }
     }
 
-    /* =====================================================
-       5. DELETE SOFT (IsActive = 0)
-       ===================================================== */
-//    public void updateIsActive(int medicineId, boolean isActive) {
-//
-//        String sql = "UPDATE Medicine "
-//                + "SET IsActive = ? "
-//                + "WHERE MedicineId = ?";
-//
-//        try {
-//            PreparedStatement ps = conn.prepareStatement(sql);
-//            ps.setBoolean(1, isActive);
-//            ps.setInt(2, medicineId);
-//            ps.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
     public static void main(String[] args) {
         Medicine m = new Medicine(1, "pARAMACE", "Vỉ", "Ko", "ko", "ko", true);
         new MedicineDAO().update(m);

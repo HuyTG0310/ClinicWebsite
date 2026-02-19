@@ -9,13 +9,15 @@
 
 <h4 class="mb-4 fw-semibold text-primary">
     <i class="fa-solid fa-pills me-2"></i>
-    Add Medicine
+    <c:choose>
+        <c:when test="${not empty medicine.medicineId}">Edit Medicine</c:when>
+        <c:otherwise>Add Medicine</c:otherwise>
+    </c:choose>
 </h4>
 
 <div class="card shadow-sm border-0">
     <div class="card-body">
 
-        <!-- ERROR MESSAGE -->
         <c:if test="${not empty error}">
             <div class="alert alert-danger d-flex align-items-center">
                 <i class="fa-solid fa-circle-exclamation me-2"></i>
@@ -25,7 +27,10 @@
 
         <form method="post">
 
-            <!-- MEDICINE NAME -->
+            <c:if test="${not empty medicine.medicineId}">
+                <input type="hidden" name="id" value="${medicine.medicineId}">
+            </c:if>
+
             <div class="mb-3">
                 <label class="form-label fw-semibold">
                     Medicine Name <span class="text-danger">*</span>
@@ -37,57 +42,51 @@
                        required>
             </div>
 
-            <!-- UNIT -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">
                     Unit <span class="text-danger">*</span>
                 </label>
                 <select name="unit" class="form-select" required>
                     <option value="">-- Select Unit --</option>
-
-                    <option value="tablet" ${medicine.unit == 'tablet' ? 'selected' : ''}>Tablet</option>
-                    <option value="blister" ${medicine.unit == 'blister' ? 'selected' : ''}>Blister</option>
-                    <option value="box" ${medicine.unit == 'box' ? 'selected' : ''}>Box</option>
-                    <option value="bottle" ${medicine.unit == 'bottle' ? 'selected' : ''}>Bottle</option>
-                    <option value="vial" ${medicine.unit == 'vial' ? 'selected' : ''}>Vial</option>
-                    <option value="tube" ${medicine.unit == 'tube' ? 'selected' : ''}>Tube</option>
-                    <option value="sachet" ${medicine.unit == 'sachet' ? 'selected' : ''}>Sachet</option>
-                    <option value="effervescent tablet"
-                            ${medicine.unit == 'effervescent tablet' ? 'selected' : ''}>
-                        Effervescent Tablet
-                    </option>
-                    <option value="capsule" ${medicine.unit == 'capsule' ? 'selected' : ''}>Capsule</option>
-                    <option value="bag" ${medicine.unit == 'bag' ? 'selected' : ''}>Bag</option>
+                    <option value="Tablet" ${medicine.unit == 'Tablet' ? 'selected' : ''}>Tablet</option>
+                    <option value="Blister" ${medicine.unit == 'Blister' ? 'selected' : ''}>Blister</option>
+                    <option value="Box" ${medicine.unit == 'Box' ? 'selected' : ''}>Box</option>
+                    <option value="Bottle" ${medicine.unit == 'Bottle' ? 'selected' : ''}>Bottle</option>
+                    <option value="Vial" ${medicine.unit == 'Vial' ? 'selected' : ''}>Vial</option>
+                    <option value="Tube" ${medicine.unit == 'Tube' ? 'selected' : ''}>Tube</option>
+                    <option value="Sachet" ${medicine.unit == 'Sachet' ? 'selected' : ''}>Sachet</option>
+                    <option value="Effervescent tablet" ${medicine.unit == 'Effervescent tablet' ? 'selected' : ''}>Effervescent Tablet</option>
+                    <option value="Capsule" ${medicine.unit == 'Capsule' ? 'selected' : ''}>Capsule</option>
+                    <option value="Bag" ${medicine.unit == 'Bag' ? 'selected' : ''}>Bag</option>
                 </select>
             </div>
 
-            <!-- INGREDIENTS -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Ingredients</label>
-                <textarea class="form-control"
-                          name="ingredients"
-                          rows="3">${medicine.ingredients}</textarea>
+                <textarea class="form-control" name="ingredients" rows="3">${medicine.ingredients}</textarea>
             </div>
 
-            <!-- USAGE -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Usage</label>
-                <textarea class="form-control"
-                          name="usage"
-                          rows="3">${medicine.usage}</textarea>
+                <textarea class="form-control" name="usage" rows="3">${medicine.usage}</textarea>
             </div>
 
-            <!-- CONTRAINDICATION -->
-            <div class="mb-4">
+            <div class="mb-3">
                 <label class="form-label fw-semibold">Contraindication</label>
-                <textarea class="form-control"
-                          name="contra">${medicine.contraindication}</textarea>
+                <textarea class="form-control" name="contra">${medicine.contraindication}</textarea>
             </div>
 
-            <!-- ACTION BUTTONS -->
+            <c:if test="${not empty medicine.medicineId}">
+                <div class="mb-4 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" 
+                           id="isActive" name="isActive" value="true"
+                           ${medicine.isActive ? 'checked' : ''}>
+                    <label class="form-check-label" for="isActive">Active Status (Is being used?)</label>
+                </div>
+            </c:if>
+
             <div class="d-flex justify-content-end gap-2">
-                <a href="${pageContext.request.contextPath}/admin/medicine"
-                   class="btn btn-outline-secondary">
+                <a href="${basePath}/medicine/list" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left me-1"></i> Cancel
                 </a>
 
