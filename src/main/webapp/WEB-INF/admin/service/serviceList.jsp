@@ -7,96 +7,66 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<!-- HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-stethoscope text-primary me-2"></i>
-            Service Management
+            Manage Service
         </h2>
-        <p class="text-muted mb-0">
-            Manage and monitor all medical services
-        </p>
+        <p class="text-muted mb-0">Manage and monitor all medical services</p>
     </div>
 
-    <a href="${pageContext.request.contextPath}/admin/service/add"
-       class="btn btn-success">
+    <a href="${pageContext.request.contextPath}/admin/service/add" class="btn btn-primary">
         <i class="fa-solid fa-plus-circle me-2"></i>
-        Add
+        Add New Service
     </a>
 </div>
 
-<!-- SEARCH --><div class="card shadow-sm mb-4">
+<div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form method="get"
-              action="${pageContext.request.contextPath}/admin/service/list">
-
-            <div class="row g-3 align-items-end">
-
-                <!-- KEYWORD -->
-                <div class="col-lg-6 col-md-12">
-                    <label class="form-label fw-semibold">Service Name</label>
+        <form method="get" action="${pageContext.request.contextPath}/admin/service/list">
+            <div class="row g-3">
+                <div class="col-md-10">
                     <div class="input-group">
                         <span class="input-group-text bg-white">
                             <i class="fa-solid fa-magnifying-glass text-muted"></i>
                         </span>
-                        <input type="text"
-                               name="keyword"
-                               value="${keyword}"
-                               class="form-control"
-                               placeholder="Search by service name..." />
+                        <input type="text" name="keyword" value="${keyword}" 
+                               class="form-control" placeholder="Search by service name...">
                     </div>
                 </div>
-
-                <!-- STATUS -->
-                <div class="col-lg-3 col-md-6">
-                    <label class="form-label fw-semibold">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All</option>
-                        <option value="1"
-                                <c:if test="${status == '1'}">selected</c:if>>
-                                    Active
-                                </option>
-                                <option value="0"
-                                <c:if test="${status == '0'}">selected</c:if>>
-                                    Inactive
-                                </option>
-                        </select>
-                    </div>
-
-                    <!-- BUTTON -->
-                    <div class="col-lg-2 col-md-6">
-                        <button type="submit"
-                                class="btn btn-primary w-100">
-                            <i class="fa-solid fa-filter me-2"></i>
-                            Search
-                        </button>
-                    </div>
-
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>
+                        Search
+                    </button>
                 </div>
-            </form>
-        </div>
+                
+                <c:if test="${not empty keyword}">
+                    <div class="col-12 mt-2">
+                        <a href="${pageContext.request.contextPath}/admin/service/list" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times me-2"></i>Clear Search
+                        </a>
+                    </div>
+                </c:if>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">
+            <i class="fa-solid fa-list me-2 text-primary"></i>Service List
+        </h5>
     </div>
 
-
-    <!-- LIST -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-list me-2 text-primary"></i>
-                Service List
-            </h5>
-        </div>
-
-        <div class="card-body p-0">
-
+    <div class="card-body p-0">
         <c:choose>
             <c:when test="${services == null || services.size() == 0}">
                 <div class="text-center py-5">
                     <i class="fa-solid fa-inbox fa-3x text-muted mb-3 d-block"></i>
-                    <p class="text-muted mb-0">
-                        No services found
-                    </p>
+                    <p class="text-muted mb-0">No services found</p>
                 </div>
             </c:when>
 
@@ -105,28 +75,23 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>
+                                <th class="px-4">
                                     <i class="fa-solid fa-hashtag me-2 text-primary"></i>ID
                                 </th>
                                 <th>
-                                    <i class="fa-solid fa-notes-medical me-2 text-primary"></i>
-                                    Service Name
+                                    <i class="fa-solid fa-notes-medical me-2 text-primary"></i>Service Name
                                 </th>
                                 <th>
-                                    <i class="fa-solid fa-layer-group me-2 text-primary"></i>
-                                    Category
+                                    <i class="fa-solid fa-layer-group me-2 text-primary"></i>Category
                                 </th>
                                 <th>
-                                    <i class="fa-solid fa-dollar-sign me-2 text-primary"></i>
-                                    Price
+                                    <i class="fa-solid fa-dollar-sign me-2 text-primary"></i>Price
                                 </th>
                                 <th>
-                                    <i class="fa-solid fa-toggle-on me-2 text-primary"></i>
-                                    Status
+                                    <i class="fa-solid fa-toggle-on me-2 text-primary"></i>Status
                                 </th>
                                 <th class="text-center">
-                                    <i class="fa-solid fa-gear me-2 text-primary"></i>
-                                    Actions
+                                    <i class="fa-solid fa-gear me-2 text-primary"></i>Actions
                                 </th>
                             </tr>
                         </thead>
@@ -134,47 +99,35 @@
                         <tbody>
                             <c:forEach var="s" items="${services}">
                                 <tr>
-                                    <td>
-                                        ${s.serviceId}
-                                    </td>
-
-                                    <td class="fw-semibold">
-                                        ${s.serviceName}
-                                    </td>
-
+                                    <td class="px-4">${s.serviceId}</td>
+                                    <td class="fw-semibold">${s.serviceName}</td>
                                     <td>
                                         <span class="badge bg-light text-dark border">
                                             ${s.category}
                                         </span>
                                     </td>
-
-                                    <td>
-                                        ${s.currentPrice}
-                                    </td>
-
+                                    <td>${s.currentPrice}</td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${s.isActive}">
                                                 <span class="badge bg-success">
-                                                    <i class="fa-solid fa-check-circle me-1"></i>
-                                                    Active
+                                                    <i class="fa-solid fa-check-circle me-1"></i>Active
                                                 </span>
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="badge bg-danger">
-                                                    <i class="fa-solid fa-times-circle me-1"></i>
-                                                    Inactive
+                                                    <i class="fa-solid fa-times-circle me-1"></i>Inactive
                                                 </span>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
-
                                     <td class="text-center">
-                                        <a href="${pageContext.request.contextPath}/admin/service/detail?id=${s.serviceId}"
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="View Details">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="${pageContext.request.contextPath}/admin/service/detail?id=${s.serviceId}"
+                                               class="btn btn-sm btn-outline-primary" title="View Details">
+                                                <i class="fa-solid fa-eye me-1"></i> View
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             </c:forEach>
@@ -183,12 +136,10 @@
                 </div>
             </c:otherwise>
         </c:choose>
-
     </div>
 </div>
 
 <style>
-
     .table-hover tbody tr:hover {
         background-color: rgba(13, 110, 253, 0.05);
         transition: background-color 0.2s ease;
@@ -201,6 +152,7 @@
 
     .card-header {
         border-bottom: 1px solid rgba(0,0,0,0.08);
+        border-radius: 12px 12px 0 0 !important;
     }
 
     .badge {
@@ -210,12 +162,28 @@
     }
 
     .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 8px;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
         transition: all 0.25s ease;
     }
 
     .btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Style cho input group đồng bộ */
+    .input-group-text {
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 8px 8px 0;
     }
 </style>

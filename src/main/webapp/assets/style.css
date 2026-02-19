@@ -1,3 +1,7 @@
+:root {
+    --bs-body-font-family: 'Poppins', sans-serif;
+}
+
 /* ===== SIDEBAR BASE ===== */
 .sidebar {
     background-color: #0d6efd; /* Bootstrap primary */
