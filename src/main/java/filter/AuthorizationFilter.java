@@ -171,7 +171,7 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "MEDICINE_CREATE";
         } else if (path.contains("/medicine/edit")) {
             requiredPriv = "MEDICINE_EDIT";
-        } else if (path.contains("/medicine")) { // Bao gồm cả /list và /detail
+        } else if (path.contains("/medicine/list")) { // Bao gồm cả /list và /detail
             requiredPriv = "MEDICINE_VIEW";
         }
 
@@ -206,7 +206,6 @@ public class AuthorizationFilter implements Filter {
 
         chain.doFilter(request, response);
     }
-    
 
     public FilterConfig getFilterConfig() {
         return (this.filterConfig);
