@@ -44,10 +44,10 @@
 
         <!-- Test Requests -->
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/tests">
+            <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/receptionist/service-order/list">
                 <i class="fa-solid fa-vials me-2"></i>
-                Manage invoice
+                Manage service order
             </a>
         </li>
 
