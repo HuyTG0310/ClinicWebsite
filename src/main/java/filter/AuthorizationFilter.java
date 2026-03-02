@@ -171,7 +171,7 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "MEDICINE_CREATE";
         } else if (path.contains("/medicine/edit")) {
             requiredPriv = "MEDICINE_EDIT";
-        } else if (path.contains("/medicine")) { // Bao gồm cả /list và /detail
+        } else if (path.contains("/medicine/list") || path.contains("/medicine/detail")) { // Bao gồm cả /list và /detail
             requiredPriv = "MEDICINE_VIEW";
         }
 
@@ -180,7 +180,7 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "ROOM_CREATE";
         } else if (path.contains("/room/edit")) {
             requiredPriv = "ROOM_EDIT";
-        } else if (path.contains("/room/list")) {
+        } else if (path.contains("/room/list") || path.contains("/room/detail")) {
             requiredPriv = "ROOM_VIEW";
         }
 
@@ -188,7 +188,7 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "PATIENT_CREATE";
         } else if (path.contains("/patient/edit")) {
             requiredPriv = "PATIENT_EDIT";
-        } else if (path.contains("/patient/list")) {
+        } else if (path.contains("/patient/list") || path.contains("/patient/detail")) {
             requiredPriv = "PATIENT_VIEW";
         } else if (path.contains("/patient/delete")) {
             requiredPriv = "PATIENT_DELETE";
@@ -206,7 +206,6 @@ public class AuthorizationFilter implements Filter {
 
         chain.doFilter(request, response);
     }
-    
 
     public FilterConfig getFilterConfig() {
         return (this.filterConfig);

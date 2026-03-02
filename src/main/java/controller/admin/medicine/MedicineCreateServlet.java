@@ -120,6 +120,6 @@ public class MedicineCreateServlet extends HttpServlet {
         MedicineDAO dao = new MedicineDAO();
         dao.insert(m);
 
-        response.sendRedirect(basePath + "/medicine");
+        response.sendRedirect(basePath + "/medicine/list");
     }
 }
