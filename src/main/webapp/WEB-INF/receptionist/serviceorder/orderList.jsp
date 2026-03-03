@@ -58,7 +58,7 @@
 
 <div class="card shadow-sm mb-4 border-0 rounded-4">
     <div class="card-body p-4">
-        <form action="${pageContext.request.contextPath}/receptionist/service-order/list" method="get">
+        <form action="${basePath}/service-order/list" method="get">
             <div class="row g-3 align-items-end">
 
                 <div class="col-md-3">
@@ -92,7 +92,7 @@
                         </button>
 
                     <c:if test="${not empty param.paymentMethod or not empty param.date or not empty param.status}">
-                        <a href="${pageContext.request.contextPath}/receptionist/service-order/list" 
+                        <a href="${basePath}/service-order/list" 
                            class="btn btn-outline-secondary px-3" title="Xóa bộ lọc">
                             <i class="fas fa-redo-alt"></i>
                         </a>
@@ -187,10 +187,10 @@
 
                                 <c:choose>
                                     <c:when test="${o.medicalRecordId > 0}">
-                                        <a href="${pageContext.request.contextPath}/receptionist/service-order/detail?mrId=${o.medicalRecordId}&patientId=${o.patientId}&status=${o.status}<c:if test="${o.status == 'PAID'}">&time=${o.paidAt.time}</c:if>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
+                                        <a href="${basePath}/service-order/detail?mrId=${o.medicalRecordId}&patientId=${o.patientId}&status=${o.status}<c:if test="${o.status == 'PAID'}">&time=${o.paidAt.time}</c:if>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/receptionist/service-order/detail?soId=${o.serviceOrderId}&patientId=${o.patientId}&status=${o.status}<c:if test="${o.status == 'PAID'}">&time=${o.paidAt.time}</c:if>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
+                                        <a href="${basePath}/service-order/detail?soId=${o.serviceOrderId}&patientId=${o.patientId}&status=${o.status}<c:if test="${o.status == 'PAID'}">&time=${o.paidAt.time}</c:if>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
