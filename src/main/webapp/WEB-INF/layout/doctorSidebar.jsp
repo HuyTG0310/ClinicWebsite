@@ -80,6 +80,25 @@
         </c:if>
 
 
+        <c:if test="${hasAppointmentView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/doctor/appointment/list">
+                    <i class="fa-solid fa-gauge me-2"></i>
+                    Manage appointment
+                </a>
+            </li>
+        </c:if>
+
+
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/doctor/service-order/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage service order
+            </a>
+        </li>
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/profile/view">
