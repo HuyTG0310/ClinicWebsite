@@ -26,7 +26,7 @@
                 </c:if>
             </c:if>
 
-            <a href="${pageContext.request.contextPath}/receptionist/receipt/print?appId=${app.appointmentId}" target="_blank" class="btn btn-primary shadow-sm fw-bold">
+            <a href="${basePath}/receipt/print?appId=${app.appointmentId}" target="_blank" class="btn btn-primary shadow-sm fw-bold">
                 <i class="fas fa-print me-2"></i>In Biên Lai Khám
             </a>
         </div>

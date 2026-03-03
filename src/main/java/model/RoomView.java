@@ -4,7 +4,6 @@
  */
 package model;
 
-
 public class RoomView {
 
     private int roomId;
@@ -12,6 +11,7 @@ public class RoomView {
     private String specialtyName;
     private String doctorName; // có thể null
     private boolean isActive;
+    private int specialtyId;
 
     public int getRoomId() {
         return roomId;
@@ -23,6 +23,14 @@ public class RoomView {
 
     public String getRoomName() {
         return roomName;
+    }
+
+    public int getSpecialtyId() {
+        return specialtyId;
+    }
+
+    public void setSpecialtyId(int specialtyId) {
+        this.specialtyId = specialtyId;
     }
 
     public void setRoomName(String roomName) {
