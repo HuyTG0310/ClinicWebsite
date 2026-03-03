@@ -141,4 +141,117 @@ public class AppointmentDAO extends DBContext {
         return app;
     }
 
+    public int createAppointment(int patientId, int roomId, int receptionistId, String paymentMethod) {
+        Connection conn = null;
+        PreparedStatement stApp = null;
+        PreparedStatement stOrder = null;
+        ResultSet rsApp = null;
+        ResultSet rsOrder = null;
+        int generatedServiceOrderId = -1;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+            String sqlApp = "INSERT INTO Appointment (PatientId, RoomId, CreatedBy, Status) VALUES (?, ?, ?, 'WAITING')";
+
+            stApp = conn.prepareStatement(sqlApp, PreparedStatement.RETURN_GENERATED_KEYS);
+            stApp.setInt(1, patientId);
+            stApp.setInt(2, roomId);
+            stApp.setInt(3, receptionistId);
+
+            if (stApp.executeUpdate() == 0) {
+                conn.rollback();
+                return -1;
+            }
+
+            int generatedAppId = -1;
+            rsApp = stApp.getGeneratedKeys();
+            if (rsApp.next()) {
+                generatedAppId = rsApp.getInt(1);
+            }
+
+            int clinicalExamServiceId = 1;
+            double examPrice = 200000;
+
+            String status = "CASH".equals(paymentMethod) ? "PAID" : "UNPAID";
+            String paidAtFragment = "CASH".equals(paymentMethod) ? "GETDATE()" : "NULL";
+
+            String sqlOrder = "INSERT INTO ServiceOrder "
+                    + "(PatientId, AppointmentId, MedicalRecordId, ServiceId, AssignedById, CashierId, PriceAtTime, Status, PaidAt, PaymentMethod) "
+                    + "VALUES (?, ?, NULL, ?, ?, ?, ?, ?, " + paidAtFragment + ", ?)";
+
+            stOrder = conn.prepareStatement(sqlOrder, PreparedStatement.RETURN_GENERATED_KEYS);
+
+            stOrder.setInt(1, patientId);
+            stOrder.setInt(2, generatedAppId);
+            stOrder.setInt(3, clinicalExamServiceId);
+            stOrder.setInt(4, receptionistId);
+
+            if ("CASH".equals(paymentMethod)) {
+                stOrder.setInt(5, receptionistId);
+            } else {
+                stOrder.setNull(5, java.sql.Types.INTEGER);
+            }
+
+            stOrder.setDouble(6, examPrice);
+            stOrder.setString(7, status);
+            stOrder.setString(8, paymentMethod);
+
+            if (stOrder.executeUpdate() == 0) {
+                conn.rollback();
+                return -1;
+            }
+
+            rsOrder = stOrder.getGeneratedKeys();
+            if (rsOrder.next()) {
+                generatedServiceOrderId = rsOrder.getInt(1);
+            }
+
+            conn.commit();
+            return generatedServiceOrderId;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return -1;
+        } finally {
+            try {
+                if (rsApp != null) {
+                    rsApp.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (rsOrder != null) {
+                    rsOrder.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stOrder != null) {
+                    stOrder.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stApp != null) {
+                    stApp.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+
 }
