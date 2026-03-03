@@ -13,7 +13,7 @@ public class RoomDAO extends DBContext {
         List<RoomView> list = new ArrayList<>();
 
         String sql = "        SELECT r.RoomId, r.RoomName, r.IsActive,\n"
-                + "               s.SpecialtyName,\n"
+                + "               s.SpecialtyName, s.SpecialtyId, \n"
                 + "               u.FullName AS DoctorName\n"
                 + "        FROM Room r\n"
                 + "        JOIN Specialty s ON r.SpecialtyId = s.SpecialtyId\n"
@@ -27,6 +27,7 @@ public class RoomDAO extends DBContext {
                 rv.setRoomName(rs.getString("RoomName"));
                 rv.setSpecialtyName(rs.getString("SpecialtyName"));
                 rv.setDoctorName(rs.getString("DoctorName"));
+                rv.setSpecialtyId(rs.getInt("SpecialtyId"));
                 rv.setIsActive(rs.getBoolean("IsActive"));
                 list.add(rv);
             }
@@ -313,6 +314,13 @@ public class RoomDAO extends DBContext {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        RoomDAO dao = new RoomDAO();
+        for (RoomView roomView : dao.getAllView()) {
+            System.out.println(roomView);
+        }
     }
 
 }
