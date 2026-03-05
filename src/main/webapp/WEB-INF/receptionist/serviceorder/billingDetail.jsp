@@ -90,6 +90,9 @@
                                         <c:when test="${currentStatus == 'UNPAID'}">
                                             <span class="badge bg-warning text-dark px-3 py-2"><i class="fa-solid fa-clock me-1"></i>UNPAID</span>
                                         </c:when>
+                                        <c:when test="${currentStatus == 'REFUNDED'}">
+                                            <span class="badge bg-secondary text-dark px-3 py-2"><i class="fa-solid fa-ban me-1"></i>REFUNDED</span>
+                                        </c:when>
                                         <c:otherwise>
                                             <span class="badge bg-secondary px-3 py-2"><i class="fa-solid fa-ban me-1"></i>CANCELLED</span>
                                         </c:otherwise>
@@ -537,7 +540,7 @@
                             btnCheck.classList.replace('btn-warning', 'btn-success');
                             btnCheck.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i>Payment successful!';
                             alert("⚠️ NOTE: The customer has transferred an EXCESS amount " + data.excess.toLocaleString('vi-VN') + " đ.\nThe system has confirmed the order. Please return the change to the customer!");
-                            window.location.href = '${pageContext.request.contextPath}/receptionist/service-order/list';
+                            window.location.href = '${basePath}/service-order/list';
                         } else if (data.status === 'UNDERPAID') {
                             clearInterval(paymentCheckInterval);
                             btnCheck.classList.replace('btn-warning', 'btn-danger');
