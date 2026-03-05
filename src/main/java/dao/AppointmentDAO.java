@@ -254,4 +254,81 @@ public class AppointmentDAO extends DBContext {
         }
     }
 
+    
+    public boolean updateAppointmentRoom(int appointmentId, int newRoomId) {
+        String sql = "UPDATE Appointment SET RoomId = ? WHERE AppointmentId = ? AND Status = 'WAITING'";
+        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, newRoomId);
+            st.setInt(2, appointmentId);
+
+            return st.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean cancelAppointment(int appointmentId) {
+        Connection conn = null;
+        PreparedStatement stApp = null;
+        PreparedStatement stOrder = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false); 
+
+            String sqlApp = "UPDATE Appointment SET Status = 'CANCELLED' WHERE AppointmentId = ? AND Status = 'WAITING'";
+            stApp = conn.prepareStatement(sqlApp);
+            stApp.setInt(1, appointmentId);
+
+            if (stApp.executeUpdate() == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            
+            String sqlOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' WHERE AppointmentId = ?";
+
+            stOrder = conn.prepareStatement(sqlOrder);
+            stOrder.setInt(1, appointmentId);
+
+            stOrder.executeUpdate();
+
+           
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        } finally {
+            try {
+                if (stOrder != null) {
+                    stOrder.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stApp != null) {
+                    stApp.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+    
 }
