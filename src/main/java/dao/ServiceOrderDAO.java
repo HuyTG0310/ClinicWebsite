@@ -98,7 +98,6 @@ public class ServiceOrderDAO extends DBContext {
     public java.util.List<java.util.Map<String, Object>> getServiceDetailsByMrId(int medicalRecordId, int patientId, String status, String formattedTime) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
 
-
         StringBuilder sql = new StringBuilder("SELECT s.ServiceName, so.PriceAtTime, "
                 + "so.PaymentMethod, so.PaidAt, u.FullName AS CashierName "
                 + "FROM ServiceOrder so "
@@ -195,4 +194,133 @@ public class ServiceOrderDAO extends DBContext {
         return null;
     }
 
+    //hàm xác nhận thu tiền cho toàn bộ dịch vụ của 1 ca khám
+    public boolean checkoutServiceOrders(int medicalRecordId, int cashierId, String paymentMethod) {
+
+        // 1. Cập nhật tất cả các record có cùng MedicalRecordId và đang UNPAID thành PAID
+        String sqlService = "UPDATE ServiceOrder "
+                + "SET Status = 'PAID', CashierId = ?, PaymentMethod = ?, PaidAt = GETDATE() "
+                + "WHERE MedicalRecordId = ? AND Status = 'UNPAID'";
+
+        // 2. Cập nhật Lô xét nghiệm từ CREATED -> IN_PROGRESS để báo cho phòng Lab biết đã thu tiền
+        String sqlBatch = "UPDATE LabTestBatch "
+                + "SET Status = 'IN_PROGRESS' "
+                + "WHERE MedicalRecordId = ? AND Status = 'CREATED'";
+
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stService = null;
+        java.sql.PreparedStatement stBatch = null;
+
+        try {
+            // Lưu ý: Nếu DBContext của bạn dùng getConnection() thì đổi lại nhé
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false); // Bật Transaction: Đảm bảo Kế toán và Lab đồng bộ 100%
+
+            // Bước 1: Thu tiền (Cập nhật bảng ServiceOrder)
+            stService = conn.prepareStatement(sqlService);
+            stService.setInt(1, cashierId);
+            stService.setString(2, paymentMethod);
+            stService.setInt(3, medicalRecordId);
+
+            int rowsAffected = stService.executeUpdate();
+
+            // Bước 2: Bật cờ cho phòng Lab (Nếu có thu tiền thành công)
+            if (rowsAffected > 0) {
+                stBatch = conn.prepareStatement(sqlBatch);
+                stBatch.setInt(1, medicalRecordId);
+                stBatch.executeUpdate();
+            }
+
+            conn.commit(); // Chốt giao dịch! Lưu cả 2 bảng.
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            System.out.println("Lỗi thu tiền: " + e.getMessage());
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback(); // Nếu có lỗi thì quay xe, không lưu gì cả
+                }
+            } catch (Exception ex) {
+            }
+        } finally {
+            // Đóng tài nguyên sạch sẽ
+            try {
+                if (stService != null) {
+                    stService.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stBatch != null) {
+                    stBatch.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+        return false;
+    }
+
+    //hàm dùng cho khách hàng khi trả tiền khám bằng QR mà đổi ý thành tiền mặt
+    public boolean checkoutSingleServiceOrder(int soId, int cashierId, String paymentMethod) {
+        // Chỉ Update khi nó đang UNPAID để tránh bug chốt 2 lần
+        String sql = "UPDATE ServiceOrder "
+                + "SET Status = 'PAID', CashierId = ?, PaidAt = GETDATE(), PaymentMethod = ? "
+                + "WHERE ServiceOrderId = ? AND Status = 'UNPAID'";
+
+        try (Connection conn = new DBContext().conn; PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, cashierId);
+            ps.setString(2, paymentMethod); // Cập nhật lại thành CASH
+            ps.setInt(3, soId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //hàm check xem bệnh án này đã được thu tiền xong chưa
+    public boolean isOrderPaid(int medicalRecordId) {
+        String sql = "SELECT COUNT(*) AS UnpaidCount FROM ServiceOrder WHERE MedicalRecordId = ? AND Status = 'UNPAID'";
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    // Nếu số lượng UNPAID = 0, tức là đã PAID toàn bộ!
+                    return rs.getInt("UnpaidCount") == 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public double getUnpaidTotalAmount(int medicalRecordId) {
+        String sql = "SELECT SUM(PriceAtTime) AS Total FROM ServiceOrder WHERE MedicalRecordId = ? AND Status = 'UNPAID'";
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("Total");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0; // Không nợ đồng nào
+    }
 }
