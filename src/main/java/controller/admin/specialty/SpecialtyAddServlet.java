@@ -14,7 +14,7 @@ public class SpecialtyAddServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("pageTitle", "Manage speiclaty");
+        request.setAttribute("pageTitle", "Specialty Detail");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/addSpecialty.jsp");
 
@@ -41,7 +41,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
         request.setAttribute("error",
                 "Name và Description không được để trống hoặc chỉ chứa khoảng trắng.");
 
-        request.setAttribute("pageTitle", "Manage speiclaty");
+        request.setAttribute("pageTitle", "Specialty Detail");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/addSpecialty.jsp");
 
@@ -53,7 +53,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
     // ===== DUPLICATE CHECK =====
     if (dao.existsByName(name.trim())) {
         request.setAttribute("error", "Specialty name đã tồn tại.");
-        request.setAttribute("pageTitle", "Manage speiclaty");
+        request.setAttribute("pageTitle", "Specialty Detail");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/addSpecialty.jsp");
         request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);

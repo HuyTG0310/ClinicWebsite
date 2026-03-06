@@ -44,6 +44,11 @@ public class AppointmentListServlet extends HttpServlet {
 
         request.setAttribute("basePath", basePath);
 
+        String msg = request.getParameter("msg");
+        if ("success".equals(msg)) {
+            request.setAttribute("successMessage", "Đã tạo phiếu khám thành công! Bệnh nhân đã vào hàng đợi.");
+        }
+
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -54,7 +59,6 @@ public class AppointmentListServlet extends HttpServlet {
         String dateStr = request.getParameter("date");
         String status = request.getParameter("status");
 
-        
         if (dateStr == null) {
             dateStr = LocalDate.now().toString();
         }
@@ -64,10 +68,10 @@ public class AppointmentListServlet extends HttpServlet {
 
         request.setAttribute("appointmentList", list);
 
-        request.setAttribute("paramDate", dateStr); 
+        request.setAttribute("paramDate", dateStr);
 
         request.setAttribute("pageTitle", "Appointment List");
-        request.setAttribute("activePage", "manageAppointment"); 
+        request.setAttribute("activePage", "manageAppointment");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/appointment/appointmentList.jsp");
 
         request.getRequestDispatcher(layout).forward(request, response);

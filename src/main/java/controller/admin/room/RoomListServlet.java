@@ -65,7 +65,7 @@ public class RoomListServlet extends HttpServlet {
 
             request.setAttribute("basePath", basePath);
             request.setAttribute("roomList", roomList);
-            request.setAttribute("pageTitle", "Manage Room");
+            request.setAttribute("pageTitle", "Room List");
             request.setAttribute("activePage", "manageRoom");
             request.setAttribute("contentPage", "/WEB-INF/admin/room/roomList.jsp");
 

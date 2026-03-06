@@ -71,7 +71,7 @@ public class ServiceAddServlet extends HttpServlet {
             request.setAttribute("price", priceRaw);
 
             request.setAttribute("categories", ServiceCategory.getAll());
-            request.setAttribute("pageTitle", "Add service");
+            request.setAttribute("pageTitle", "Service Detail");
             request.setAttribute("activePage", "manageService");
             request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceAdd.jsp");
 
@@ -94,7 +94,7 @@ public class ServiceAddServlet extends HttpServlet {
             request.setAttribute("error", "Thêm dịch vụ thất bại");
 
             request.setAttribute("categories", ServiceCategory.getAll());
-            request.setAttribute("pageTitle", "Add service");
+            request.setAttribute("pageTitle", "Service Detail");
             request.setAttribute("activePage", "manageService");
             request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceAdd.jsp");
 

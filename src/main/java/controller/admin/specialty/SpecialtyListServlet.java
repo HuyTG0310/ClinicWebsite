@@ -34,7 +34,7 @@ public class SpecialtyListServlet extends HttpServlet {
         }
 
         request.setAttribute("list", list);
-        request.setAttribute("pageTitle", "Manage speiclaty");
+        request.setAttribute("pageTitle", "Specialty List");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/listSpecialty.jsp");
 

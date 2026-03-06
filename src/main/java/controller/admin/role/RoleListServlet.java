@@ -38,7 +38,7 @@ public class RoleListServlet extends HttpServlet {
         // 3. Đẩy dữ liệu lên JSP
         request.setAttribute("roles", roles);
         request.setAttribute("searchValue", search); // Giữ lại từ khóa trên ô input sau khi search
-        request.setAttribute("pageTitle", "Role management");
+        request.setAttribute("pageTitle", "Role List");
         request.setAttribute("activePage", "manageRole");
 
         // Load vào layout Admin của bạn

@@ -68,7 +68,7 @@ public class MedicineListServlet extends HttpServlet {
         }
 
         request.setAttribute("basePath", basePath);
-        request.setAttribute("pageTitle", "Medicine");
+        request.setAttribute("pageTitle", "Medicine List");
         request.setAttribute("activePage", "manageMedicine");
         request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineList.jsp");
         request.getRequestDispatcher(layout).forward(request, response);

@@ -6,7 +6,7 @@
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-file-invoice-dollar text-primary me-2"></i>
-            Service Order List
+            Manage Service Order
         </h2>
         <p class="text-muted mb-0">Manage daily service orders and revenue</p>
     </div>

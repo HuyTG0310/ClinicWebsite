@@ -7,7 +7,7 @@
     <div>
         <h2 class="mb-1">
             <i class="fas fa-users text-primary me-2"></i>
-            Manage patient
+            Manage Patient
         </h2>
         <p class="text-muted mb-0">Manage and view all patients</p>
     </div>

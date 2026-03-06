@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 @WebServlet(name = "SePayWebhookServlet", urlPatterns = {"/api/sepay-webhook"})
 public class SePayWebhookServlet extends HttpServlet {
 
-    //lưu trữ thông báo số tiền dư/thiếu theo bệnh án (mrid => số tiền lệch) âm - thiếu, dương -dư
     public static ConcurrentHashMap<String, Double> paymentAlerts = new ConcurrentHashMap<>();
 
     @Override
@@ -59,15 +58,13 @@ public class SePayWebhookServlet extends HttpServlet {
             return;
         }
 
-        // 🔥 CHUẨN HÓA: Ép tất cả thành chữ hoa và XÓA SẠCH khoảng trắng
+        // Ép tất cả thành chữ hoa và XÓA SẠCH khoảng trắng
         String normalizedContent = content.toUpperCase().replace(" ", "");
         dao.ServiceOrderDAO dao = new dao.ServiceOrderDAO();
-        int botCashierId = 1; // ID Lễ tân tự động (1)
+        int botCashierId = 4; // ID Lễ tân tự động (1)
 
         try {
-            // ==============================================================
-            // NHÁNH 1: THANH TOÁN BỆNH ÁN (CHÙM DỊCH VỤ / XÉT NGHIỆM)
-            // ==============================================================
+            //THANH TOÁN BỆNH ÁN (XÉT NGHIỆM)
             if (normalizedContent.contains("THANHTOANBA")) {
                 int mrId = Integer.parseInt(normalizedContent.replaceAll(".*THANHTOANBA(\\d+).*", "$1"));
                 String alertKey = "BA" + mrId;
@@ -99,9 +96,7 @@ public class SePayWebhookServlet extends HttpServlet {
                     }
                 }
 
-                // ==============================================================
-                // NHÁNH 2: THANH TOÁN PHIẾU KHÁM LẺ (CHƯA CÓ BỆNH ÁN)
-                // ==============================================================
+                //THANH TOÁN PHIẾU KHÁM LẺ (CHƯA CÓ BỆNH ÁN)
             } else if (normalizedContent.contains("THANHTOANPK")) {
                 int soId = Integer.parseInt(normalizedContent.replaceAll(".*THANHTOANPK(\\d+).*", "$1"));
                 String alertKey = "PK" + soId;
@@ -119,7 +114,7 @@ public class SePayWebhookServlet extends HttpServlet {
                         return;
                     } else {
                         if (transferAmount > expectedAmount) {
-                            System.out.println("-> ⚠️ KHÁCH CHUYỂN DƯ TIỀN!");
+                            System.out.println("-> ⚠ KHÁCH CHUYỂN DƯ TIỀN!");
                             paymentAlerts.put(alertKey, transferAmount - expectedAmount);
                         }
 
@@ -135,11 +130,11 @@ public class SePayWebhookServlet extends HttpServlet {
                 }
 
             } else {
-                System.out.println("❌ LỖI: Không tìm thấy mã THANHTOANBA hay THANHTOANPK hợp lệ.");
+                System.out.println("LỖI: Không tìm thấy mã THANHTOANBA hay THANHTOANPK hợp lệ.");
             }
 
         } catch (Exception e) {
-            System.out.println("❌ LỖI TRONG QUÁ TRÌNH XỬ LÝ: " + e.getMessage());
+            System.out.println("LỖI TRONG QUÁ TRÌNH XỬ LÝ: " + e.getMessage());
             e.printStackTrace();
         }
 

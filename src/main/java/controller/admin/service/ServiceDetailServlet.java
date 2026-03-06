@@ -52,7 +52,7 @@ public class ServiceDetailServlet extends HttpServlet {
 //        request.getRequestDispatcher("/WEB-INF/admin/service/serviceDetail.jsp").forward(request, response);
         
         request.setAttribute("categories", ServiceCategory.getAll());
-        request.setAttribute("pageTitle", "Add service");
+        request.setAttribute("pageTitle", "Service Detail");
         request.setAttribute("activePage", "manageService");
         request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceDetail.jsp");
 

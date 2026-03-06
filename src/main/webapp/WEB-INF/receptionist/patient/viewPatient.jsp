@@ -8,6 +8,7 @@
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
+
         <div>
             <h2 class="mb-1">
                 <i class="fas fa-user text-primary me-2"></i>
@@ -16,9 +17,37 @@
             <p class="text-muted mb-0">View complete patient information</p>
         </div>
 
-        <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to List
-        </a>
+        <div class="d-flex gap-2">
+
+            <c:if test="${hasPatientDelete}">
+                <button class="btn btn-danger"
+                        onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </c:if>
+
+            <c:if test="${hasPatientEdit}">
+                <button class="btn btn-warning"
+                        onclick="openEditModal(
+                                        '${patient.patientId}',
+                                        '${patient.fullName}',
+                                        '${patient.phone}',
+                                        '<fmt:formatDate value="${patient.dateOfBirth}" pattern="yyyy-MM-dd"/>',
+                                        '${patient.gender}',
+                                        '${patient.address}',
+                                        '${patient.medicalHistory}',
+                                        '${patient.allergy}'
+                                        )">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </button>
+            </c:if>
+
+            <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+
+        </div>
+
     </div>
 
     <c:choose>
@@ -169,38 +198,6 @@
 
                 </div>
             </div>
-
-            <!-- ACTION BUTTONS -->
-            <div class="d-flex gap-2">
-                <a href="${basePath}/patient/list" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back
-                </a>
-                <c:if test="${hasPatientEdit}">
-                    <button class="btn btn-warning"
-                            onclick="openEditModal(
-                                            '${patient.patientId}',
-                                            '${patient.fullName}',
-                                            '${patient.phone}',
-                                            '<fmt:formatDate value="${patient.dateOfBirth}" pattern="yyyy-MM-dd"/>',
-                                            '${patient.gender}',
-                                            '${patient.address}',
-                                            '${patient.medicalHistory}',
-                                            '${patient.allergy}'
-                                            )">
-                        <i class="fas fa-edit me-2"></i>Edit Patient
-                    </button>
-                </c:if>
-
-                <c:if test="${hasPatientDelete}">
-                    <button class="btn btn-danger"
-                            onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
-                        <i class="fas fa-trash me-2"></i>Delete Patient
-                    </button>
-                </c:if>
-
-
-            </div>
-
         </c:when>
 
         <c:otherwise>

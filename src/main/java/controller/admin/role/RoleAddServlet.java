@@ -25,7 +25,7 @@ public class RoleAddServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("pageTitle", "Role Create");
+        request.setAttribute("pageTitle", "Role Detail");
         request.setAttribute("activePage", "manageRole"); // Để menu bên trái vẫn sáng ở mục Role
         request.setAttribute("contentPage", "/WEB-INF/admin/role/roleAdd.jsp");
 

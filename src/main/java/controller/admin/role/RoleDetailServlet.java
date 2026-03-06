@@ -44,7 +44,7 @@ public class RoleDetailServlet extends HttpServlet {
         request.setAttribute("allPrivileges", allPrivileges);
         request.setAttribute("currentPrivilegeIds", currentPrivilegeIds);
 
-        request.setAttribute("pageTitle", "Role detail");
+        request.setAttribute("pageTitle", "Role Detail");
         request.setAttribute("activePage", "manageRole");
 
         // Trỏ về file JSP mới (đẹp hơn) nằm trong thư mục admin
