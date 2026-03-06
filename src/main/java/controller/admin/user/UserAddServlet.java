@@ -32,7 +32,7 @@ public class UserAddServlet extends HttpServlet {
 //        request.getRequestDispatcher("/WEB-INF/admin/user/userAdd.jsp")
 //                .forward(request, response);
 
-        request.setAttribute("pageTitle", "Add user");
+        request.setAttribute("pageTitle", "Staff Detail");
         request.setAttribute("activePage", "manageStaff");
         request.setAttribute("contentPage", "/WEB-INF/admin/user/userAdd.jsp");
 
@@ -120,7 +120,7 @@ public class UserAddServlet extends HttpServlet {
 //            request.getRequestDispatcher("/WEB-INF/admin/user/userAdd.jsp")
 //                    .forward(request, response);
 //            
-            request.setAttribute("pageTitle", "Add staff");
+            request.setAttribute("pageTitle", "Staff Detail");
             request.setAttribute("activePage", "manageStaff");
             request.setAttribute("contentPage", "/WEB-INF/admin/user/userAdd.jsp");
 

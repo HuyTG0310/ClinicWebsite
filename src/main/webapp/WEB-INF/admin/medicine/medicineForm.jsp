@@ -7,94 +7,233 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
-<h4 class="mb-4 fw-semibold text-primary">
-    <i class="fa-solid fa-pills me-2"></i>
-    <c:choose>
-        <c:when test="${not empty medicine.medicineId}">Edit Medicine</c:when>
-        <c:otherwise>Add Medicine</c:otherwise>
-    </c:choose>
-</h4>
+<div class="container-fluid">
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <c:if test="${not empty error}">
-            <div class="alert alert-danger d-flex align-items-center">
-                <i class="fa-solid fa-circle-exclamation me-2"></i>
-                ${error}
-            </div>
-        </c:if>
+        <div>
+            <h2 class="mb-1">
+                <i class="fa-solid fa-pills text-primary me-2"></i>
 
-        <form method="post">
+                <c:choose>
+                    <c:when test="${not empty medicine.medicineId}">
+                        Edit Medicine
+                    </c:when>
+                    <c:otherwise>
+                        Add Medicine
+                    </c:otherwise>
+                </c:choose>
 
-            <c:if test="${not empty medicine.medicineId}">
-                <input type="hidden" name="id" value="${medicine.medicineId}">
-            </c:if>
+            </h2>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Medicine Name <span class="text-danger">*</span>
-                </label>
-                <input type="text"
-                       class="form-control"
-                       name="name"
-                       value="${medicine.medicineName}"
-                       required>
-            </div>
+            <p class="text-muted mb-0">
+                Manage medicine information in the system
+            </p>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Unit <span class="text-danger">*</span>
-                </label>
-                <select name="unit" class="form-select" required>
-                    <option value="">-- Select Unit --</option>
-                    <option value="Tablet" ${medicine.unit == 'Tablet' ? 'selected' : ''}>Tablet</option>
-                    <option value="Blister" ${medicine.unit == 'Blister' ? 'selected' : ''}>Blister</option>
-                    <option value="Box" ${medicine.unit == 'Box' ? 'selected' : ''}>Box</option>
-                    <option value="Bottle" ${medicine.unit == 'Bottle' ? 'selected' : ''}>Bottle</option>
-                    <option value="Vial" ${medicine.unit == 'Vial' ? 'selected' : ''}>Vial</option>
-                    <option value="Tube" ${medicine.unit == 'Tube' ? 'selected' : ''}>Tube</option>
-                    <option value="Sachet" ${medicine.unit == 'Sachet' ? 'selected' : ''}>Sachet</option>
-                    <option value="Effervescent tablet" ${medicine.unit == 'Effervescent tablet' ? 'selected' : ''}>Effervescent Tablet</option>
-                    <option value="Capsule" ${medicine.unit == 'Capsule' ? 'selected' : ''}>Capsule</option>
-                    <option value="Bag" ${medicine.unit == 'Bag' ? 'selected' : ''}>Bag</option>
-                </select>
-            </div>
+        <a href="${basePath}/medicine/list"
+           class="btn btn-outline-secondary">
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Ingredients</label>
-                <textarea class="form-control" name="ingredients" rows="3">${medicine.ingredients}</textarea>
-            </div>
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to list
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Usage</label>
-                <textarea class="form-control" name="usage" rows="3">${medicine.usage}</textarea>
-            </div>
+        </a>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Contraindication</label>
-                <textarea class="form-control" name="contra">${medicine.contraindication}</textarea>
-            </div>
-
-            <c:if test="${not empty medicine.medicineId}">
-                <div class="mb-4 form-check form-switch">
-                    <input class="form-check-input" type="checkbox" 
-                           id="isActive" name="isActive" value="true"
-                           ${medicine.isActive ? 'checked' : ''}>
-                    <label class="form-check-label" for="isActive">Active Status (Is being used?)</label>
-                </div>
-            </c:if>
-
-            <div class="d-flex justify-content-end gap-2">
-                <a href="${basePath}/medicine/list" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left me-1"></i> Cancel
-                </a>
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-floppy-disk me-1"></i> Save
-                </button>
-            </div>
-
-        </form>
     </div>
+
+
+
+    <!-- ================= ERROR ================= -->
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger shadow-sm">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            ${error}
+        </div>
+    </c:if>
+
+
+
+    <!-- ================= FORM CARD ================= -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <h5 class="mb-0">
+
+                <i class="fa-solid fa-capsules text-primary me-2"></i>
+                Medicine Information
+
+            </h5>
+
+        </div>
+
+
+
+        <div class="card-body">
+
+            <form method="post">
+
+                <c:if test="${not empty medicine.medicineId}">
+                    <input type="hidden"
+                           name="id"
+                           value="${medicine.medicineId}">
+                </c:if>
+
+
+
+                <div class="row g-4">
+
+                    <!-- MEDICINE NAME -->
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Medicine Name <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               name="name"
+                               value="${medicine.medicineName}"
+                               required>
+
+                    </div>
+
+
+
+                    <!-- UNIT -->
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Unit <span class="text-danger">*</span>
+                        </label>
+
+                        <select name="unit"
+                                class="form-select"
+                                required>
+
+                            <option value="">-- Select Unit --</option>
+
+                            <option value="Tablet" ${medicine.unit == 'Tablet' ? 'selected' : ''}>Tablet</option>
+                            <option value="Blister" ${medicine.unit == 'Blister' ? 'selected' : ''}>Blister</option>
+                            <option value="Box" ${medicine.unit == 'Box' ? 'selected' : ''}>Box</option>
+                            <option value="Bottle" ${medicine.unit == 'Bottle' ? 'selected' : ''}>Bottle</option>
+                            <option value="Vial" ${medicine.unit == 'Vial' ? 'selected' : ''}>Vial</option>
+                            <option value="Tube" ${medicine.unit == 'Tube' ? 'selected' : ''}>Tube</option>
+                            <option value="Sachet" ${medicine.unit == 'Sachet' ? 'selected' : ''}>Sachet</option>
+                            <option value="Effervescent tablet" ${medicine.unit == 'Effervescent tablet' ? 'selected' : ''}>Effervescent Tablet</option>
+                            <option value="Capsule" ${medicine.unit == 'Capsule' ? 'selected' : ''}>Capsule</option>
+                            <option value="Bag" ${medicine.unit == 'Bag' ? 'selected' : ''}>Bag</option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- INGREDIENTS -->
+                    <div class="col-12">
+
+                        <label class="form-label fw-semibold">
+                            Ingredients
+                        </label>
+
+                        <textarea class="form-control"
+                                  name="ingredients"
+                                  rows="3">${medicine.ingredients}</textarea>
+
+                    </div>
+
+
+
+                    <!-- USAGE -->
+                    <div class="col-12">
+
+                        <label class="form-label fw-semibold">
+                            Usage
+                        </label>
+
+                        <textarea class="form-control"
+                                  name="usage"
+                                  rows="3">${medicine.usage}</textarea>
+
+                    </div>
+
+
+
+                    <!-- CONTRAINDICATION -->
+                    <div class="col-12">
+
+                        <label class="form-label fw-semibold">
+                            Contraindication
+                        </label>
+
+                        <textarea class="form-control"
+                                  name="contra"
+                                  rows="3">${medicine.contraindication}</textarea>
+
+                    </div>
+
+
+
+                    <!-- ACTIVE -->
+                    <c:if test="${not empty medicine.medicineId}">
+
+                        <div class="col-12">
+
+                            <div class="form-check form-switch">
+
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       id="isActive"
+                                       name="isActive"
+                                       value="true"
+                                       ${medicine.isActive ? 'checked' : ''}>
+
+                                <label class="form-check-label fw-semibold"
+                                       for="isActive">
+
+                                    Active Status (Is being used?)
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                    </c:if>
+
+
+                </div>
+
+
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+
+                    <a href="${basePath}/medicine/list"
+                       class="btn btn-outline-secondary">
+
+                        <i class="fa-solid fa-arrow-left me-1"></i>
+                        Cancel
+
+                    </a>
+
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="fa-solid fa-floppy-disk me-1"></i>
+                        Save
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
 </div>

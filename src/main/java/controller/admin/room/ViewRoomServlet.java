@@ -72,7 +72,7 @@ public class ViewRoomServlet extends HttpServlet {
             request.setAttribute("specialties", specialtyDAO.getAll());
 //            request.getRequestDispatcher("WEB-INF/admin/room/editRoom.jsp").forward(request, response);
 
-            request.setAttribute("pageTitle", "Manage Room");
+            request.setAttribute("pageTitle", "Room Detail");
             request.setAttribute("activePage", "manageRoom");
             request.setAttribute("contentPage", "/WEB-INF/admin/room/viewRoom.jsp");
 

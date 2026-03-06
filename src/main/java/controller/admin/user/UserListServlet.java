@@ -63,7 +63,7 @@ public class UserListServlet extends HttpServlet {
         request.setAttribute("users", users);
         request.setAttribute("roles", roleDAO.getAll());
 
-        request.setAttribute("pageTitle", "Manage staff");
+        request.setAttribute("pageTitle", "Staff List");
         request.setAttribute("activePage", "manageStaff");
         request.setAttribute("contentPage", "/WEB-INF/admin/user/userList.jsp");
 

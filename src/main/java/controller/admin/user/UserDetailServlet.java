@@ -66,7 +66,7 @@ public class UserDetailServlet extends HttpServlet {
 //                .forward(request, response);
         request.setAttribute("roles", roleDAO.getAll());
 
-        request.setAttribute("pageTitle", "User detail");
+        request.setAttribute("pageTitle", "Staff Detail");
         request.setAttribute("activePage", "manageStaff");
         request.setAttribute("contentPage", "/WEB-INF/admin/user/userDetail.jsp");
 

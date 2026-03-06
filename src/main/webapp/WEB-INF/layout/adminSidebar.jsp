@@ -117,7 +117,7 @@
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
                 <i class="fa-solid fa-right-from-bracket me-2"></i>
-                Log out
+                Logout
             </a>
         </li>
 

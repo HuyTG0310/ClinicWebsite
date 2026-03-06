@@ -51,23 +51,6 @@
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/tests">
-                <i class="fa-solid fa-vials me-2"></i>
-                Manage follow-up
-            </a>
-        </li>
-
-
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'labTests' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/tests">
-                <i class="fa-solid fa-vials me-2"></i>
-                Revenue report
-            </a>
-        </li>
-
 
         <c:if test="${hasRoomView}">
             <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"

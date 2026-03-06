@@ -154,7 +154,7 @@ public class ServiceOrderDetailServlet extends HttpServlet {
             }
 
             // 5. Chuyển hướng sang trang Giao diện Chi tiết
-            request.setAttribute("pageTitle", "Chi tiết khoản thu");
+            request.setAttribute("pageTitle", "Service Order Detail");
             request.setAttribute("activePage", "manageServiceOrder");
             request.setAttribute("contentPage", "/WEB-INF/receptionist/serviceorder/billingDetail.jsp");
 

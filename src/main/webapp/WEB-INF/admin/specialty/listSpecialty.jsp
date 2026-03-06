@@ -7,7 +7,7 @@
     <div>
         <h2 class="mb-1">
             <i class="fas fa-stethoscope text-primary me-2"></i>
-            Manage specialty
+            Manage Specialty
         </h2>
         <p class="text-muted mb-0">Manage and monitor all specialties</p>
     </div>

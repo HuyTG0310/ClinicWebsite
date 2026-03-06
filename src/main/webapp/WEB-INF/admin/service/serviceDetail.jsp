@@ -13,7 +13,7 @@
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-notes-medical text-primary me-2"></i>
-            Service detail
+            Service Detail
         </h2>
         <p class="text-muted mb-0">
             Detailed information about the service within the system.
