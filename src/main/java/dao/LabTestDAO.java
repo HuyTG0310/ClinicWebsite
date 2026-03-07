@@ -4,6 +4,7 @@
  */
 package dao;
 
+import model.LabTest;
 import util.DBContext;
 
 /**
