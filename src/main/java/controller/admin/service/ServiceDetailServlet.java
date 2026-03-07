@@ -14,10 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "ServiceDetailServlet", urlPatterns = {"/admin/service/detail"})
 public class ServiceDetailServlet extends HttpServlet {
 
@@ -53,7 +50,7 @@ public class ServiceDetailServlet extends HttpServlet {
             }
 
             request.setAttribute("categories", ServiceCategory.getAll());
-            request.setAttribute("pageTitle", "Add service");
+            request.setAttribute("pageTitle", "Service Detail");
             request.setAttribute("activePage", "manageService");
             request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceDetail.jsp");
 

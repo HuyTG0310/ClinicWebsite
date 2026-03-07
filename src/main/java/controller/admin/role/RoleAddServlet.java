@@ -13,10 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "RoleAddServlet", urlPatterns = {"/admin/role/create"})
 public class RoleAddServlet extends HttpServlet {
 

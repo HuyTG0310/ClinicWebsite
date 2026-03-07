@@ -120,7 +120,6 @@ public class AppointmentCreateServlet extends HttpServlet {
 
             if (newServiceOrderId > 0) {
                 if ("CASH".equals(paymentMethod)) {
-//                    response.sendRedirect("create?msg=success");
                     response.sendRedirect(basePath + "/appointment/list?msg=success");
                 } else {
                     response.sendRedirect(basePath + "/service-order/detail?soId=" + newServiceOrderId);

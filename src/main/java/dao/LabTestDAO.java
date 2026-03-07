@@ -16,9 +16,7 @@ public class LabTestDAO extends DBContext {
     public boolean insertFullLabTest(model.Service service, model.LabTest labTest, java.util.List<model.LabTestParameter> parameters) {
         String sqlService = "INSERT INTO Service (ServiceName, Category, CurrentPrice, IsActive) VALUES (?, ?, ?, 1)";
         String sqlLabTest = "INSERT INTO LabTest (ServiceId, TestCode, TestName, CategoryId, IsPanel, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
-        // ĐÃ BỎ RefMin, RefMax
         String sqlParam = "INSERT INTO LabTestParameter (LabTestId, ParameterCode, ParameterName, Unit, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, 1)";
-        // 🔥 THÊM MỚI: Câu lệnh Insert Range
         String sqlRange = "INSERT INTO LabReferenceRange (ParameterId, Gender, AgeMinDays, AgeMaxDays, RefMin, RefMax, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
 
         java.sql.Connection conn = null;
@@ -82,7 +80,7 @@ public class LabTestDAO extends DBContext {
                     paramId = rsParam.getInt(1);
                 }
 
-                // 🔥 DUYỆT VÀ INSERT TẤT CẢ RANGES CỦA PARAMETER NÀY
+                // DUYỆT VÀ INSERT TẤT CẢ RANGES CỦA PARAMETER NÀY
                 if (p.getReferenceRanges() != null && !p.getReferenceRanges().isEmpty()) {
                     for (model.LabReferenceRange r : p.getReferenceRanges()) {
                         psRange.setInt(1, paramId);
@@ -106,7 +104,7 @@ public class LabTestDAO extends DBContext {
                     }
                 }
             }
-            psRange.executeBatch(); // Quất 1 lần toàn bộ Ranges
+            psRange.executeBatch();
 
             conn.commit();
             return true;
@@ -177,7 +175,7 @@ public class LabTestDAO extends DBContext {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
-            // 1 & 2. Update Service & LabTest (Giống cũ)
+            // 1 & 2. Update Service & LabTest
             psUpdateService = conn.prepareStatement(sqlUpdateService);
             psUpdateService.setString(1, service.getServiceName());
             psUpdateService.setBigDecimal(2, service.getCurrentPrice());
@@ -212,7 +210,7 @@ public class LabTestDAO extends DBContext {
             String sqlUpdateP = "UPDATE LabTestParameter SET ParameterCode=?, ParameterName=?, Unit=?, SortOrder=?, IsActive=1 WHERE ParameterId=?";
             String sqlInsertP = "INSERT INTO LabTestParameter (LabTestId, ParameterCode, ParameterName, Unit, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, 1)";
 
-            // Chiến thuật "Bàn tay sắt": Xóa sạch Range cũ của Param đó và Insert lại toàn bộ Range mới (nhanh và an toàn nhất)
+            //Xóa sạch Range cũ của Param đó và Insert lại toàn bộ Range mới
             String sqlDelRange = "DELETE FROM LabReferenceRange WHERE ParameterId = ?";
             String sqlInsRange = "INSERT INTO LabReferenceRange (ParameterId, Gender, AgeMinDays, AgeMaxDays, RefMin, RefMax, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
 
@@ -344,8 +342,6 @@ public class LabTestDAO extends DBContext {
                     test.setIsPanel(rs.getBoolean("IsPanel"));
                     test.setSortOrder(rs.getInt("SortOrder"));
                     test.setIsActive(rs.getBoolean("IsActive"));
-
-                    // Móc thêm danh sách Parameters
                     dao.LabTestDAO labDao = new dao.LabTestDAO();
                     test.setParameters(labDao.getParametersByLabTestId(test.getLabTestId()));
                     return test;
@@ -360,8 +356,6 @@ public class LabTestDAO extends DBContext {
 
 // Hàm lấy danh sách các chỉ số của xét nghiệm đó
     public java.util.List<model.LabTestParameter> getParametersByLabTestId(int labTestId) {
-        // Sử dụng LinkedHashMap để tự động gộp các Range vào đúng Parameter 
-        // và quan trọng nhất là GIỮ NGUYÊN THỨ TỰ SortOrder của câu SQL
         java.util.Map<Integer, model.LabTestParameter> paramMap = new java.util.LinkedHashMap<>();
 
         // 🔥 LEFT JOIN: Lấy Parameter và tất cả các Range của nó (nếu có)
@@ -392,7 +386,7 @@ public class LabTestDAO extends DBContext {
                         p.setSortOrder(rs.getInt("SortOrder"));
                         p.setActive(rs.getBoolean("IsActive"));
 
-                        // 🔥 Khởi tạo danh sách Range rỗng cho nó
+                        // Khởi tạo danh sách Range rỗng
                         p.setReferenceRanges(new java.util.ArrayList<>());
 
                         // Cất vào Map

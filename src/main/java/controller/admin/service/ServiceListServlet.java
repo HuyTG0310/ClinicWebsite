@@ -15,10 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "ServiceListServlet", urlPatterns = {"/admin/service/list"})
 public class ServiceListServlet extends HttpServlet {
 
@@ -44,7 +41,7 @@ public class ServiceListServlet extends HttpServlet {
         request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
 
-        request.setAttribute("pageTitle", "Manage service");
+        request.setAttribute("pageTitle", "Service List");
         request.setAttribute("activePage", "manageService");
         request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceList.jsp");
 

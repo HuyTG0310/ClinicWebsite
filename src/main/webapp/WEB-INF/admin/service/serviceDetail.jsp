@@ -147,7 +147,7 @@
     <div class="modal-dialog modal-dialog-centered ${service.category == 'Xét nghiệm' ? 'modal-xl' : 'modal-lg'}">
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header bg-warning border-0 py-3 rounded-top-4">
-                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Thông Tin</h5>
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Information</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
@@ -163,32 +163,32 @@
                         <div class="${service.category == 'Xét nghiệm' ? 'col-lg-4 mb-3' : 'col-12'}">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-body p-3">
-                                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">Thông Tin Cơ Bản</h6>
+                                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">Basic Information</h6>
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold small">Loại Dịch Vụ</label>
+                                        <label class="form-label fw-bold small">Service Category</label>
                                         <select class="form-select bg-light fw-bold text-muted" disabled><option>${service.category}</option></select>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold small">Tên Dịch Vụ <span class="text-danger">*</span></label>
+                                        <label class="form-label fw-bold small">Service Name <span class="text-danger">*</span></label>
                                         <input type="text" name="serviceName" value="${service.serviceName}" class="form-control" required pattern=".*\S+.*" title="Name cannot be empty"/>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold small">Giá Thu Tiền <span class="text-danger">*</span></label>
+                                        <label class="form-label fw-bold small">Price <span class="text-danger">*</span></label>
                                         <input type="number" name="price" value="<fmt:formatNumber value='${service.currentPrice}' pattern='#'/>" class="form-control font-monospace text-danger fw-bold" required min="1" />
                                     </div>
                                     <div class="form-check form-switch mt-4">
                                         <input class="form-check-input" type="checkbox" name="isActive" id="isActiveEdit" value="true" ${service.isActive ? 'checked' : ''}>
-                                        <label class="form-check-label fw-bold small text-success" for="isActiveEdit">Đang hoạt động</label>
+                                        <label class="form-check-label fw-bold small text-success" for="isActiveEdit">Is active</label>
                                     </div>
 
                                     <c:if test="${service.category == 'Xét nghiệm'}">
-                                        <h6 class="fw-bold text-info border-bottom pb-2 mb-3 mt-4">Cấu Hình Xét Nghiệm</h6>
+                                        <h6 class="fw-bold text-info border-bottom pb-2 mb-3 mt-4">Lab Test Configuration</h6>
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small">Mã Code <span class="text-danger">*</span></label>
+                                            <label class="form-label fw-bold small">Code <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control text-uppercase" name="testCode" value="${labTest.testCode}" required pattern=".*\S+.*" title="Code cannot be empty">
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small">Nhóm <span class="text-danger">*</span></label>
+                                            <label class="form-label fw-bold small">Category <span class="text-danger">*</span></label>
                                             <select class="form-select" name="labCategoryId" required>
                                                 <c:forEach items="${labCategories}" var="cat">
                                                     <option value="${cat.categoryId}" ${cat.categoryId == labTest.categoryId ? 'selected' : ''}>${cat.categoryName}</option>
@@ -204,9 +204,9 @@
                             <div class="col-lg-8 mb-3">
                                 <div class="card border-0 shadow-sm h-100 border-info">
                                     <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
-                                        <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2"></i>Cấu hình Chỉ Số</h6>
+                                        <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2"></i>Parameter Configuration</h6>
                                         <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addParameterRowEdit()">
-                                            <i class="fa-solid fa-plus"></i> Thêm Chỉ Số Mới
+                                            <i class="fa-solid fa-plus"></i> Add New Parameter
                                         </button>
                                     </div>
                                     <div class="card-body p-0">
@@ -214,10 +214,10 @@
                                             <table class="table table-hover align-middle mb-0 border-0">
                                                 <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                                     <tr>
-                                                        <th width="25%" class="small text-muted py-2">MÃ CHỈ SỐ</th>
-                                                        <th width="35%" class="small text-muted py-2">TÊN CHỈ SỐ</th>
-                                                        <th width="15%" class="small text-muted py-2">ĐƠN VỊ</th>
-                                                        <th width="15%" class="text-center small text-muted py-2">THAM CHIẾU</th>
+                                                        <th width="25%" class="small text-muted py-2">PARAM CODE</th>
+                                                        <th width="35%" class="small text-muted py-2">PARAM NAME</th>
+                                                        <th width="15%" class="small text-muted py-2">UNIT</th>
+                                                        <th width="15%" class="text-center small text-muted py-2">REF</th>
                                                         <th width="10%" class="text-center small text-muted py-2"><i class="fa-solid fa-trash"></i></th>
                                                     </tr>
                                                 </thead>
@@ -233,7 +233,7 @@
                                                     <td class="text-center">
                                                         <input type="hidden" name="paramRanges[]" class="range-hidden-val" value='${jsonRanges}'>
                                                         <button type="button" class="btn btn-sm btn-outline-primary fw-bold param-config-btn" onclick="openRangeModal(this)">
-                                                            <i class="fa-solid fa-gears"></i> Sửa Rule
+                                                            <i class="fa-solid fa-gears"></i> Edit
                                                         </button>
                                                     </td>
                                                     <td class="text-center">
@@ -251,8 +251,8 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-white border-top py-3 rounded-bottom-4">
-                    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-warning text-dark fw-bold shadow-sm px-5"><i class="fa-solid fa-floppy-disk me-2"></i>LƯU THAY ĐỔI</button>
+                    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning text-dark fw-bold shadow-sm px-5"><i class="fa-solid fa-floppy-disk me-2"></i>Save</button>
                 </div>
             </form>
         </div>
@@ -262,7 +262,7 @@
 <div class="modal fade" id="rangeModal" tabindex="-1" data-bs-backdrop="static" style="z-index: 1060;"> <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-lg border-0 rounded-4">
             <div class="modal-header bg-dark text-white py-3 rounded-top-4">
-                <h5 class="modal-title fw-bold"><i class="fa-solid fa-sliders me-2"></i>Cấu Hình Khoảng Tham Chiếu</h5>
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-sliders me-2"></i>Reference Range Configuration</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-4">
@@ -270,12 +270,12 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light text-center small">
                             <tr>
-                                <th width="15%">GIỚI TÍNH</th>
-                                <th width="20%">TUỔI MIN (Ngày)</th>
-                                <th width="20%">TUỔI MAX (Ngày)</th>
-                                <th width="15%">NGƯỠNG MIN</th>
-                                <th width="15%">NGƯỠNG MAX</th>
-                                <th width="15%"><button type="button" class="btn btn-sm btn-success fw-bold w-100" onclick="addModalRangeRow()"><i class="fa-solid fa-plus"></i> Thêm</button></th>
+                                <th width="15%">SEX</th>
+                                <th width="20%">MIN AGE (DAY)</th>
+                                <th width="20%">MAX AGE (DAY)</th>
+                                <th width="15%">MIN VALUE</th>
+                                <th width="15%">MAX VALUE</th>
+                                <th width="15%"><button type="button" class="btn btn-sm btn-success fw-bold w-100" onclick="addModalRangeRow()"><i class="fa-solid fa-plus"></i> Add</button></th>
                             </tr>
                         </thead>
                         <tbody id="modalRangeBody" class="text-center"></tbody>
@@ -283,8 +283,8 @@
                 </div>
             </div>
             <div class="modal-footer bg-white border-top">
-                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary fw-bold px-4" onclick="saveRangeData()"><i class="fa-solid fa-check me-2"></i>Xác Nhận Lưu</button>
+                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" onclick="saveRangeData()"><i class="fa-solid fa-check me-2"></i>Save</button>
             </div>
         </div>
     </div>

@@ -14,10 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-/**
- *
- * @author huytr
- */
 @WebServlet(name = "ServiceEditServlet", urlPatterns = {"/admin/service/edit"})
 public class ServiceEditServlet extends HttpServlet {
 
@@ -53,9 +49,8 @@ public class ServiceEditServlet extends HttpServlet {
 
             boolean success = false;
 
-            // 🔥 PHÂN LUỒNG UPDATE THÔNG MINH
+            // CHIA TH
             if ("Xét nghiệm".equals(category)) {
-                // Hứng dữ liệu LabTest
                 int labTestId = Integer.parseInt(request.getParameter("labTestId"));
                 String testCode = request.getParameter("testCode");
                 int labCategoryId = Integer.parseInt(request.getParameter("labCategoryId"));
@@ -68,12 +63,10 @@ public class ServiceEditServlet extends HttpServlet {
                 labTest.setCategoryId(labCategoryId);
                 labTest.setIsActive(isActive);
 
-                // Hứng mảng Chỉ số
                 String[] paramIds = request.getParameterValues("paramId[]");
                 String[] paramCodes = request.getParameterValues("paramCode[]");
                 String[] paramNames = request.getParameterValues("paramName[]");
                 String[] paramUnits = request.getParameterValues("paramUnit[]");
-                // 🔥 HỨNG CỤC CHUỖI JSON RANGES TỪ JSP
                 String[] paramRangesData = request.getParameterValues("paramRanges[]");
 
                 boolean isPanel = (paramCodes != null && paramCodes.length > 1);
@@ -81,7 +74,7 @@ public class ServiceEditServlet extends HttpServlet {
 
                 java.util.List<model.LabTestParameter> paramList = new java.util.ArrayList<>();
                 if (paramCodes != null) {
-                    Gson gson = new Gson(); // Khởi tạo thư viện Gson
+                    Gson gson = new Gson(); 
                     java.lang.reflect.Type listType = new TypeToken<java.util.ArrayList<model.LabReferenceRange>>() {
                     }.getType();
 
@@ -92,7 +85,7 @@ public class ServiceEditServlet extends HttpServlet {
                         p.setParameterName(paramNames[i].trim());
                         p.setUnit(paramUnits[i] != null ? paramUnits[i].trim() : "");
 
-                        // 🔥 DÙNG GSON ĐỂ ĐỌC CHUỖI JSON THÀNH LIST OBJECT RANGES
+                        // DÙNG GSON ĐỂ ĐỌC CHUỖI JSON THÀNH LIST OBJECT RANGES
                         java.util.List<model.LabReferenceRange> rangesList = new java.util.ArrayList<>();
                         if (paramRangesData != null && i < paramRangesData.length && !paramRangesData[i].trim().isEmpty()) {
                             try {
@@ -115,17 +108,16 @@ public class ServiceEditServlet extends HttpServlet {
             }
 
             if (success) {
-                request.getSession().setAttribute("success", "Cập nhật dịch vụ thành công!");
+                request.getSession().setAttribute("success", "Update service successful!");
             } else {
-                request.getSession().setAttribute("error", "Lỗi cập nhật CSDL!");
+                request.getSession().setAttribute("error", "Error when update Database!");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Dữ liệu nhập vào không hợp lệ!");
+            request.getSession().setAttribute("error", "Invalid input!");
         }
 
-        // Dù thành công hay thất bại cũng quay lại trang Detail
         response.sendRedirect(request.getContextPath() + "/admin/service/detail?id=" + id);
     }
 

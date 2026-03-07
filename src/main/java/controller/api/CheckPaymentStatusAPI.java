@@ -28,19 +28,18 @@ public class CheckPaymentStatusAPI extends HttpServlet {
 
         try (java.io.PrintWriter out = response.getWriter()) {
 
-            // 1. BẮT CẢ 2 LOẠI ID TỪ JAVASCRIPT GỬI LÊN
+            // 1. 2 LOẠI ID TỪ JAVASCRIPT GỬI LÊN
             String mrIdRaw = request.getParameter("mrId");
             String soIdRaw = request.getParameter("soId");
 
             int mrId = (mrIdRaw != null && !mrIdRaw.isEmpty()) ? Integer.parseInt(mrIdRaw) : 0;
             int soId = (soIdRaw != null && !soIdRaw.isEmpty()) ? Integer.parseInt(soIdRaw) : 0;
 
-            // 2. TẠO KEY ĐỊNH DANH DUY NHẤT (Tránh đụng hàng giữa Mã Bệnh Án và Mã Hóa Đơn)
+            // 2. TẠO KEY ĐỊNH DANH DUY NHẤT
             // Nếu có Bệnh án -> Key là "BA68", Nếu Khám lẻ -> Key là "PK101"
             String alertKey = (mrId > 0) ? "BA" + mrId : "PK" + soId;
 
             // 3. KIỂM TRA CẢNH BÁO TỪ WEBHOOK
-            // ⚠️ LƯU Ý: Lát nữa qua file Webhook, ta phải đổi kiểu dữ liệu của paymentAlerts thành Map<String, Double>
             Double alertAmount = SePayWebhookServlet.paymentAlerts.remove(alertKey);
 
             if (alertAmount != null) {
@@ -53,16 +52,14 @@ public class CheckPaymentStatusAPI extends HttpServlet {
                 }
             }
 
-            // 4. KIỂM TRA DATABASE (Rẽ nhánh thông minh)
+            // 4. KIỂM TRA DATABASE
             dao.ServiceOrderDAO dao = new dao.ServiceOrderDAO();
             boolean isPaid = false;
 
             if (mrId > 0) {
-                // Check cả chùm dịch vụ của Bệnh án (Code cũ của bạn)
                 isPaid = dao.isOrderPaid(mrId);
             } else if (soId > 0) {
-                // Check đúng 1 cái Phiếu khám ban đầu
-                // Tái sử dụng hàm getServiceOrderById ta vừa viết lúc nãy
+                // Check đúng 1 Phiếu khám ban đầu
                 model.ServiceOrder order = dao.getServiceOrderById(soId);
                 if (order != null && "PAID".equals(order.getStatus())) {
                     isPaid = true;

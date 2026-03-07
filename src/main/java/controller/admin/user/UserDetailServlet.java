@@ -14,10 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "UserDetailServlet", urlPatterns = {"/admin/user/detail"})
 public class UserDetailServlet extends HttpServlet {
 
@@ -62,8 +59,6 @@ public class UserDetailServlet extends HttpServlet {
         }
 
         request.setAttribute("user", user);
-//        request.getRequestDispatcher("/WEB-INF/admin/user/userDetail.jsp")
-//                .forward(request, response);
         request.setAttribute("roles", roleDAO.getAll());
 
         request.setAttribute("pageTitle", "Staff Detail");

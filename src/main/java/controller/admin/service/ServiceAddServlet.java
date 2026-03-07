@@ -16,10 +16,7 @@ import model.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "ServiceAddServlet", urlPatterns = {"/admin/service/add"})
 public class ServiceAddServlet extends HttpServlet {
 
@@ -61,22 +58,21 @@ public class ServiceAddServlet extends HttpServlet {
 
             boolean success = false;
 
-            // 🔥 PHÂN LUỒNG THÔNG MINH
+            // CHIA TH
             if ("Xét nghiệm".equals(category)) {
-                // NẾU LÀ XÉT NGHIỆM -> Đọc thêm các trường đặc thù
+                // NẾU LÀ XÉT NGHIỆM -> Đọc thêm các trường XN
                 String testCode = request.getParameter("testCode");
                 int labCategoryId = Integer.parseInt(request.getParameter("labCategoryId"));
 
                 model.LabTest labTest = new model.LabTest();
                 labTest.setTestCode(testCode);
-                labTest.setTestName(name.trim()); // Dùng chung tên Service
+                labTest.setTestName(name.trim());
                 labTest.setCategoryId(labCategoryId);
 
                 // Đọc mảng Chỉ số cơ bản
                 String[] paramCodes = request.getParameterValues("paramCode[]");
                 String[] paramNames = request.getParameterValues("paramName[]");
                 String[] paramUnits = request.getParameterValues("paramUnit[]");
-                // 🔥 CHỈ LẤY CỤC CHUỖI RANGES ẨN
                 String[] paramRangesData = request.getParameterValues("paramRanges[]");
 
                 boolean isPanel = (paramCodes != null && paramCodes.length > 1);
@@ -84,7 +80,7 @@ public class ServiceAddServlet extends HttpServlet {
 
                 java.util.List<model.LabTestParameter> paramList = new java.util.ArrayList<>();
                 if (paramCodes != null) {
-                    Gson gson = new Gson(); // Khởi tạo Gson
+                    Gson gson = new Gson(); 
                     java.lang.reflect.Type listType = new TypeToken<java.util.ArrayList<model.LabReferenceRange>>() {
                     }.getType();
                     for (int i = 0; i < paramCodes.length; i++) {
@@ -93,7 +89,7 @@ public class ServiceAddServlet extends HttpServlet {
                         p.setParameterName(paramNames[i].trim());
                         p.setUnit(paramUnits[i] != null ? paramUnits[i].trim() : "");
 
-                        // 🔥 Parse JSON siêu mượt mà bằng Gson
+                        //Parse JSON bằng Gson
                         java.util.List<model.LabReferenceRange> rangesList = new java.util.ArrayList<>();
                         if (paramRangesData != null && i < paramRangesData.length && !paramRangesData[i].trim().isEmpty()) {
                             try {
@@ -114,7 +110,7 @@ public class ServiceAddServlet extends HttpServlet {
             }
 
             if (success) {
-                request.getSession().setAttribute("success", "Thêm mới thành công!");
+                request.getSession().setAttribute("success", "Add service successful!");
                 response.sendRedirect(request.getContextPath() + "/admin/service/list");
             } else {
                 throw new Exception("Database Insert Failed");
