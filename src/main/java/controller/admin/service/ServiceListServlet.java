@@ -44,8 +44,7 @@ public class ServiceListServlet extends HttpServlet {
         request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
 
-//        request.getRequestDispatcher("/WEB-INF/admin/service/serviceList.jsp").forward(request, response);
-        request.setAttribute("pageTitle", "Service List");
+        request.setAttribute("pageTitle", "Manage service");
         request.setAttribute("activePage", "manageService");
         request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceList.jsp");
 
