@@ -358,4 +358,72 @@ public class LabTestDAO extends DBContext {
 
     }
 
+// Hàm lấy danh sách các chỉ số của xét nghiệm đó
+    public java.util.List<model.LabTestParameter> getParametersByLabTestId(int labTestId) {
+        // Sử dụng LinkedHashMap để tự động gộp các Range vào đúng Parameter 
+        // và quan trọng nhất là GIỮ NGUYÊN THỨ TỰ SortOrder của câu SQL
+        java.util.Map<Integer, model.LabTestParameter> paramMap = new java.util.LinkedHashMap<>();
+
+        // 🔥 LEFT JOIN: Lấy Parameter và tất cả các Range của nó (nếu có)
+        String sql = "SELECT p.*, r.RangeId, r.Gender, r.AgeMinDays, r.AgeMaxDays, r.RefMin, r.RefMax "
+                + "FROM LabTestParameter p "
+                + "LEFT JOIN LabReferenceRange r ON p.ParameterId = r.ParameterId AND r.IsActive = 1 "
+                + "WHERE p.LabTestId = ? AND p.IsActive = 1 "
+                + "ORDER BY p.SortOrder ASC, r.Gender DESC, r.AgeMinDays ASC";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, labTestId);
+
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    int paramId = rs.getInt("ParameterId");
+
+                    // 1. Kiểm tra xem Parameter này đã được tạo trong Map chưa?
+                    model.LabTestParameter p = paramMap.get(paramId);
+                    if (p == null) {
+                        // Lần đầu tiên gặp Parameter này -> Tạo mới
+                        p = new model.LabTestParameter();
+                        p.setParameterId(paramId);
+                        p.setLabTestId(rs.getInt("LabTestId"));
+                        p.setParameterCode(rs.getString("ParameterCode"));
+                        p.setParameterName(rs.getString("ParameterName"));
+                        p.setUnit(rs.getString("Unit"));
+                        p.setSortOrder(rs.getInt("SortOrder"));
+                        p.setActive(rs.getBoolean("IsActive"));
+
+                        // 🔥 Khởi tạo danh sách Range rỗng cho nó
+                        p.setReferenceRanges(new java.util.ArrayList<>());
+
+                        // Cất vào Map
+                        paramMap.put(paramId, p);
+                    }
+
+                    // 2. Đọc thông tin Range (Nếu LEFT JOIN có dữ liệu)
+                    int rangeId = rs.getInt("RangeId");
+                    if (!rs.wasNull() && rangeId > 0) { // Đảm bảo Range thực sự tồn tại
+                        model.LabReferenceRange r = new model.LabReferenceRange();
+                        r.setRangeId(rangeId);
+                        r.setParameterId(paramId);
+                        r.setGender(rs.getString("Gender"));
+                        r.setAgeMinDays(rs.getInt("AgeMinDays"));
+                        r.setAgeMaxDays(rs.getInt("AgeMaxDays"));
+
+                        // Lấy Min/Max an toàn vì có thể NULL
+                        r.setRefMin(rs.getObject("RefMin") != null ? rs.getDouble("RefMin") : null);
+                        r.setRefMax(rs.getObject("RefMax") != null ? rs.getDouble("RefMax") : null);
+
+                        // Nhét Range này vào bụng thằng Parameter mẹ
+                        p.getReferenceRanges().add(r);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Trả về danh sách các Parameter đã được gộp đầy đủ Range
+        return new java.util.ArrayList<>(paramMap.values());
+    }
+
 }
