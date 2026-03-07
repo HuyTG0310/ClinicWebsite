@@ -147,13 +147,18 @@ public class AppointmentDAO extends DBContext {
         PreparedStatement stOrder = null;
         ResultSet rsApp = null;
         ResultSet rsOrder = null;
-        int generatedServiceOrderId = -1;
+        int generatedServiceOrderId = -1; // Biến lưu ID hóa đơn mới
 
         try {
             conn = new DBContext().conn;
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // BẮT ĐẦU TRANSACTION
+
+            // ==========================================
+            // BƯỚC 1: TẠO LỊCH HẸN (APPOINTMENT) VÀ LẤY ID CỦA NÓ
+            // ==========================================
             String sqlApp = "INSERT INTO Appointment (PatientId, RoomId, CreatedBy, Status) VALUES (?, ?, ?, 'WAITING')";
 
+            // 🔥 Yêu cầu SQL trả về ID của Lịch khám
             stApp = conn.prepareStatement(sqlApp, PreparedStatement.RETURN_GENERATED_KEYS);
             stApp.setInt(1, patientId);
             stApp.setInt(2, roomId);
@@ -164,51 +169,62 @@ public class AppointmentDAO extends DBContext {
                 return -1;
             }
 
+            // Lấy ID Lịch khám vừa tạo
             int generatedAppId = -1;
             rsApp = stApp.getGeneratedKeys();
             if (rsApp.next()) {
                 generatedAppId = rsApp.getInt(1);
             }
 
-            int clinicalExamServiceId = 1;
-            double examPrice = 200000;
+            // ==========================================
+            // BƯỚC 2: TẠO SERVICE ORDER (GẮN CÁI AppointmentId VÀO)
+            // ==========================================
+            int clinicalExamServiceId = 1; // ID dịch vụ khám lâm sàng (Check lại DB của bạn)
 
+            double examPrice = new ServiceDAO().getById(1).getCurrentPrice().doubleValue();     // Giá tiền khám
+
+            // Xác định Status và PaidAt dựa trên PaymentMethod
             String status = "CASH".equals(paymentMethod) ? "PAID" : "UNPAID";
             String paidAtFragment = "CASH".equals(paymentMethod) ? "GETDATE()" : "NULL";
 
+            // Có tổng cộng 8 dấu chấm hỏi (?)
             String sqlOrder = "INSERT INTO ServiceOrder "
                     + "(PatientId, AppointmentId, MedicalRecordId, ServiceId, AssignedById, CashierId, PriceAtTime, Status, PaidAt, PaymentMethod) "
                     + "VALUES (?, ?, NULL, ?, ?, ?, ?, ?, " + paidAtFragment + ", ?)";
 
             stOrder = conn.prepareStatement(sqlOrder, PreparedStatement.RETURN_GENERATED_KEYS);
 
-            stOrder.setInt(1, patientId);
-            stOrder.setInt(2, generatedAppId);
-            stOrder.setInt(3, clinicalExamServiceId);
-            stOrder.setInt(4, receptionistId);
+            // Gán giá trị cẩn thận theo ĐÚNG THỨ TỰ các dấu ?
+            stOrder.setInt(1, patientId);             // ?: PatientId
+            stOrder.setInt(2, generatedAppId);        // ?: AppointmentId (Móc nối quan trọng nhất)
+            stOrder.setInt(3, clinicalExamServiceId); // ?: ServiceId
+            stOrder.setInt(4, receptionistId);        // ?: AssignedById (Lễ tân chỉ định)
 
+            // ?: CashierId (Người thu tiền: Nếu CASH thì là Lễ tân, BANKING thì để NULL)
             if ("CASH".equals(paymentMethod)) {
                 stOrder.setInt(5, receptionistId);
             } else {
                 stOrder.setNull(5, java.sql.Types.INTEGER);
             }
 
-            stOrder.setDouble(6, examPrice);
-            stOrder.setString(7, status);
-            stOrder.setString(8, paymentMethod);
+            stOrder.setDouble(6, examPrice);          // ?: PriceAtTime
+            stOrder.setString(7, status);             // ?: Status
+            stOrder.setString(8, paymentMethod);      // ?: PaymentMethod
 
             if (stOrder.executeUpdate() == 0) {
                 conn.rollback();
                 return -1;
             }
 
+            // Lấy ID của ServiceOrder vừa tạo ra
             rsOrder = stOrder.getGeneratedKeys();
             if (rsOrder.next()) {
                 generatedServiceOrderId = rsOrder.getInt(1);
             }
 
+            // THÀNH CÔNG -> CHỐT ĐƠN
             conn.commit();
-            return generatedServiceOrderId;
+            return generatedServiceOrderId; // Trả về ID Hóa đơn
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -221,6 +237,7 @@ public class AppointmentDAO extends DBContext {
             }
             return -1;
         } finally {
+            // Đóng kết nối...
             try {
                 if (rsApp != null) {
                     rsApp.close();
@@ -254,7 +271,6 @@ public class AppointmentDAO extends DBContext {
         }
     }
 
-    
     public boolean updateAppointmentRoom(int appointmentId, int newRoomId) {
         String sql = "UPDATE Appointment SET RoomId = ? WHERE AppointmentId = ? AND Status = 'WAITING'";
         try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql)) {
@@ -276,7 +292,7 @@ public class AppointmentDAO extends DBContext {
 
         try {
             conn = new DBContext().conn;
-            conn.setAutoCommit(false); 
+            conn.setAutoCommit(false);
 
             String sqlApp = "UPDATE Appointment SET Status = 'CANCELLED' WHERE AppointmentId = ? AND Status = 'WAITING'";
             stApp = conn.prepareStatement(sqlApp);
@@ -287,7 +303,6 @@ public class AppointmentDAO extends DBContext {
                 return false;
             }
 
-            
             String sqlOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' WHERE AppointmentId = ?";
 
             stOrder = conn.prepareStatement(sqlOrder);
@@ -295,7 +310,6 @@ public class AppointmentDAO extends DBContext {
 
             stOrder.executeUpdate();
 
-           
             conn.commit();
             return true;
 
@@ -330,5 +344,5 @@ public class AppointmentDAO extends DBContext {
             }
         }
     }
-    
+
 }
