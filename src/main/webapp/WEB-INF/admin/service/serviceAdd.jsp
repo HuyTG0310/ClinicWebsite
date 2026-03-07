@@ -183,7 +183,7 @@
                             </thead>
                             <tbody id="parameterTableBody">
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]"></td>
+                                    <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required  pattern=".*\\S+.*" title="Vui lòng nhập mã chỉ số hợp lệ"></td>
                                     <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]"></td>
                                     <td><input type="text" class="form-control form-control-sm" name="paramUnit[]"></td>
                                     <td class="text-center">
@@ -335,8 +335,8 @@
         const row = document.createElement('tr');
         // 🔥 Value mặc định giờ là 1 chuỗi JSON hợp lệ
         row.innerHTML = `
-            <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required></td>
-            <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]" required></td>
+            <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required  pattern=".*\\S+.*" title="Vui lòng nhập mã chỉ số hợp lệ"></td>
+            <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]" required pattern=".*\\S+.*" title="Vui lòng nhập tên chỉ số hợp lệ"></td>
             <td><input type="text" class="form-control form-control-sm" name="paramUnit[]"></td>
             <td class="text-center">
                 <input type="hidden" name="paramRanges[]" class="range-hidden-val" value='[{"gender":"ALL","ageMinDays":0,"ageMaxDays":36500}]'>
