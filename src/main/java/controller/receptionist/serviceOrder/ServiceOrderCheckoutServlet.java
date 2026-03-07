@@ -45,7 +45,7 @@ public class ServiceOrderCheckoutServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             User cashier = (User) session.getAttribute("user");
 
-            // Bắt cả 2 ID từ Form gửi lên
+            //2 ID từ Form gửi lên
             String mrIdRaw = request.getParameter("medicalRecordId");
             String soIdRaw = request.getParameter("serviceOrderId");
             String paymentMethod = request.getParameter("paymentMethod");
@@ -57,11 +57,10 @@ public class ServiceOrderCheckoutServlet extends HttpServlet {
             boolean success = false;
 
             if (mrId > 0) {
-                // Chốt cả chùm xét nghiệm
+                //xét nghiệm
                 success = dao.checkoutServiceOrders(mrId, cashier.getUserId(), paymentMethod);
             } else if (soId > 0) {
-                // Chốt đúng 1 phiếu khám ban đầu
-                // Tự viết thêm hàm này trong DAO: UPDATE ServiceOrder SET Status='PAID', CashierId=?, PaidAt=GETDATE() WHERE ServiceOrderId=?
+                //1 phiếu khám ban đầu
                 success = dao.checkoutSingleServiceOrder(soId, cashier.getUserId(), paymentMethod);
             }
 

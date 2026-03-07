@@ -12,11 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.Room;
 import model.RoomView;
 
-/**
- * RoomListServlet - Controller for Room List Management
- *
- * @author ClinicWebsite
- */
 @WebServlet(name = "RoomListServlet", urlPatterns = {"/admin/room/list", "/receptionist/room/list", "/doctor/room/list"})
 public class RoomListServlet extends HttpServlet {
 

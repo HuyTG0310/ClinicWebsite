@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -192,7 +193,7 @@
                                         </div>
 
                                         <div class="fs-4 fw-bold text-danger">
-                                            200.000 VNĐ
+                                            <fmt:formatNumber value="${servicePrice}" pattern="#,###"/> VND
                                         </div>
 
                                         <div class="small text-muted">
