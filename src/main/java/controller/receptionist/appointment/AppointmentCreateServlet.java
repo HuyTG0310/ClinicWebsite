@@ -51,10 +51,15 @@ public class AppointmentCreateServlet extends HttpServlet {
 
         SpecialtyDAO specialtyDAO = new SpecialtyDAO();
         List<Specialty> specialties = specialtyDAO.getAll();
+        
+        
+        ServiceDAO serviceDAO = new ServiceDAO();
+        double servicePrice = serviceDAO.getById(1).getCurrentPrice().doubleValue();
 
         request.setAttribute("patients", patients);
         request.setAttribute("rooms", activeRooms);
         request.setAttribute("specialties", specialties);
+        request.setAttribute("servicePrice", servicePrice);
 
         request.setAttribute("pageTitle", "Create Appointment");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/appointment/addAppointment.jsp");

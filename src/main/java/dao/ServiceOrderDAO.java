@@ -76,7 +76,7 @@ public class ServiceOrderDAO extends DBContext {
                     order.setServiceName("Gói Cận Lâm Sàng (" + count + " chỉ định)");
                 } else {
                     // Nếu là phí khám ban đầu
-                    order.setServiceName("Khám bệnh lâm sàng");
+                    order.setServiceName(new ServiceDAO().getById(1).getServiceName());
                 }
 
                 order.setPriceAtTime(rs.getDouble("TotalAmount"));

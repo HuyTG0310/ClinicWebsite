@@ -21,7 +21,7 @@ public class PatientDAO extends DBContext {
         List<Patient> patients = new ArrayList<>();
         String query = "SELECT TOP (1000) [PatientId], [FullName], [Phone], [DateOfBirth], "
                 + "[Gender], [Address], [MedicalHistory], [Allergy], [CreatedAt] "
-                + "FROM [DB_03_02].[dbo].[Patient]";
+                + "FROM Patient";
 
         try {
             PreparedStatement ps = conn.prepareStatement(query);
@@ -56,7 +56,7 @@ public class PatientDAO extends DBContext {
         Patient patient = null;
         String query = "SELECT [PatientId], [FullName], [Phone], [DateOfBirth], "
                 + "[Gender], [Address], [MedicalHistory], [Allergy], [CreatedAt] "
-                + "FROM [DB_03_02].[dbo].[Patient] WHERE [PatientId] = ?";
+                + "FROM Patient WHERE [PatientId] = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(query);
@@ -90,7 +90,7 @@ public class PatientDAO extends DBContext {
         List<Patient> patients = new ArrayList<>();
         String query = "SELECT [PatientId], [FullName], [Phone], [DateOfBirth], "
                 + "[Gender], [Address], [MedicalHistory], [Allergy], [CreatedAt] "
-                + "FROM [DB_03_02].[dbo].[Patient] WHERE [FullName] LIKE ?";
+                + "FROM Patient WHERE [FullName] LIKE ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(query);
@@ -123,7 +123,7 @@ public class PatientDAO extends DBContext {
 
    
     public boolean addPatient(Patient patient) {
-        String query = "INSERT INTO [DB_03_02].[dbo].[Patient] ([FullName], [Phone], [DateOfBirth], "
+        String query = "INSERT INTO Patient ([FullName], [Phone], [DateOfBirth], "
                 + "[Gender], [Address], [MedicalHistory], [Allergy], [CreatedAt]) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -153,8 +153,8 @@ public class PatientDAO extends DBContext {
   
     public boolean isPhoneExists(String phone, Integer excludePatientId) {
         String query = excludePatientId != null
-                ? "SELECT COUNT(*) as count FROM [DB_03_02].[dbo].[Patient] WHERE [Phone] = ? AND [PatientId] != ?"
-                : "SELECT COUNT(*) as count FROM [DB_03_02].[dbo].[Patient] WHERE [Phone] = ?";
+                ? "SELECT COUNT(*) as count FROM Patient WHERE [Phone] = ? AND [PatientId] != ?"
+                : "SELECT COUNT(*) as count FROM Patient WHERE [Phone] = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, phone);
@@ -179,7 +179,7 @@ public class PatientDAO extends DBContext {
 
   
     public boolean isPhoneExists(String phone) {
-        String query = "SELECT COUNT(*) as count FROM [DB_03_02].[dbo].[Patient] WHERE [Phone] = ?";
+        String query = "SELECT COUNT(*) as count FROM Patient WHERE [Phone] = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, phone);
@@ -202,8 +202,8 @@ public class PatientDAO extends DBContext {
     
     public boolean isDuplicatePatient(String fullName, java.sql.Date dateOfBirth, Integer excludePatientId) {
         String query = excludePatientId != null
-                ? "SELECT COUNT(*) as count FROM [DB_03_02].[dbo].[Patient] WHERE [FullName] = ? AND [DateOfBirth] = ? AND [PatientId] != ?"
-                : "SELECT COUNT(*) as count FROM [DB_03_02].[dbo].[Patient] WHERE [FullName] = ? AND [DateOfBirth] = ?";
+                ? "SELECT COUNT(*) as count FROM Patient WHERE [FullName] = ? AND [DateOfBirth] = ? AND [PatientId] != ?"
+                : "SELECT COUNT(*) as count FROM Patient WHERE [FullName] = ? AND [DateOfBirth] = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, fullName);
@@ -229,7 +229,7 @@ public class PatientDAO extends DBContext {
 
    
     public boolean isDuplicatePatient(String fullName, java.sql.Date dateOfBirth) {
-        String query = "SELECT COUNT(*) as count FROM [DB_03_02].[dbo].[Patient] WHERE [FullName] = ? AND [DateOfBirth] = ?";
+        String query = "SELECT COUNT(*) as count FROM Patient WHERE [FullName] = ? AND [DateOfBirth] = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, fullName);
@@ -255,7 +255,7 @@ public class PatientDAO extends DBContext {
         List<Patient> patients = new ArrayList<>();
         String query = "SELECT TOP (1000) [PatientId], [FullName], [Phone], [DateOfBirth], "
                 + "[Gender], [Address], [MedicalHistory], [Allergy], [CreatedAt] "
-                + "FROM [DB_03_02].[dbo].[Patient] "
+                + "FROM Patient "
                 + "WHERE [FullName] LIKE ? OR [Phone] LIKE ? OR [Address] LIKE ?";
 
         try {
@@ -292,7 +292,7 @@ public class PatientDAO extends DBContext {
     }
 
         public boolean updatePatient(Patient patient) {
-        String query = "UPDATE [DB_03_02].[dbo].[Patient] "
+        String query = "UPDATE Patient "
                 + "SET [FullName] = ?, [Phone] = ?, [DateOfBirth] = ?, [Gender] = ?, "
                 + "[Address] = ?, [MedicalHistory] = ?, [Allergy] = ? "
                 + "WHERE [PatientId] = ?";
@@ -322,7 +322,7 @@ public class PatientDAO extends DBContext {
 
    
     public boolean deletePatient(int patientId) {
-        String query = "DELETE FROM [DB_03_02].[dbo].[Patient] WHERE [PatientId] = ?";
+        String query = "DELETE FROM Patient WHERE [PatientId] = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(query);

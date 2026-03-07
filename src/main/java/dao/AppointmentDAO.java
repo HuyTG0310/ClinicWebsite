@@ -92,12 +92,14 @@ public class AppointmentDAO extends DBContext {
     public Appointment getAppointmentDetailById(int appointmentId) {
         Appointment app = null;
 
+        // Câu SQL lấy toàn bộ thông tin chi tiết
         String sql = "SELECT a.AppointmentId, a.PatientId, a.AppointmentTime, a.Status, a.MedicalRecordId, \n"
                 + "       p.FullName AS PatientName, p.Phone AS PatientPhone, p.Gender AS PatientGender, p.DateOfBirth AS PatientDob, p.Address AS PatientAddress, \n"
                 + "       r.RoomName, s.SpecialtyName, -- 🔥 Thêm s.SpecialtyName\n"
                 + "       uDoc.FullName AS DoctorName, \n"
                 + "       uRec.FullName AS ReceptionistName, \n"
-                + "       so.PriceAtTime, so.PaymentMethod \n"
+                + "       so.PriceAtTime, so.PaymentMethod, \n"
+                + "       srv.ServiceName "
                 + "FROM Appointment a \n"
                 + "JOIN Patient p ON a.PatientId = p.PatientId \n"
                 + "JOIN Room r ON a.RoomId = r.RoomId \n"
@@ -105,6 +107,7 @@ public class AppointmentDAO extends DBContext {
                 + "LEFT JOIN [User] uDoc ON r.CurrentDoctorId = uDoc.UserId \n"
                 + "LEFT JOIN [User] uRec ON a.CreatedBy = uRec.UserId \n"
                 + "LEFT JOIN ServiceOrder so ON so.AppointmentId = a.AppointmentId \n"
+                + "LEFT JOIN Service srv ON so.ServiceId = srv.ServiceId \n"
                 + "WHERE a.AppointmentId = ?";
 
         try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql)) {
@@ -119,21 +122,26 @@ public class AppointmentDAO extends DBContext {
                 app.setStatus(rs.getString("Status"));
                 app.setMedicalRecordId(rs.getInt("MedicalRecordId"));
 
+                // Patient info
                 app.setPatientId(rs.getInt("PatientId"));
                 app.setPatientName(rs.getString("PatientName"));
                 app.setPatientPhone(rs.getString("PatientPhone"));
                 app.setPatientGender(rs.getString("PatientGender"));
                 app.setPatientDob(rs.getDate("PatientDob"));
+                // Nếu bạn có PatientAddress thì set thêm, không thì bỏ qua
 
                 app.setSpecialtyName(rs.getString("SpecialtyName"));
                 app.setPatientAddress(rs.getString("PatientAddress"));
 
+                // Room & Staff
                 app.setRoomName(rs.getString("RoomName"));
                 app.setDoctorName(rs.getString("DoctorName") != null ? rs.getString("DoctorName") : "N/A");
                 app.setReceptionistName(rs.getString("ReceptionistName"));
 
+                // Billing info (Từ ServiceOrder)
                 app.setPrice(rs.getDouble("PriceAtTime"));
                 app.setPaymentMethod(rs.getString("PaymentMethod") != null ? rs.getString("PaymentMethod") : "CASH");
+                app.setServiceName(rs.getString("ServiceName"));
             }
         } catch (Exception e) {
             e.printStackTrace();

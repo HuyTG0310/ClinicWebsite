@@ -25,7 +25,7 @@
             <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/lab/history">
                 <i class="fa-solid fa-calendar-check me-2"></i>
-                My appointment
+                Manage queue
             </a>
         </li>
 
