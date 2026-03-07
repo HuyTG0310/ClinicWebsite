@@ -89,7 +89,7 @@ public class ServiceAddServlet extends HttpServlet {
                     }.getType();
                     for (int i = 0; i < paramCodes.length; i++) {
                         model.LabTestParameter p = new model.LabTestParameter();
-                        p.setParameterCode(paramCodes[i].trim());
+                        p.setParameterCode(paramCodes[i].trim().toUpperCase());
                         p.setParameterName(paramNames[i].trim());
                         p.setUnit(paramUnits[i] != null ? paramUnits[i].trim() : "");
 

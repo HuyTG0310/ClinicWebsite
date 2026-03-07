@@ -170,7 +170,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold small">Tên Dịch Vụ <span class="text-danger">*</span></label>
-                                        <input type="text" name="serviceName" value="${service.serviceName}" class="form-control" required />
+                                        <input type="text" name="serviceName" value="${service.serviceName}" class="form-control" required pattern=".*\S+.*" title="Name cannot be empty"/>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold small">Giá Thu Tiền <span class="text-danger">*</span></label>
@@ -185,7 +185,7 @@
                                         <h6 class="fw-bold text-info border-bottom pb-2 mb-3 mt-4">Cấu Hình Xét Nghiệm</h6>
                                         <div class="mb-3">
                                             <label class="form-label fw-bold small">Mã Code <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control text-uppercase" name="testCode" value="${labTest.testCode}" required>
+                                            <input type="text" class="form-control text-uppercase" name="testCode" value="${labTest.testCode}" required pattern=".*\S+.*" title="Code cannot be empty">
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label fw-bold small">Nhóm <span class="text-danger">*</span></label>
@@ -227,8 +227,8 @@
 
                                                         <tr>
                                                     <input type="hidden" name="paramId[]" value="${p.parameterId}">
-                                                    <td><input type="text" class="form-control form-control-sm text-uppercase" name="paramCode[]" value="${p.parameterCode}" required></td>
-                                                    <td><input type="text" class="form-control form-control-sm" name="paramName[]" value="${p.parameterName}" required></td>
+                                                    <td><input type="text" class="form-control form-control-sm text-uppercase" name="paramCode[]" value="${p.parameterCode}" required pattern=".*\S+.*" title="Vui lòng nhập mã chỉ số hợp lệ"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" name="paramName[]" value="${p.parameterName}" required pattern=".*\S+.*" title="Vui lòng nhập tên chỉ số hợp lệ"></td>
                                                     <td><input type="text" class="form-control form-control-sm" name="paramUnit[]" value="${p.unit}"></td>
                                                     <td class="text-center">
                                                         <input type="hidden" name="paramRanges[]" class="range-hidden-val" value='${jsonRanges}'>

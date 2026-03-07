@@ -183,8 +183,8 @@
                             </thead>
                             <tbody id="parameterTableBody">
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required  pattern=".*\\S+.*" title="Vui lòng nhập mã chỉ số hợp lệ"></td>
-                                    <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]"></td>
+                                    <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required pattern=".*\S+.*" title="Vui lòng nhập mã chỉ số hợp lệ"></td>
+                                    <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]" required pattern=".*\S+.*" title="Vui lòng nhập tên chỉ số hợp lệ"></td>
                                     <td><input type="text" class="form-control form-control-sm" name="paramUnit[]"></td>
                                     <td class="text-center">
                                         <input type="hidden" name="paramRanges[]" class="range-hidden-val" value="ALL|0|36500||">
