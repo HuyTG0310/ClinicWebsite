@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import model.*;
 
-
 @WebServlet(name = "AppointmentCreateServlet", urlPatterns = {"/receptionist/appointment/create", "/doctor/appointment/create", "/admin/appointment/create"})
 public class AppointmentCreateServlet extends HttpServlet {
 
@@ -43,24 +42,24 @@ public class AppointmentCreateServlet extends HttpServlet {
         }
 
         request.setAttribute("basePath", basePath);
-        String msg = request.getParameter("msg");
-        if ("success".equals(msg)) {
-            request.setAttribute("successMessage", "Đã tạo phiếu khám thành công! Bệnh nhân đã vào hàng đợi.");
-        }
-        
-        PatientDAO patientDAO = new PatientDAO();
-        List<Patient> patients = patientDAO.getAllPatients(); 
 
-        
+        PatientDAO patientDAO = new PatientDAO();
+        List<Patient> patients = patientDAO.getAllPatients();
+
         RoomDAO roomDAO = new RoomDAO();
         List<RoomView> activeRooms = roomDAO.getAllView();
 
         SpecialtyDAO specialtyDAO = new SpecialtyDAO();
         List<Specialty> specialties = specialtyDAO.getAll();
+        
+        
+        ServiceDAO serviceDAO = new ServiceDAO();
+        double servicePrice = serviceDAO.getById(1).getCurrentPrice().doubleValue();
 
         request.setAttribute("patients", patients);
         request.setAttribute("rooms", activeRooms);
         request.setAttribute("specialties", specialties);
+        request.setAttribute("servicePrice", servicePrice);
 
         request.setAttribute("pageTitle", "Create Appointment");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/appointment/addAppointment.jsp");
@@ -105,7 +104,7 @@ public class AppointmentCreateServlet extends HttpServlet {
 
             if (patientIdRaw == null || roomIdRaw == null || patientIdRaw.isEmpty() || roomIdRaw.isEmpty()) {
                 request.setAttribute("error", "Vui lòng chọn đầy đủ Bệnh nhân và Phòng khám!");
-                doGet(request, response); 
+                doGet(request, response);
                 return;
             }
 
@@ -121,7 +120,7 @@ public class AppointmentCreateServlet extends HttpServlet {
 
             if (newServiceOrderId > 0) {
                 if ("CASH".equals(paymentMethod)) {
-                    response.sendRedirect("create?msg=success");
+                    response.sendRedirect(basePath + "/appointment/list?msg=success");
                 } else {
                     response.sendRedirect(basePath + "/service-order/detail?soId=" + newServiceOrderId);
                 }

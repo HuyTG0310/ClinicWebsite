@@ -39,7 +39,7 @@ public class RoomDAO extends DBContext {
 
     public Room getRoomById(int roomId) {
         String query = "SELECT [RoomId], [RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive] "
-                + "FROM [DB_03_02].[dbo].[Room] WHERE [RoomId] = ?";
+                + "FROM Room WHERE [RoomId] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, roomId);
@@ -56,7 +56,7 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean addRoom(Room room) {
-        String query = "INSERT INTO [DB_03_02].[dbo].[Room] ([RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive]) "
+        String query = "INSERT INTO Room ([RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive]) "
                 + "VALUES (?, ?, ?, ?)";
 
         System.out.println("\n========== RoomDAO.addRoom() ==========");
@@ -100,7 +100,7 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean updateRoom(Room room) {
-        String query = "UPDATE [DB_03_02].[dbo].[Room] SET [RoomName] = ?, [SpecialtyId] = ?, "
+        String query = "UPDATE Room SET [RoomName] = ?, [SpecialtyId] = ?, "
                 + "[CurrentDoctorId] = ?, [IsActive] = ? WHERE [RoomId] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -119,7 +119,7 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean deleteRoom(int roomId) {
-        String query = "DELETE FROM [DB_03_02].[dbo].[Room] WHERE [RoomId] = ?";
+        String query = "DELETE FROM Room WHERE [RoomId] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, roomId);
@@ -134,7 +134,7 @@ public class RoomDAO extends DBContext {
     public List<Room> searchRoomByName(String keyword) {
         List<Room> rooms = new ArrayList<>();
         String query = "SELECT [RoomId], [RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive] "
-                + "FROM [DB_03_02].[dbo].[Room] WHERE [RoomName] LIKE ?";
+                + "FROM Room WHERE [RoomName] LIKE ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, "%" + keyword + "%");
@@ -182,8 +182,8 @@ public class RoomDAO extends DBContext {
 
     public boolean isRoomNameExists(String roomName, Integer excludeRoomId) {
         String query = excludeRoomId != null
-                ? "SELECT COUNT(*) FROM [DB_03_02].[dbo].[Room] WHERE [RoomName] = ? AND [RoomId] != ?"
-                : "SELECT COUNT(*) FROM [DB_03_02].[dbo].[Room] WHERE [RoomName] = ?";
+                ? "SELECT COUNT(*) FROM Room WHERE [RoomName] = ? AND [RoomId] != ?"
+                : "SELECT COUNT(*) FROM Room WHERE [RoomName] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, roomName);

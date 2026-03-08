@@ -17,10 +17,7 @@ import java.time.*;
 import java.util.*;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "ServiceOrderListServlet", urlPatterns = {"/receptionist/service-order/list", "/doctor/service-order/list", "/admin/service-order/list"})
 public class ServiceOrderListServlet extends HttpServlet {
 
@@ -93,7 +90,7 @@ public class ServiceOrderListServlet extends HttpServlet {
         // Giữ lại tham số lọc để hiển thị trên form
         request.setAttribute("paramDate", dateStr);
 
-        request.setAttribute("pageTitle", "Transaction History");
+        request.setAttribute("pageTitle", "Service Order List");
         request.setAttribute("activePage", "manageServiceOrder");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/serviceorder/orderList.jsp");
 

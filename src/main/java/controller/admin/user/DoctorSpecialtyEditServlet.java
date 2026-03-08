@@ -14,10 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "DoctorSpecialtyEditServlet", urlPatterns = {"/admin/doctor-specialty/edit"})
 public class DoctorSpecialtyEditServlet extends HttpServlet {
 
@@ -46,20 +43,20 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
             return;
         }
 
-        // 1ï¸âƒ£ Check user tá»“n táº¡i
+
         User doctor = userDAO.getUserById(doctorId);
         if (doctor == null || !"Doctor".equals(doctor.getRoleName())) {
             response.sendRedirect(request.getContextPath() + "/admin/user/detail?id=" + doctorId);
             return;
         }
 
-        // 2ï¸âƒ£ Validate cÃ³ chá»n specialty chÆ°a
+
         if (specialtyIdsRaw == null || specialtyIdsRaw.length == 0) {
             redirectWithError(response, request, doctorId, "Pháº£i chá»n Ã­t nháº¥t má»™t chuyÃªn khoa.");
             return;
         }
 
-        // 3ï¸âƒ£ Validate primary
+
         if (primaryRaw == null || primaryRaw.isEmpty()) {
             redirectWithError(response, request, doctorId, "Pháº£i chá»n má»™t chuyÃªn khoa chÃ­nh.");
             return;
@@ -86,7 +83,7 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
             return;
         }
 
-        // 4ï¸âƒ£ LÆ°u DB
+
         doctorSpecialtyDAO.deleteByDoctor(doctorId);
 
         for (String sid : specialtyIdsRaw) {
@@ -95,7 +92,7 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
             doctorSpecialtyDAO.insert(doctorId, specialtyId, isPrimary);
         }
 
-        // 5ï¸âƒ£ Redirect thÃ nh cÃ´ng
+
         response.sendRedirect(request.getContextPath() + "/admin/user/detail?id=" + doctorId
         );
     }

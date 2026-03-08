@@ -1,17 +1,4 @@
-<%-- 
-    Document   : userDetail
-    Created on : Feb 7, 2026, 8:53:11 AM
-    Author     : huytr
---%>
 
-
-
-
-<%-- 
-Document   : userDetail
-Created on : Feb 7, 2026
-Author     : huytr
---%>
 
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>

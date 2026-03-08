@@ -9,10 +9,7 @@ import java.util.logging.Logger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-/**
- *
- * @auth CE200044
- */
+
 public class DBContext {
 
     public Connection conn = null;
@@ -21,7 +18,7 @@ public class DBContext {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             String dbURL = "jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=DB_03_02;"
+                    + "databaseName=DB_07_03;"
                     + "user=sa;"
                     + "password=123;"
                     + "encrypt=true;trustServerCertificate=true;";

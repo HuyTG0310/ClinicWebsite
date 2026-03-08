@@ -6,11 +6,28 @@
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-file-invoice-dollar text-primary me-2"></i>
-            Service Order List
+            Manage Service Order
         </h2>
         <p class="text-muted mb-0">Manage daily service orders and revenue</p>
     </div>
 </div>
+
+
+<c:if test="${sessionScope.success != null}">
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle me-2"></i>${sessionScope.success}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <% session.removeAttribute("success"); %>
+</c:if>
+
+<c:if test="${sessionScope.error != null}">
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>${sessionScope.error}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <% session.removeAttribute("error");%>
+</c:if>
 
 <div class="row mb-4 g-3">
     <div class="col-md-4">
