@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
+import util.EmailUtil;
 
 @WebServlet(name = "UserAddServlet", urlPatterns = {"/admin/user/add"})
 public class UserAddServlet extends HttpServlet {
@@ -119,8 +120,24 @@ public class UserAddServlet extends HttpServlet {
         u.setRoleId(roleId);
         u.setIsActive(activeRaw != null);
 
-        userDAO.insert(u);
+//        userDAO.insert(u);
+//
+//        response.sendRedirect(request.getContextPath() + "/admin/user/list");
+        boolean success = userDAO.insert(u);
 
-        response.sendRedirect(request.getContextPath() + "/admin/user/list");
+        if (success) {
+
+            if (email != null && !email.isEmpty()) {
+                EmailUtil.sendAccount(email, username);
+            }
+
+            response.sendRedirect(request.getContextPath() + "/admin/user/list");
+
+        } else {
+
+            request.setAttribute("error", "Cannot create user");
+            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp")
+                    .forward(request, response);
+        }
     }
 }
