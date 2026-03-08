@@ -1,5 +1,6 @@
 package dao;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -382,11 +383,11 @@ public class UserDAO extends DBContext {
                 + "JOIN Role r ON u.RoleId = r.RoleId "
                 + "WHERE u.Username = ? AND u.PasswordHash = ? AND u.IsActive = 1";
 
-        try (PreparedStatement st = conn.prepareStatement(sql)) {
-            st.setString(1, username);
-            st.setString(2, password);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, password);
 
-            try (ResultSet rs = st.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     User u = new User();
                     u.setUserId(rs.getInt("UserId"));
@@ -402,6 +403,60 @@ public class UserDAO extends DBContext {
         } catch (SQLException e) {
             System.out.println("Login DAO Error: " + e.getMessage());
         }
+        return null;
+    }
+
+    public boolean resetPassword(String email, String password) {
+
+        String sql = "UPDATE [User] SET passwordHash=? WHERE email=?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, password);
+            ps.setString(2, email);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public User getUserByEmail(String email) {
+
+        String sql = "SELECT * FROM [User] WHERE Email = ?";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            System.out.println("QUERY EMAIL = " + email);
+
+            ps.setString(1, email);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                System.out.println("USER FOUND IN DB");
+
+                User user = new User();
+                user.setUserId(rs.getInt("UserId"));
+                user.setUsername(rs.getString("Username"));
+                user.setEmail(rs.getString("Email"));
+                user.setPasswordHash(rs.getString("PasswordHash"));
+
+                return user;
+            } else {
+
+                System.out.println("NO USER FOUND");
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 

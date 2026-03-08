@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 /**
  *
@@ -42,8 +44,18 @@ public class DBContext {
         }
     }
 
+    public static Connection getConnection() throws Exception {
+
+        String url = "jdbc:sqlserver://localhost:1433;databaseName=DB_03_02";
+        String user = "sa";
+        String password = "123";
+
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+        return DriverManager.getConnection(url, user, password);
+    }
+
     public static void main(String[] args) {
         DBContext db = new DBContext();
     }
 }
-    

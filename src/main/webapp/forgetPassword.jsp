@@ -111,7 +111,7 @@
                 </div>
             </c:if>
 
-            <form action="forgot-password" method="post">
+           <form action="${pageContext.request.contextPath}/forget-password" method="post">
 
                 <div class="mb-4">
                     <label class="form-label">Email Address</label>
