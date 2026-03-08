@@ -142,7 +142,7 @@ public class SePayWebhookServlet extends HttpServlet {
         response.setStatus(400); // Chỉ trả 400 khi lỗi nặng hoặc mã rác
     }
 
-    // Các hàm Regex hỗ trợ lọc JSON siêu tốc
+    
     private int extractInt(String json, String regex) {
         Matcher matcher = Pattern.compile(regex).matcher(json);
         if (matcher.find()) {

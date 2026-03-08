@@ -1,11 +1,7 @@
-<%-- 
-    Document   : serviceList
-    Created on : Feb 4, 2026
-    Author     : huytr
---%>
 
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -21,6 +17,22 @@
         Add New Service
     </a>
 </div>
+
+<c:if test="${not empty sessionScope.success}">
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i>${sessionScope.success}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="success" scope="session"/>
+</c:if>
+
+<c:if test="${not empty sessionScope.error}">
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>${sessionScope.error}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="error" scope="session"/>
+</c:if>
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
@@ -41,7 +53,7 @@
                         Search
                     </button>
                 </div>
-                
+
                 <c:if test="${not empty keyword}">
                     <div class="col-12 mt-2">
                         <a href="${pageContext.request.contextPath}/admin/service/list" class="btn btn-outline-secondary btn-sm">
@@ -106,7 +118,9 @@
                                             ${s.category}
                                         </span>
                                     </td>
-                                    <td>${s.currentPrice}</td>
+                                    <td>
+                                        <div class="fw-bold text-danger"><fmt:formatNumber value="${s.currentPrice}" pattern="#,###"/> đ</div>
+                                    </td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${s.isActive}">
@@ -181,7 +195,7 @@
         border-right: none;
         border-radius: 8px 0 0 8px;
     }
-    
+
     .input-group .form-control {
         border-left: none;
         border-radius: 0 8px 8px 0;

@@ -99,9 +99,7 @@ public class MedicineEditServlet extends HttpServlet {
         m.setContraindication(contra);
 
         // Xử lý checkbox isActive (Nếu null là ko tick -> false)
-        // Lưu ý: Form Edit thường có checkbox Active, Form Create thì mặc định true
         m.setIsActive(isActiveStr != null);
-
         MedicineDAO dao = new MedicineDAO();
         dao.update(m);
         response.sendRedirect(basePath + "/medicine/detail?id=" + m.getMedicineId() + "&msg=updateSuccess");

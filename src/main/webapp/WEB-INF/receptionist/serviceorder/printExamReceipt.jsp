@@ -107,7 +107,7 @@
                 </div>
 
                 <div class="mt-2">
-                    Lý do thu: <span class="ms-2">Khám bệnh lâm sàng</span>
+                    Lý do thu: <span class="ms-2">${app.serviceName}</span>
                 </div>
 
 

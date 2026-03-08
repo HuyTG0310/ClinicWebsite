@@ -8,16 +8,17 @@ public class Appointment {
     private int appointmentId;
     private int patientId;
     private String patientAddress;
-    private Integer medicalRecordId; 
+    private Integer medicalRecordId; // Có thể null
     private int roomId;
     private Integer createdBy;
     private Timestamp appointmentTime;
-    private String status; 
+    private String status; // WAITING, IN_PROGRESS, COMPLETED, CANCELLED
 
+    // Các trường phụ để hiển thị (Join bảng)
     private String patientName;
     private String patientPhone;
     private String roomName;
-    private String doctorName; 
+    private String doctorName; // Tên bác sĩ phụ trách phòng đó
     private String specialtyName;
 
     private String patientGender;
@@ -27,6 +28,7 @@ public class Appointment {
     private double price;
 
     private String paymentStatus;
+    private String serviceName;
 
     public Appointment() {
     }
@@ -205,4 +207,11 @@ public class Appointment {
         this.paymentStatus = paymentStatus;
     }
 
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
 }

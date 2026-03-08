@@ -14,47 +14,50 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "ServiceDetailServlet", urlPatterns = {"/admin/service/detail"})
 public class ServiceDetailServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO = new ServiceDAO();
+    private LabTestDAO labTestDAO = new LabTestDAO();
+    private LabTestCategoryDAO labCateDAO = new LabTestCategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idRaw = request.getParameter("id");
-
         if (idRaw == null) {
             response.sendRedirect(request.getContextPath() + "/admin/service/list");
             return;
         }
 
-        int id;
         try {
-            id = Integer.parseInt(idRaw);
-        } catch (NumberFormatException e) {
+            int id = Integer.parseInt(idRaw);
+            Service service = serviceDAO.getById(id);
+
+            if (service == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/service/list");
+                return;
+            }
+
+            request.setAttribute("service", service);
+
+            if ("Xét nghiệm".equals(service.getCategory())) {
+                LabTest labTest = labTestDAO.getLabTestByServiceId(id);
+                request.setAttribute("labTest", labTest);
+                //load nhóm đưa vào form edit
+                request.setAttribute("labCategories", labCateDAO.getAllCategories());
+            }
+
+            request.setAttribute("categories", ServiceCategory.getAll());
+            request.setAttribute("pageTitle", "Service Detail");
+            request.setAttribute("activePage", "manageService");
+            request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceDetail.jsp");
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/admin/service/list");
-            return;
         }
-
-        Service service = serviceDAO.getById(id);
-
-        if (service == null) {
-            response.sendRedirect(request.getContextPath() + "/admin/service/list");
-            return;
-        }
-
-        request.setAttribute("service", service);
-//        request.getRequestDispatcher("/WEB-INF/admin/service/serviceDetail.jsp").forward(request, response);
-        
-        request.setAttribute("categories", ServiceCategory.getAll());
-        request.setAttribute("pageTitle", "Service Detail");
-        request.setAttribute("activePage", "manageService");
-        request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceDetail.jsp");
 
         request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }

@@ -51,10 +51,15 @@ public class AppointmentCreateServlet extends HttpServlet {
 
         SpecialtyDAO specialtyDAO = new SpecialtyDAO();
         List<Specialty> specialties = specialtyDAO.getAll();
+        
+        
+        ServiceDAO serviceDAO = new ServiceDAO();
+        double servicePrice = serviceDAO.getById(1).getCurrentPrice().doubleValue();
 
         request.setAttribute("patients", patients);
         request.setAttribute("rooms", activeRooms);
         request.setAttribute("specialties", specialties);
+        request.setAttribute("servicePrice", servicePrice);
 
         request.setAttribute("pageTitle", "Create Appointment");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/appointment/addAppointment.jsp");
@@ -115,7 +120,6 @@ public class AppointmentCreateServlet extends HttpServlet {
 
             if (newServiceOrderId > 0) {
                 if ("CASH".equals(paymentMethod)) {
-//                    response.sendRedirect("create?msg=success");
                     response.sendRedirect(basePath + "/appointment/list?msg=success");
                 } else {
                     response.sendRedirect(basePath + "/service-order/detail?soId=" + newServiceOrderId);

@@ -15,10 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "RoleDetailServlet", urlPatterns = {"/admin/role/detail"})
 public class RoleDetailServlet extends HttpServlet {
 
@@ -35,7 +32,6 @@ public class RoleDetailServlet extends HttpServlet {
         }
         int roleId = Integer.parseInt(roleIdRaw);
 
-        // Tận dụng logic lấy data của bạn
         List<Privilege> allPrivileges = privilegeDAO.getAll();
         List<Integer> currentPrivilegeIds = privilegeDAO.getPrivilegeIdsByRole(roleId);
         Role role = roleDAO.getRoleById(roleId);
@@ -47,7 +43,6 @@ public class RoleDetailServlet extends HttpServlet {
         request.setAttribute("pageTitle", "Role Detail");
         request.setAttribute("activePage", "manageRole");
 
-        // Trỏ về file JSP mới (đẹp hơn) nằm trong thư mục admin
         request.setAttribute("contentPage", "/WEB-INF/admin/role/roleDetail.jsp");
         request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }
@@ -55,7 +50,6 @@ public class RoleDetailServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Giữ nguyên logic xử lý lưu của bạn
         int roleId = Integer.parseInt(request.getParameter("roleId"));
         String[] selectedPrivileges = request.getParameterValues("privilegeIds");
 
@@ -65,8 +59,7 @@ public class RoleDetailServlet extends HttpServlet {
         privilegeDAO.updateRolePrivileges(roleId, selectedPrivileges);
 
         roleDAO.update(roleId, isActive);
-
-        // Quay lại đúng trang detail của Role đó kèm thông báo
+        
         response.sendRedirect("detail?roleId=" + roleId + "&msg=success");
     }
 
