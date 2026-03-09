@@ -8,6 +8,7 @@
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
+
         <div>
             <h2 class="mb-1">
                 <i class="fas fa-user text-primary me-2"></i>
@@ -16,9 +17,37 @@
             <p class="text-muted mb-0">View complete patient information</p>
         </div>
 
-        <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to List
-        </a>
+        <div class="d-flex gap-2">
+
+            <c:if test="${hasPatientDelete}">
+                <button class="btn btn-danger"
+                        onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </c:if>
+
+            <c:if test="${hasPatientEdit}">
+                <button class="btn btn-warning"
+                        onclick="openEditModal(
+                                        '${patient.patientId}',
+                                        '${patient.fullName}',
+                                        '${patient.phone}',
+                                        '<fmt:formatDate value="${patient.dateOfBirth}" pattern="yyyy-MM-dd"/>',
+                                        '${patient.gender}',
+                                        '${patient.address}',
+                                        '${patient.medicalHistory}',
+                                        '${patient.allergy}'
+                                        )">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </button>
+            </c:if>
+
+            <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+
+        </div>
+
     </div>
 
     <c:choose>
@@ -169,38 +198,6 @@
 
                 </div>
             </div>
-
-            <!-- ACTION BUTTONS -->
-            <div class="d-flex gap-2">
-                <a href="${basePath}/patient/list" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back
-                </a>
-                <c:if test="${hasPatientEdit}">
-                    <button class="btn btn-warning"
-                            onclick="openEditModal(
-                                            '${patient.patientId}',
-                                            '${patient.fullName}',
-                                            '${patient.phone}',
-                                            '<fmt:formatDate value="${patient.dateOfBirth}" pattern="yyyy-MM-dd"/>',
-                                            '${patient.gender}',
-                                            '${patient.address}',
-                                            '${patient.medicalHistory}',
-                                            '${patient.allergy}'
-                                            )">
-                        <i class="fas fa-edit me-2"></i>Edit Patient
-                    </button>
-                </c:if>
-
-                <c:if test="${hasPatientDelete}">
-                    <button class="btn btn-danger"
-                            onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
-                        <i class="fas fa-trash me-2"></i>Delete Patient
-                    </button>
-                </c:if>
-
-
-            </div>
-
         </c:when>
 
         <c:otherwise>
@@ -216,116 +213,251 @@
 
     <!-- ===== EDIT MODAL ===== -->
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <form class="modal-content" method="post" action="${basePath}/patient/edit" class="needs-validation" novalidate>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
 
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-edit text-primary me-2"></i>
+                        <i class="fa-solid fa-pen-to-square me-2"></i>
                         Edit Patient
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
+                <form method="post"
+                      action="${basePath}/patient/edit"
+                      class="needs-validation"
+                      novalidate>
 
-                    <input type="hidden" name="patientId">
+                    <div class="modal-body">
 
-                    <div class="mb-3">
-                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="editFullName" name="fullName" required oninput="validateEditFullName(this)">
-                        <div class="invalid-feedback" id="editFullNameError">
-                            Full name can only contain Vietnamese/English letters and spaces.
+                        <input type="hidden" name="patientId">
+
+                        <div class="row g-3">
+
+                            <!-- Full Name -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Full Name <span class="text-danger">*</span>
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       id="editFullName"
+                                       name="fullName"
+                                       required
+                                       oninput="validateEditFullName(this)">
+
+                                <div class="invalid-feedback" id="editFullNameError">
+                                    Full name can only contain Vietnamese/English letters and spaces.
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Phone <span class="text-danger">*</span>
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       id="editPhone"
+                                       name="phone"
+                                       pattern="[0-9\-\+\s]+"
+                                       required
+                                       oninput="validateEditPhone(this)"
+                                       onblur="checkEditPhoneExists(this)">
+
+                                <div class="invalid-feedback" id="editPhoneError">
+                                    Please enter exactly 10 digits.
+                                </div>
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Date of Birth <span class="text-danger">*</span>
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       id="editDateOfBirth"
+                                       name="dateOfBirth"
+                                       required
+                                       oninput="validateEditDateOfBirth(this)">
+
+                                <div class="invalid-feedback" id="editDobError">
+                                    Date of birth cannot be in the future.
+                                </div>
+                            </div>
+
+                            <!-- Gender -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Gender <span class="text-danger">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        id="editGender"
+                                        name="gender"
+                                        required>
+
+                                    <option value="">-- Select Gender --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+
+                                </select>
+
+                                <div class="invalid-feedback">
+                                    Please select a gender.
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">
+                                    Address <span class="text-danger">*</span>
+                                </label>
+
+                                <textarea class="form-control"
+                                          id="editAddress"
+                                          name="address"
+                                          rows="2"
+                                          required></textarea>
+
+                                <div class="invalid-feedback">
+                                    Address is required.
+                                </div>
+                            </div>
+
+                            <!-- Medical History -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Medical History
+                                </label>
+
+                                <textarea class="form-control"
+                                          id="editMedicalHistory"
+                                          name="medicalHistory"
+                                          rows="2"></textarea>
+                            </div>
+
+                            <!-- Allergy -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Allergy
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       id="editAllergy"
+                                       name="allergy">
+                            </div>
+
                         </div>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Phone <span class="text-danger">*</span></label>
-                        <input type="tel" class="form-control" id="editPhone" name="phone" pattern="[0-9\-\+\s]+" required oninput="validateEditPhone(this)" onblur="checkEditPhoneExists(this)">
-                        <div class="invalid-feedback" id="editPhoneError">
-                            Please enter exactly 10 digits.
-                        </div>
+                    <div class="modal-footer">
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-primary px-4"
+                                id="editPatientBtn"
+                                disabled>
+
+                            <i class="fa-solid fa-save me-1"></i>
+                            Save
+                        </button>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="editDateOfBirth" name="dateOfBirth" required oninput="validateEditDateOfBirth(this)">
-                        <div class="invalid-feedback" id="editDobError">
-                            Date of birth cannot be in the future.
-                        </div>
-                    </div>
+                </form>
 
-                    <div class="mb-3">
-                        <label class="form-label">Gender <span class="text-danger">*</span></label>
-                        <select class="form-select" id="editGender" name="gender" required>
-                            <option value="">-- Select Gender --</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <div class="invalid-feedback">Please select a gender.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Address <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="editAddress" name="address" rows="2" required></textarea>
-                        <div class="invalid-feedback">Address is required.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Medical History</label>
-                        <textarea class="form-control" id="editMedicalHistory" name="medicalHistory" rows="2"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Allergy</label>
-                        <input type="text" class="form-control" id="editAllergy" name="allergy">
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="editPatientBtn" disabled>
-                        <i class="fas fa-save me-2"></i>Save Changes
-                    </button>
-                </div>
-
-            </form>
+            </div>
         </div>
     </div>
 
     <!-- ===== DELETE MODAL ===== -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
+
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
                         Confirm Delete
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body">
-                    <p>Are you sure you want to delete this patient?</p>
-                    <p><strong>Patient Name:</strong> <span id="deletePatientName"></span></p>
-                    <p class="text-danger"><strong>Note:</strong> This action cannot be undone!</p>
+
+                    <p class="mb-2">
+                        Are you sure you want to delete this patient?
+                    </p>
+
+                    <p class="mb-2">
+                        <strong>Patient Name:</strong>
+                        <span id="deletePatientName"></span>
+                    </p>
+
+                    <div class="alert alert-danger mb-0">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>
+                        This action cannot be undone.
+                    </div>
+
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form method="post" action="${basePath}/patient/delete" style="display: inline;">
-                        <input type="hidden" name="patientId" id="deletePatientId">
-                        <input type="hidden" name="confirmDelete" value="yes">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-2"></i>Delete Patient
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <form method="post"
+                          action="${basePath}/patient/delete">
+
+                        <input type="hidden"
+                               name="patientId"
+                               id="deletePatientId">
+
+                        <input type="hidden"
+                               name="confirmDelete"
+                               value="yes">
+
+                        <button type="submit"
+                                class="btn btn-danger px-4">
+
+                            <i class="fa-solid fa-trash me-1"></i>
+                            Delete
+
                         </button>
+
                     </form>
+
                 </div>
+
             </div>
         </div>
     </div>
+
+
+
 </div>
 
 <script>

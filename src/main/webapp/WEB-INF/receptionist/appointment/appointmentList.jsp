@@ -7,33 +7,31 @@
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-calendar-check text-primary me-2"></i>
-            Appointment Manager
+            Manage Appointment
         </h2>
         <p class="text-muted mb-0">Track and manage patient queues & schedules</p>
     </div>
 
     <c:if test="${hasAppointmentCreate}">
         <a href="${basePath}/appointment/create" class="btn btn-primary">
-            <i class="fas fa-plus-circle me-2"></i>New Appointment
+            <i class="fas fa-plus-circle me-2"></i>Add New Appointment
         </a>
     </c:if>
 
 </div>
 
-<c:if test="${not empty sessionScope.success}">
+<c:if test="${not empty successMessage}">
     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="fas fa-check-circle me-2"></i>${sessionScope.success}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <i class="fa-solid fa-circle-check me-2"></i> ${successMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <% session.removeAttribute("success"); %>
 </c:if>
 
-<c:if test="${not empty sessionScope.error}">
+<c:if test="${not empty error}">
     <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>${sessionScope.error}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <i class="fa-solid fa-circle-exclamation me-2"></i> ${error}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <% session.removeAttribute("error");%>
 </c:if>
 
 <div class="card shadow-sm mb-4">
@@ -71,7 +69,7 @@
 
                     <div class="col-md-3 d-flex align-items-end gap-2">
                         <button class="btn btn-primary flex-grow-1" type="submit">
-                            <i class="fas fa-filter me-2"></i>Filter
+                            <i class="fas fa-filter me-2"></i>Search
                         </button>
 
                     <c:if test="${not empty param.keyword or not empty param.status or not empty param.date}">
@@ -90,7 +88,7 @@
 <div class="card shadow-sm">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-list me-2 text-primary"></i>Patient Queue
+            <i class="fas fa-list me-2 text-primary"></i>Appointment List
         </h5>
         <span class="badge bg-light text-dark border">
             Total: ${appointmentList.size()} records
@@ -212,68 +210,3 @@
         }
     }
 </script>
-
-<style>
-    /* Hover effect cho table rows */
-    .table-hover tbody tr:hover {
-        background-color: rgba(13, 110, 253, 0.05);
-        transition: background-color 0.2s ease;
-    }
-    /* Card styling */
-    .card {
-        border: none;
-        border-radius: 12px;
-    }
-    .card-header {
-        border-bottom: 1px solid rgba(0,0,0,0.08);
-        border-radius: 12px 12px 0 0 !important;
-    }
-    /* Badge styling */
-    .badge {
-        padding: 0.4em 0.8em;
-        font-weight: 500;
-        border-radius: 6px;
-    }
-    .bg-success-subtle {
-        background-color: #d1e7dd !important;
-    }
-    /* Input group styling */
-    .input-group-text {
-        border-right: none;
-        border-radius: 8px 0 0 8px;
-    }
-    .input-group .form-control {
-        border-left: none;
-        border-radius: 0 8px 8px 0;
-    }
-    .input-group .form-control:focus {
-        border-left: none;
-        box-shadow: none;
-    }
-    .input-group:focus-within .input-group-text {
-        border-color: #86b7fe;
-    }
-    /* Button styling */
-    .btn {
-        border-radius: 8px;
-        padding: 0.5rem 1.2rem;
-        font-weight: 500;
-        transition: all 0.25s ease;
-    }
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    /* Alert styling */
-    .alert {
-        border: none;
-        border-radius: 10px;
-        border-left: 4px solid;
-    }
-    .alert-success {
-        border-left-color: #28a745;
-    }
-    .alert-danger {
-        border-left-color: #dc3545;
-    }
-</style>

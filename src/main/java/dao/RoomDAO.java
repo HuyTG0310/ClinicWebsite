@@ -8,12 +8,41 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class RoomDAO extends DBContext {
+    
+    public List<RoomView> getAllActiveRoomsForAppointment() {
+        List<RoomView> list = new ArrayList<>();
 
+        String sql = "        SELECT r.RoomId, r.RoomName, r.IsActive,\n"
+                + "               s.SpecialtyName, s.SpecialtyId, \n"
+                + "               u.FullName AS DoctorName\n"
+                + "        FROM Room r\n"
+                + "        JOIN Specialty s ON r.SpecialtyId = s.SpecialtyId\n"
+                + "        LEFT JOIN [User] u ON r.CurrentDoctorId = u.UserId\n"
+                + "        WHERE r.IsActive = 1";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                RoomView rv = new RoomView();
+                rv.setRoomId(rs.getInt("RoomId"));
+                rv.setRoomName(rs.getString("RoomName"));
+                rv.setSpecialtyName(rs.getString("SpecialtyName"));
+                rv.setDoctorName(rs.getString("DoctorName"));
+                rv.setSpecialtyId(rs.getInt("SpecialtyId"));
+                rv.setIsActive(rs.getBoolean("IsActive"));
+                list.add(rv);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
     public List<RoomView> getAllView() {
         List<RoomView> list = new ArrayList<>();
 
         String sql = "        SELECT r.RoomId, r.RoomName, r.IsActive,\n"
-                + "               s.SpecialtyName,\n"
+                + "               s.SpecialtyName, s.SpecialtyId, \n"
                 + "               u.FullName AS DoctorName\n"
                 + "        FROM Room r\n"
                 + "        JOIN Specialty s ON r.SpecialtyId = s.SpecialtyId\n"
@@ -27,6 +56,7 @@ public class RoomDAO extends DBContext {
                 rv.setRoomName(rs.getString("RoomName"));
                 rv.setSpecialtyName(rs.getString("SpecialtyName"));
                 rv.setDoctorName(rs.getString("DoctorName"));
+                rv.setSpecialtyId(rs.getInt("SpecialtyId"));
                 rv.setIsActive(rs.getBoolean("IsActive"));
                 list.add(rv);
             }
@@ -38,7 +68,7 @@ public class RoomDAO extends DBContext {
 
     public Room getRoomById(int roomId) {
         String query = "SELECT [RoomId], [RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive] "
-                + "FROM [DB_03_02].[dbo].[Room] WHERE [RoomId] = ?";
+                + "FROM Room WHERE [RoomId] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, roomId);
@@ -55,7 +85,7 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean addRoom(Room room) {
-        String query = "INSERT INTO [DB_03_02].[dbo].[Room] ([RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive]) "
+        String query = "INSERT INTO Room ([RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive]) "
                 + "VALUES (?, ?, ?, ?)";
 
         System.out.println("\n========== RoomDAO.addRoom() ==========");
@@ -99,7 +129,7 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean updateRoom(Room room) {
-        String query = "UPDATE [DB_03_02].[dbo].[Room] SET [RoomName] = ?, [SpecialtyId] = ?, "
+        String query = "UPDATE Room SET [RoomName] = ?, [SpecialtyId] = ?, "
                 + "[CurrentDoctorId] = ?, [IsActive] = ? WHERE [RoomId] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -118,7 +148,7 @@ public class RoomDAO extends DBContext {
     }
 
     public boolean deleteRoom(int roomId) {
-        String query = "DELETE FROM [DB_03_02].[dbo].[Room] WHERE [RoomId] = ?";
+        String query = "DELETE FROM Room WHERE [RoomId] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, roomId);
@@ -133,7 +163,7 @@ public class RoomDAO extends DBContext {
     public List<Room> searchRoomByName(String keyword) {
         List<Room> rooms = new ArrayList<>();
         String query = "SELECT [RoomId], [RoomName], [SpecialtyId], [CurrentDoctorId], [IsActive] "
-                + "FROM [DB_03_02].[dbo].[Room] WHERE [RoomName] LIKE ?";
+                + "FROM Room WHERE [RoomName] LIKE ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, "%" + keyword + "%");
@@ -181,8 +211,8 @@ public class RoomDAO extends DBContext {
 
     public boolean isRoomNameExists(String roomName, Integer excludeRoomId) {
         String query = excludeRoomId != null
-                ? "SELECT COUNT(*) FROM [DB_03_02].[dbo].[Room] WHERE [RoomName] = ? AND [RoomId] != ?"
-                : "SELECT COUNT(*) FROM [DB_03_02].[dbo].[Room] WHERE [RoomName] = ?";
+                ? "SELECT COUNT(*) FROM Room WHERE [RoomName] = ? AND [RoomId] != ?"
+                : "SELECT COUNT(*) FROM Room WHERE [RoomName] = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, roomName);
@@ -313,6 +343,13 @@ public class RoomDAO extends DBContext {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        RoomDAO dao = new RoomDAO();
+        for (RoomView roomView : dao.getAllView()) {
+            System.out.println(roomView);
+        }
     }
 
 }

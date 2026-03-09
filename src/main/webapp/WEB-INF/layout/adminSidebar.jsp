@@ -103,12 +103,32 @@
         </c:if>
 
 
+        <c:if test="${hasAppointmentView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/appointment/list">
+                    <i class="fa-solid fa-gauge me-2"></i>
+                    Manage appointment
+                </a>
+            </li>
+        </c:if>
+
+
+
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/service-order/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage service order
+            </a>
+        </li>
+
         <!-- Logout -->
         <li class="nav-item mt-3">
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
                 <i class="fa-solid fa-right-from-bracket me-2"></i>
-                Log out
+                Logout
             </a>
         </li>
 

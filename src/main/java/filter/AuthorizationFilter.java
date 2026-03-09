@@ -53,7 +53,6 @@ public class AuthorizationFilter implements Filter {
     private PrivilegeDAO privilegeDAO = new PrivilegeDAO();
 //    private static final Map<String, String> URL_PRIVILEGE_MAP = new LinkedHashMap<>();
 
-    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
@@ -67,6 +66,11 @@ public class AuthorizationFilter implements Filter {
         if (!uri.startsWith(ctx)) {
             res.sendError(404);
             return;
+        }
+
+        if (uri.contains("/api/sepay-webhook")) {
+            chain.doFilter(request, response);
+            return; // Cho đi qua luôn và thoát hàm filter
         }
 
         String path = uri.substring(ctx.length());
@@ -135,9 +139,11 @@ public class AuthorizationFilter implements Filter {
         req.setAttribute("hasPatientCreate", privileges.contains("PATIENT_CREATE"));
         req.setAttribute("hasPatientEdit", privileges.contains("PATIENT_EDIT"));
         req.setAttribute("hasPatientDelete", privileges.contains("PATIENT_DELETE"));
+
         req.setAttribute("hasAppointmentCreate", privileges.contains("APPOINTMENT_CREATE"));
         req.setAttribute("hasAppointmentEdit", privileges.contains("APPOINTMENT_EDIT"));
         req.setAttribute("hasAppointmentView", privileges.contains("APPOINTMENT_VIEW"));
+
 
         if (path.startsWith("/profile")) {
             chain.doFilter(request, response);
@@ -162,8 +168,13 @@ public class AuthorizationFilter implements Filter {
             return;
         }
 
+        if (path.startsWith("/lab") && !"LAB TECHNICIAN".equalsIgnoreCase(role)) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         // --- 5. Dashboard Always OK ---
-        if (path.equals("/admin/dashboard") || path.equals("/doctor/dashboard") || path.equals("/receptionist/dashboard")) {
+        if (path.equals("/admin/dashboard") || path.equals("/doctor/dashboard") || path.equals("/receptionist/dashboard") || path.equals("/lab/dashboard")) {
             chain.doFilter(request, response);
             return;
         }
@@ -184,7 +195,6 @@ public class AuthorizationFilter implements Filter {
         } else if (path.contains("/room/edit")) {
             requiredPriv = "ROOM_EDIT";
         } else if (path.contains("/room/list") || path.contains("/room/detail")) {
-
             requiredPriv = "ROOM_VIEW";
         }
 
@@ -193,7 +203,6 @@ public class AuthorizationFilter implements Filter {
         } else if (path.contains("/patient/edit")) {
             requiredPriv = "PATIENT_EDIT";
         } else if (path.contains("/patient/list") || path.contains("/patient/detail")) {
-
             requiredPriv = "PATIENT_VIEW";
         } else if (path.contains("/patient/delete")) {
             requiredPriv = "PATIENT_DELETE";

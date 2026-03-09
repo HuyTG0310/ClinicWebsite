@@ -1,13 +1,12 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<!-- HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
         <h2 class="mb-1">
             <i class="fas fa-stethoscope text-primary me-2"></i>
-            Manage specialty
+            Manage Specialty
         </h2>
         <p class="text-muted mb-0">Manage and monitor all specialties</p>
     </div>
@@ -15,14 +14,12 @@
     <a href="${pageContext.request.contextPath}/admin/specialty/add"
        class="btn btn-primary">
 
-        <i class="fas fa-plus-circle me-2"></i>
-        Add New Specialty
+        <i class="fas fa-plus-circle me-2"></i>Add New Specialty
     </a>
 
 </div>
 
 
-<!-- SEARCH -->
 <div class="card shadow-sm mb-4">
 
     <div class="card-body">
@@ -32,7 +29,9 @@
 
             <div class="row g-3">
 
-                <div class="col-md-10">
+                <div class="col-md-9">
+
+                    <label class="form-label fw-bold small text-muted">Keyword</label>
 
                     <div class="input-group">
 
@@ -43,20 +42,29 @@
                         <input type="text"
                                name="keyword"
                                class="form-control"
-                               placeholder="Search by specialty name">
+                               placeholder="Specialty name...">
 
                     </div>
 
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3 d-flex align-items-end gap-2">
 
-                    <button class="btn btn-primary w-100">
+                    <button class="btn btn-primary flex-grow-1">
 
-                        <i class="fas fa-search me-2"></i>
-                        Search
+                        <i class="fas fa-filter me-2"></i>Search
 
                     </button>
+
+                    <c:if test="${not empty param.keyword}">
+                        <a href="${pageContext.request.contextPath}/admin/specialty/list"
+                           class="btn btn-outline-secondary px-3"
+                           title="Clear Filters">
+
+                            <i class="fas fa-redo-alt"></i>
+
+                        </a>
+                    </c:if>
 
                 </div>
 
@@ -70,15 +78,17 @@
 
 
 
-<!-- TABLE -->
 <div class="card shadow-sm">
 
-    <div class="card-header bg-white py-3">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
 
         <h5 class="mb-0">
-            <i class="fas fa-list me-2 text-primary"></i>
-            Specialty List
+            <i class="fas fa-list me-2 text-primary"></i>Specialty List
         </h5>
+
+        <span class="badge bg-light text-dark border">
+            Total: ${list.size()} records
+        </span>
 
     </div>
 
@@ -92,11 +102,23 @@
 
                     <tr>
 
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th class="text-center">Action</th>
+                        <th class="px-4">#ID</th>
+
+                        <th>
+                            <i class="fas fa-stethoscope me-2 text-primary"></i>Specialty
+                        </th>
+
+                        <th>
+                            <i class="fas fa-align-left me-2 text-primary"></i>Description
+                        </th>
+
+                        <th>
+                            <i class="fas fa-toggle-on me-2 text-primary"></i>Status
+                        </th>
+
+                        <th class="text-center">
+                            <i class="fas fa-cog me-2 text-primary"></i>Actions
+                        </th>
 
                     </tr>
 
@@ -108,14 +130,14 @@
 
                         <tr>
 
-                            <td>
-                                <span class="badge bg-light text-dark border">
-                                    #${s.specialtyId}
-                                </span>
+                            <td class="px-4 fw-bold text-secondary">
+                                #${s.specialtyId}
                             </td>
 
-                            <td class="fw-semibold">
-                                ${s.name}
+                            <td>
+                                <div class="fw-bold text-primary">
+                                    ${s.name}
+                                </div>
                             </td>
 
                             <td class="text-muted">
@@ -128,15 +150,13 @@
 
                                     <c:when test="${s.isActive}">
                                         <span class="badge bg-success">
-                                            <i class="fas fa-check-circle me-1"></i>
-                                            Active
+                                            <i class="fas fa-check me-1"></i>ACTIVE
                                         </span>
                                     </c:when>
 
                                     <c:otherwise>
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times-circle me-1"></i>
-                                            Inactive
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-ban me-1"></i>INACTIVE
                                         </span>
                                     </c:otherwise>
 
@@ -149,7 +169,7 @@
                                 <a class="btn btn-sm btn-outline-primary"
                                    href="${pageContext.request.contextPath}/admin/specialty/detail?id=${s.specialtyId}">
 
-                                    <i class="fas fa-eye"></i> View
+                                    <i class="fas fa-eye me-1"></i>View
 
                                 </a>
 
@@ -162,7 +182,7 @@
                     <c:if test="${empty list}">
                         <tr>
                             <td colspan="5" class="text-center py-5">
-                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <i class="fas fa-stethoscope fa-3x text-muted mb-3 d-block"></i>
                                 <p class="text-muted mb-0">No specialties found</p>
                             </td>
                         </tr>
@@ -177,44 +197,3 @@
     </div>
 
 </div>
-
-
-
-<style>
-
-/* hover giống room list */
-
-.table-hover tbody tr:hover {
-    background-color: rgba(13,110,253,0.05);
-    transition: background-color 0.2s ease;
-}
-
-.card {
-    border:none;
-    border-radius:12px;
-}
-
-.card-header {
-    border-bottom:1px solid rgba(0,0,0,0.08);
-    border-radius:12px 12px 0 0 !important;
-}
-
-.badge {
-    padding:0.4em 0.8em;
-    font-weight:500;
-    border-radius:6px;
-}
-
-.btn {
-    border-radius:8px;
-    padding:0.5rem 1.2rem;
-    font-weight:500;
-    transition:all 0.25s ease;
-}
-
-.btn:hover {
-    transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-
-</style>

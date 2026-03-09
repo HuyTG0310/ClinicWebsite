@@ -35,7 +35,7 @@ public class SpecialtyDetailServlet extends HttpServlet {
         }
 
         request.setAttribute("specialty", specialty);
-        request.setAttribute("pageTitle", "Manage speiclaty");
+        request.setAttribute("pageTitle", "Specialty Detail");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/detailSpecialty.jsp");
 

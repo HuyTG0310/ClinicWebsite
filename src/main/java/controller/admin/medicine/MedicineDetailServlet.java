@@ -46,16 +46,11 @@ public class MedicineDetailServlet extends HttpServlet {
             return;
         }
 
-        request.setAttribute("medicine", medicine);
-        request.setAttribute("pageTitle", "Medicine detail");
-        request.setAttribute("activePage", "manageMedicine");
-
-        // ===== CHỌN LAYOUT THEO URL =====
         String uri = request.getRequestURI();
         String ctx = request.getContextPath();
 
         String layout;
-        String basePath; // <--- Biến cần bổ sung
+        String basePath;
 
         if (uri.startsWith(ctx + "/admin")) {
             layout = "/WEB-INF/layout/adminLayout.jsp";
@@ -71,10 +66,10 @@ public class MedicineDetailServlet extends HttpServlet {
             return;
         }
 
-        // Gửi basePath sang JSP để dùng cho nút Back/Edit
         request.setAttribute("basePath", basePath);
-
-        // ===== 5. JSP DÙNG CHUNG =====
+        request.setAttribute("medicine", medicine);
+        request.setAttribute("pageTitle", "Medicine Detail");
+        request.setAttribute("activePage", "manageMedicine");
         request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineDetail.jsp");
         request.getRequestDispatcher(layout).forward(request, response);
     }

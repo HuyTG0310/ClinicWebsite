@@ -8,45 +8,89 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h4 class="fw-bold text-primary mb-0">
-                <i class="fa-solid fa-circle-info me-2"></i>
+            <h2 class="mb-1">
+                <i class="fa-solid fa-stethoscope text-primary me-2"></i>
                 Specialty Detail
-            </h4>
-            <small class="text-muted">View specialty information</small>
+            </h2>
+
+            <p class="text-muted mb-0">
+                View specialty information
+            </p>
         </div>
 
-        <a href="${pageContext.request.contextPath}/admin/specialty/list"
-           class="btn btn-outline-secondary">
+        <div class="d-flex gap-2">
 
-            <i class="fa-solid fa-arrow-left me-2"></i>
-            Back
-        </a>
+            <button class="btn btn-warning shadow-sm"
+                    onclick="openEditModal(
+                                    '${specialty.specialtyId}',
+                                    '${specialty.name}',
+                                    '${specialty.description}',
+                                    '${specialty.isActive}'
+                                    )">
+
+                <i class="fa-solid fa-pen-to-square me-2"></i>
+                Edit
+            </button>
+
+            <a href="${pageContext.request.contextPath}/admin/specialty/list"
+               class="btn btn-outline-secondary">
+
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Back to list
+            </a>
+
+        </div>
 
     </div>
 
 
+
     <!-- DETAIL CARD -->
-    <div class="card border-0 shadow-sm">
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-stethoscope text-primary me-2"></i>
+                Specialty Information
+            </h5>
+        </div>
 
         <div class="card-body">
 
+
             <div class="row mb-3">
 
+                <!-- ID -->
                 <div class="col-md-6">
-                    <label class="text-muted small">ID</label>
-                    <div class="fw-semibold">#${specialty.specialtyId}</div>
+
+                    <label class="text-muted small">
+                        Specialty ID
+                    </label>
+
+                    <div class="fw-semibold">
+                        #${specialty.specialtyId}
+                    </div>
+
                 </div>
 
+
+                <!-- STATUS -->
                 <div class="col-md-6">
-                    <label class="text-muted small">Status</label>
+
+                    <label class="text-muted small">
+                        Status
+                    </label>
 
                     <div>
-                        <span class="badge ${specialty.isActive ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border'}">
+
+                        <span class="badge ${specialty.isActive ? 'bg-success' : 'bg-secondary'}">
 
                             <i class="fa-solid ${specialty.isActive ? 'fa-check' : 'fa-ban'} me-1"></i>
 
                             ${specialty.isActive ? 'Active' : 'Inactive'}
+
                         </span>
+
                     </div>
 
                 </div>
@@ -54,16 +98,48 @@
             </div>
 
 
+
+            <!-- NAME -->
             <div class="mb-3">
-                <label class="text-muted small">Name</label>
-                <div class="fw-medium fs-5">${specialty.name}</div>
+
+                <label class="text-muted small">
+                    Name
+                </label>
+
+                <div class="fs-5 fw-bold">
+                    ${specialty.name}
+                </div>
+
             </div>
 
+
+
+            <!-- DESCRIPTION -->
             <div>
-                <label class="text-muted small">Description</label>
-                <div class="text-muted">
-                    ${specialty.description}
+
+                <label class="text-muted small">
+                    Description
+                </label>
+
+                <div>
+
+                    <c:choose>
+
+                        <c:when test="${not empty specialty.description}">
+                            ${specialty.description}
+                        </c:when>
+
+                        <c:otherwise>
+                            <span class="text-muted">
+                                <i class="fa-solid fa-circle-info me-1"></i>
+                                No description available
+                            </span>
+                        </c:otherwise>
+
+                    </c:choose>
+
                 </div>
+
             </div>
 
         </div>
@@ -71,151 +147,177 @@
     </div>
 
 
-    <!-- ACTION BUTTON -->
-    <div class="mt-4">
 
-        <button class="btn btn-warning shadow-sm"
-                onclick="openEditModal(
-                                '${specialty.specialtyId}',
-                                '${specialty.name}',
-                                '${specialty.description}',
-                                '${specialty.isActive}'
-                                )">
-
-            <i class="fa-solid fa-pen-to-square me-2"></i>
-            Edit
-        </button>
-
-    </div>
     <!-- ===== EDIT MODAL ===== -->
 
     <div class="modal fade" id="editModal" tabindex="-1">
-
-        <div class="modal-dialog">
-
-            <form class="modal-content"
-                  method="post"
-                  action="${pageContext.request.contextPath}/admin/specialty/detail">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
 
                 <div class="modal-header">
-
                     <h5 class="modal-title">
-                        <i class="fa-solid fa-pen me-2 text-primary"></i>
+                        <i class="fa-solid fa-pen-to-square me-2"></i>
                         Edit Specialty
                     </h5>
 
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"></button>
-
                 </div>
 
-                <div class="modal-body">
-                    <!-- VALIDATE ERROR -->
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger">
-                            ${error}
+                <form method="post"
+                      action="${pageContext.request.contextPath}/admin/specialty/detail">
+
+                    <div class="modal-body">
+
+                        <input type="hidden"
+                               name="id"
+                               value="${specialty.specialtyId}" />
+
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                ${error}
+                            </div>
+                        </c:if>
+
+                        <div class="row g-3">
+
+                            <!-- Name -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Specialty Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="name"
+                                       value="${specialty.name}">
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Status
+                                </label>
+
+                                <select name="isActive"
+                                        class="form-select">
+
+                                    <option value="true"
+                                            ${specialty.isActive ? "selected" : ""}>
+                                        Active
+                                    </option>
+
+                                    <option value="false"
+                                            ${!specialty.isActive ? "selected" : ""}>
+                                        Inactive
+                                    </option>
+
+                                </select>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">
+                                    Description
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="description"
+                                          rows="3">${specialty.description}</textarea>
+                            </div>
+
                         </div>
-                    </c:if>
-                    <input type="hidden"
-                           name="id"
-                           value="${specialty.specialtyId}">
-
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-
-                        <input type="text"
-                               class="form-control"
-                               name="name"
-                               value="${specialty.name}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-
-                        <textarea class="form-control"
-                                  name="description"
-                                  rows="4">${specialty.description}</textarea>
-                    </div>
-
-                    <!-- 🔥 QUAN TRỌNG -->
-                    <div class="mb-4">
-
-                        <label class="form-label fw-semibold text-muted">
-                            <i class="fa-solid fa-toggle-on me-2 text-primary"></i>
-                            Status
-                        </label>
-
-                        <select name="isActive" class="form-select shadow-sm">
-
-                            <option value="true"
-                                    ${specialty.isActive ? "selected" : ""}>
-                                🟢 Active
-                            </option>
-
-                            <option value="false"
-                                    ${!specialty.isActive ? "selected" : ""}>
-                                🔴 Inactive
-                            </option>
-
-                        </select>
 
                     </div>
 
-                </div>
+                    <div class="modal-footer">
 
-                <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
 
-                    <button class="btn btn-primary">
-                        <i class="fa-solid fa-floppy-disk me-2"></i>
-                        Save
-                    </button>
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+                            <i class="fa-solid fa-save me-1"></i>
+                            Save
+                        </button>
 
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancel
-                    </button>
+                    </div>
 
-                </div>
+                </form>
 
-            </form>
-
+            </div>
         </div>
-
     </div>
-    <script>
-        function openEditModal(id, name, desc, active) {
 
-            document.querySelector('input[name="id"]').value = id;
-            document.querySelector('input[name="name"]').value = name;
-            document.querySelector('textarea[name="description"]').value = desc;
 
-            // FIX CHÍNH
-            document.querySelector('select[name="isActive"]').value = active;
 
-            new bootstrap.Modal(
-                    document.getElementById("editModal")
-                    ).show();
-        }
-
-// 🔥 AUTO OPEN MODAL WHEN VALIDATE FAIL
-        <c:if test="${openModal}">
-        openEditModal();
-        </c:if>
-    </script>
 </div>
 
 
-<style>
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.25s ease;
+
+<script>
+
+    function openEditModal(id, name, desc, active) {
+
+        document.querySelector('input[name="id"]').value = id;
+        document.querySelector('input[name="name"]').value = name;
+        document.querySelector('textarea[name="description"]').value = desc;
+
+        document.querySelector('select[name="isActive"]').value = active;
+
+        new bootstrap.Modal(
+                document.getElementById("editModal")
+                ).show();
+
     }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+// AUTO OPEN MODAL WHEN VALIDATE FAIL
+    <c:if test="${openModal}">
+    openEditModal(
+            '${specialty.specialtyId}',
+            '${specialty.name}',
+            '${specialty.description}',
+            '${specialty.isActive}'
+            );
+    </c:if>
+
+</script>
+
+
+
+<style>
+
+    .card{
+        border-radius:12px;
+        border:none;
     }
+
+    .card-header{
+        border-bottom:1px solid rgba(0,0,0,0.08);
+        border-radius:12px 12px 0 0 !important;
+    }
+
+    .badge{
+        padding:0.45em 0.9em;
+        font-weight:500;
+        border-radius:6px;
+    }
+
+    .btn{
+        border-radius:8px;
+        font-weight:500;
+        transition:all 0.25s ease;
+    }
+
+    .btn:hover{
+        transform:translateY(-2px);
+        box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+
 </style>

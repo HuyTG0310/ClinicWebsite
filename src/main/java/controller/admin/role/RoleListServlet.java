@@ -15,10 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.Role;
 
-/**
- *
- * @author huytr
- */
 @WebServlet(name = "RoleListServlet", urlPatterns = {"/admin/role/list"})
 public class RoleListServlet extends HttpServlet {
 
@@ -38,10 +34,10 @@ public class RoleListServlet extends HttpServlet {
         // 3. Đẩy dữ liệu lên JSP
         request.setAttribute("roles", roles);
         request.setAttribute("searchValue", search); // Giữ lại từ khóa trên ô input sau khi search
-        request.setAttribute("pageTitle", "Role management");
+        request.setAttribute("pageTitle", "Role List");
         request.setAttribute("activePage", "manageRole");
 
-        // Load vào layout Admin của bạn
+        // Load vào layout Admin
         request.setAttribute("contentPage", "/WEB-INF/admin/role/roleList.jsp");
         request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }

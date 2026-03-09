@@ -58,7 +58,7 @@ public class ViewPatientServlet extends HttpServlet {
             request.setAttribute("patient", patient);
 //            request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
 
-            request.setAttribute("pageTitle", "Manage Patient");
+            request.setAttribute("pageTitle", "Patient Detail");
             request.setAttribute("activePage", "managePatient");
             request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/viewPatient.jsp");
 

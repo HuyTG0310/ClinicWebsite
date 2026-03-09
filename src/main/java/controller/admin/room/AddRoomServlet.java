@@ -127,7 +127,7 @@ public class AddRoomServlet extends HttpServlet {
             if (doctorIdStr != null && !doctorIdStr.isBlank()) {
                 doctorId = Integer.parseInt(doctorIdStr);
 
-                // ✅ CHECK doctor thuộc specialty
+                // CHECK doctor thuộc specialty
                 if (!userDAO.isDoctorInSpecialty(doctorId, specialtyId)) {
                     throw new IllegalArgumentException(
                             "Selected doctor does not belong to the chosen specialty"

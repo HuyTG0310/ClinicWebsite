@@ -13,11 +13,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
+import util.EmailUtil;
 
-/**
- *
- * @author huytr
- */
 @WebServlet(name = "UserAddServlet", urlPatterns = {"/admin/user/add"})
 public class UserAddServlet extends HttpServlet {
 
@@ -29,10 +26,8 @@ public class UserAddServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setAttribute("roles", roleDAO.getAll());
-//        request.getRequestDispatcher("/WEB-INF/admin/user/userAdd.jsp")
-//                .forward(request, response);
 
-        request.setAttribute("pageTitle", "Add user");
+        request.setAttribute("pageTitle", "Staff Detail");
         request.setAttribute("activePage", "manageStaff");
         request.setAttribute("contentPage", "/WEB-INF/admin/user/userAdd.jsp");
 
@@ -54,21 +49,18 @@ public class UserAddServlet extends HttpServlet {
         String error = null;
         int roleId = -1;
 
-        // 1️⃣ Validate username
         if (username == null || username.trim().isEmpty()) {
             error = "Username không được để trống";
         } else if (userDAO.existsByUsername(username.trim())) {
             error = "Username đã tồn tại";
         }
 
-        // 2️⃣ Validate full name
         if (error == null) {
             if (fullName == null || fullName.trim().isEmpty()) {
                 error = "Họ tên không được để trống";
             }
         }
 
-        // 3️⃣ Validate role
         if (error == null) {
             try {
                 roleId = Integer.parseInt(roleIdRaw);
@@ -80,7 +72,6 @@ public class UserAddServlet extends HttpServlet {
             }
         }
 
-        // 4️⃣ Validate phone
         if (error == null && phone != null && !phone.trim().isEmpty()) {
 
             phone = phone.trim();
@@ -92,7 +83,6 @@ public class UserAddServlet extends HttpServlet {
             }
         }
 
-        // 5️⃣ Validate email
         if (error == null && email != null && !email.trim().isEmpty()) {
 
             email = email.trim();
@@ -104,23 +94,17 @@ public class UserAddServlet extends HttpServlet {
             }
         }
 
-        // ❌ Có lỗi → quay lại form
         if (error != null) {
             request.setAttribute("error", error);
             request.setAttribute("roles", roleDAO.getAll());
 
-            // giữ lại dữ liệu
             request.setAttribute("username", username);
             request.setAttribute("fullName", fullName);
             request.setAttribute("phone", phone);
             request.setAttribute("email", email);
             request.setAttribute("roleId", roleIdRaw);
             request.setAttribute("isActive", activeRaw);
-
-//            request.getRequestDispatcher("/WEB-INF/admin/user/userAdd.jsp")
-//                    .forward(request, response);
-//            
-            request.setAttribute("pageTitle", "Add staff");
+            request.setAttribute("pageTitle", "Staff Detail");
             request.setAttribute("activePage", "manageStaff");
             request.setAttribute("contentPage", "/WEB-INF/admin/user/userAdd.jsp");
 
@@ -128,7 +112,6 @@ public class UserAddServlet extends HttpServlet {
             return;
         }
 
-        // ✅ Hợp lệ → insert
         User u = new User();
         u.setUsername(username.trim());
         u.setFullName(fullName.trim());
@@ -137,8 +120,24 @@ public class UserAddServlet extends HttpServlet {
         u.setRoleId(roleId);
         u.setIsActive(activeRaw != null);
 
-        userDAO.insert(u);
+//        userDAO.insert(u);
+//
+//        response.sendRedirect(request.getContextPath() + "/admin/user/list");
+        boolean success = userDAO.insert(u);
 
-        response.sendRedirect(request.getContextPath() + "/admin/user/list");
+        if (success) {
+
+            if (email != null && !email.isEmpty()) {
+                EmailUtil.sendAccount(email, username);
+            }
+
+            response.sendRedirect(request.getContextPath() + "/admin/user/list");
+
+        } else {
+
+            request.setAttribute("error", "Cannot create user");
+            request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp")
+                    .forward(request, response);
+        }
     }
 }

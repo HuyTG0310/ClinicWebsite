@@ -18,12 +18,32 @@ import java.util.*;
 import model.*;
 
 
-@WebServlet(name = "ServiceOrderListServlet", urlPatterns = {"/receptionist/service-order/list"})
+@WebServlet(name = "ServiceOrderListServlet", urlPatterns = {"/receptionist/service-order/list", "/doctor/service-order/list", "/admin/service-order/list"})
 public class ServiceOrderListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
@@ -31,21 +51,21 @@ public class ServiceOrderListServlet extends HttpServlet {
             return;
         }
 
-
+        // 1. Lấy tham số bộ lọc
         String dateStr = request.getParameter("date");
         String paymentMethod = request.getParameter("paymentMethod");
         String status = request.getParameter("status");
 
-
+        // Mặc định luôn hiển thị doanh thu của NGÀY HÔM NAY
         if (dateStr == null) {
             dateStr = LocalDate.now().toString();
         }
 
-
+        // 2. Lấy dữ liệu từ DAO
         ServiceOrderDAO dao = new ServiceOrderDAO();
         List<ServiceOrder> orderList = dao.getServiceOrders(dateStr, paymentMethod, status);
 
-
+        // 3. Tính toán Thống kê nhanh (Summing up)
         double totalRevenue = 0;
         double totalCash = 0;
         double totalBanking = 0;
@@ -61,20 +81,20 @@ public class ServiceOrderListServlet extends HttpServlet {
             }
         }
 
-
+        // 4. Gửi dữ liệu ra JSP
         request.setAttribute("orderList", orderList);
         request.setAttribute("totalRevenue", totalRevenue);
         request.setAttribute("totalCash", totalCash);
         request.setAttribute("totalBanking", totalBanking);
 
-
+        // Giữ lại tham số lọc để hiển thị trên form
         request.setAttribute("paramDate", dateStr);
 
-        request.setAttribute("pageTitle", "Transaction History");
+        request.setAttribute("pageTitle", "Service Order List");
         request.setAttribute("activePage", "manageServiceOrder");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/serviceorder/orderList.jsp");
 
-        request.getRequestDispatcher("/WEB-INF/layout/receptionistLayout.jsp").forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override
