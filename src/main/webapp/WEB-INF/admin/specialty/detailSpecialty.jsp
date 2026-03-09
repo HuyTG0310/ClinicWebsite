@@ -50,7 +50,7 @@
 
         <div class="card-header bg-white py-3">
             <h5 class="mb-0">
-                <i class="fa-solid fa-circle-info text-primary me-2"></i>
+                <i class="fa-solid fa-stethoscope text-primary me-2"></i>
                 Specialty Information
             </h5>
         </div>
@@ -106,7 +106,7 @@
                     Name
                 </label>
 
-                <div class="fs-5 fw-medium">
+                <div class="fs-5 fw-bold">
                     ${specialty.name}
                 </div>
 
@@ -151,127 +151,107 @@
     <!-- ===== EDIT MODAL ===== -->
 
     <div class="modal fade" id="editModal" tabindex="-1">
-
-        <div class="modal-dialog">
-
-            <form class="modal-content"
-                  method="post"
-                  action="${pageContext.request.contextPath}/admin/specialty/detail">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
 
                 <div class="modal-header">
-
                     <h5 class="modal-title">
-                        <i class="fa-solid fa-pen me-2 text-primary"></i>
+                        <i class="fa-solid fa-pen-to-square me-2"></i>
                         Edit Specialty
                     </h5>
 
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"></button>
-
                 </div>
 
+                <form method="post"
+                      action="${pageContext.request.contextPath}/admin/specialty/detail">
 
-                <div class="modal-body">
+                    <div class="modal-body">
 
-                    <!-- VALIDATE ERROR -->
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger">
-                            ${error}
+                        <input type="hidden"
+                               name="id"
+                               value="${specialty.specialtyId}" />
+
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                ${error}
+                            </div>
+                        </c:if>
+
+                        <div class="row g-3">
+
+                            <!-- Name -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Specialty Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="name"
+                                       value="${specialty.name}">
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Status
+                                </label>
+
+                                <select name="isActive"
+                                        class="form-select">
+
+                                    <option value="true"
+                                            ${specialty.isActive ? "selected" : ""}>
+                                        Active
+                                    </option>
+
+                                    <option value="false"
+                                            ${!specialty.isActive ? "selected" : ""}>
+                                        Inactive
+                                    </option>
+
+                                </select>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">
+                                    Description
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="description"
+                                          rows="3">${specialty.description}</textarea>
+                            </div>
+
                         </div>
-                    </c:if>
-
-
-                    <input type="hidden"
-                           name="id"
-                           value="${specialty.specialtyId}">
-
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Name
-                        </label>
-
-                        <input type="text"
-                               class="form-control"
-                               name="name"
-                               value="${specialty.name}">
 
                     </div>
 
+                    <div class="modal-footer">
 
-                    <div class="mb-3">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
 
-                        <label class="form-label">
-                            Description
-                        </label>
-
-                        <textarea class="form-control"
-                                  name="description"
-                                  rows="4">${specialty.description}</textarea>
-
-                    </div>
-
-
-
-                    <div class="mb-4">
-
-                        <label class="form-label fw-semibold text-muted">
-
-                            <i class="fa-solid fa-toggle-on me-2 text-primary"></i>
-                            Status
-
-                        </label>
-
-                        <select name="isActive"
-                                class="form-select shadow-sm">
-
-                            <option value="true"
-                                    ${specialty.isActive ? "selected" : ""}>
-
-                                🟢 Active
-
-                            </option>
-
-                            <option value="false"
-                                    ${!specialty.isActive ? "selected" : ""}>
-
-                                🔴 Inactive
-
-                            </option>
-
-                        </select>
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+                            <i class="fa-solid fa-save me-1"></i>
+                            Save
+                        </button>
 
                     </div>
 
-                </div>
+                </form>
 
-
-
-                <div class="modal-footer">
-
-                    <button class="btn btn-primary">
-
-                        <i class="fa-solid fa-floppy-disk me-2"></i>
-                        Save
-
-                    </button>
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
-                        Cancel
-
-                    </button>
-
-                </div>
-
-            </form>
-
+            </div>
         </div>
-
     </div>
 
 

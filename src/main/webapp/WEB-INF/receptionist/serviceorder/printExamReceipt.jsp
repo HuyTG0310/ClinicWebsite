@@ -118,7 +118,7 @@
 
                 <div class="mt-2">
                     Bằng chữ: 
-                    <span class="ms-2 fst-italic fw-bold">Hai trăm nghìn đồng chẵn./.</span>
+                    <span class="ms-2 fst-italic fw-bold">${amountInWords}./.</span>
                 </div>
 
                 <div class="mt-2">
