@@ -7,19 +7,16 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @auth CE200044
- */
+
 public class DBContext {
 
-    protected Connection conn = null;
+    public Connection conn = null;
 
     public DBContext() {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             String dbURL = "jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=DB_03_02;"
+                    + "databaseName=DB_07_03;"
                     + "user=sa;"
                     + "password=123;"
                     + "encrypt=true;trustServerCertificate=true;";
@@ -46,3 +43,4 @@ public class DBContext {
         DBContext db = new DBContext();
     }
 }
+    

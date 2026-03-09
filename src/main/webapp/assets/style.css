@@ -1,9 +1,51 @@
+:root {
+    --bs-body-font-family: 'IBM Plex Sans', sans-serif;
+}
+
+body {
+    font-family: var(--bs-body-font-family);
+    font-size: 16px;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* table */
+.table {
+    font-size: 16px;
+}
+
+/* form */
+.form-control,
+.form-select {
+    font-size: 16px;
+}
 
 /* ===== SIDEBAR BASE ===== */
 .sidebar {
     background-color: #0d6efd; /* Bootstrap primary */
     color: #fff;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow: hidden; /* sidebar không scroll */
 }
+
+
+/* Cột content chiếm full chiều cao */
+.content-col {
+    height: 100vh;
+    overflow: hidden; /* chặn scroll ngoài */
+}
+
+/* CHỈ div này được scroll */
+.content-scroll {
+    height: 100%;
+    overflow-y: auto;
+}
+
 
 .sidebar-title {
     font-weight: 600;
@@ -55,4 +97,67 @@
 
 .sidebar-menu .nav-link.logout:hover {
     background-color: #bb2d3b;
+}
+
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    transition: background-color 0.2s ease;
+}
+/* Card styling */
+.card {
+    border: none;
+    border-radius: 12px;
+}
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px 12px 0 0 !important;
+}
+/* Badge styling */
+.badge {
+    padding: 0.4em 0.8em;
+    font-weight: 500;
+    border-radius: 6px;
+}
+.bg-success-subtle {
+    background-color: #d1e7dd !important;
+}
+/* Input group styling */
+.input-group-text {
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+}
+.input-group .form-control {
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+}
+.input-group .form-control:focus {
+    border-left: none;
+    box-shadow: none;
+}
+.input-group:focus-within .input-group-text {
+    border-color: #86b7fe;
+}
+/* Button styling */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+/* Alert styling */
+.alert {
+    border: none;
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+.alert-success {
+    border-left-color: #28a745;
+}
+.alert-danger {
+    border-left-color: #dc3545;
 }

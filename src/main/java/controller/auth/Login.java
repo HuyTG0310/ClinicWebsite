@@ -11,77 +11,78 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.*;
+import dao.*;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
  * @author huytr
  */
-@WebServlet(name = "Login", urlPatterns = {"/Login"})
+@WebServlet(name = "Login", urlPatterns = {"/login"})
 public class Login extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet Login</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet Login at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
+    UserDAO userDAO = new UserDAO();
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            User user = (User) session.getAttribute("user");
+            redirectByUserRole(response, request, user);
+            return;
+        }
+        // Hiện trang login
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        String userParam = request.getParameter("username");
+        String passParam = request.getParameter("password");
+
+        UserDAO dao = new UserDAO();
+        User user = dao.login(userParam, passParam);
+
+        if (user != null) {
+            // 1. Lưu user vào Session
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+
+            // 2. Điều hướng dựa trên Role
+            String role = user.getRoleName();
+            String ctx = request.getContextPath();
+
+            if ("ADMIN".equalsIgnoreCase(role)) {
+                response.sendRedirect(ctx + "/admin/dashboard");
+            } else if ("DOCTOR".equalsIgnoreCase(role)) {
+                response.sendRedirect(ctx + "/doctor/dashboard");
+            } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
+                response.sendRedirect(ctx + "/receptionist/dashboard");
+            } else {
+                // Các role khác nếu có
+                response.sendRedirect(ctx + "/index.jsp");
+            }
+        } else {
+            // 3. Thất bại: Gửi thông báo lỗi về trang login
+            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng, hoặc tài khoản bị khóa!");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
+        }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+    private void redirectByUserRole(HttpServletResponse response, HttpServletRequest request, User user) throws IOException {
+        String role = user.getRoleName();
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+        } else if ("DOCTOR".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/doctor/dashboard");
+        } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/receptionist/dashboard");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/home"); // Hoặc trang mặc định
+        }
+    }
 }
