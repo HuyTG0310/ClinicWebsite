@@ -91,17 +91,6 @@
             </li>
         </c:if>
 
-            
-        <c:if test="${hasAppointmentView}">
-            <li class="nav-item">
-                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
-                   href="${pageContext.request.contextPath}/admin/appointment/list">
-                    <i class="fa-solid fa-gauge me-2"></i>
-                    Manage appointment
-                </a>
-            </li>
-        </c:if>
-
 
         <c:if test="${hasAppointmentView}">
             <li class="nav-item">
@@ -114,6 +103,13 @@
         </c:if>
 
 
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/queue/list">
+                <i class="fa-solid fa-calendar-check me-2"></i>
+                Manage queue
+            </a>
+        </li>
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"

@@ -353,4 +353,116 @@ public class AppointmentDAO extends DBContext {
         }
     }
 
+    public List<Appointment> getAppointmentsForDoctor(int doctorId, String dateStr, String status, String patientName, boolean isAdmin) {
+        List<Appointment> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT a.AppointmentId, a.AppointmentTime, a.Status, ");
+        sql.append("       p.FullName AS PatientName, p.Phone AS PatientPhone, p.Gender AS PatientGender, p.DateOfBirth AS PatientDob, ");
+        // Nối thêm tên Bác sĩ phụ trách phòng để Admin nhìn vào biết ca này của ai
+        sql.append("       r.RoomName, u.FullName AS DoctorName ");
+        sql.append("FROM Appointment a ");
+        sql.append("JOIN Patient p ON a.PatientId = p.PatientId ");
+        sql.append("JOIN Room r ON a.RoomId = r.RoomId ");
+        // LEFT JOIN với User để lấy tên Bác sĩ đang ngồi phòng đó
+        sql.append("LEFT JOIN [User] u ON r.CurrentDoctorId = u.UserId ");
+
+        // 🔥 LÁ CHẮN KIM CƯƠNG: JOIN trực tiếp với hóa đơn của chính Lịch khám này!
+        sql.append("JOIN ServiceOrder so ON a.AppointmentId = so.AppointmentId ");
+
+        // Mẹo SQL động: Dùng WHERE 1=1 để nối AND cho dễ
+        sql.append("WHERE 1=1 ");
+
+        // Nếu KHÔNG PHẢI Admin -> Bắt buộc lọc theo Bác sĩ đang đăng nhập
+        if (!isAdmin) {
+            sql.append("AND r.CurrentDoctorId = ? ");
+        }
+
+        // Chỉ lấy những Lịch khám mà Hóa đơn của riêng nó đã PAID (nếu nó đang WAITING)
+        sql.append("AND (a.Status != 'WAITING' OR so.Status = 'PAID') ");
+
+        // 1. Lọc theo ngày (Mặc định hôm nay)
+        if (dateStr != null && !dateStr.trim().isEmpty()) {
+            sql.append("AND CAST(a.AppointmentTime AS DATE) = ? ");
+        }
+
+        // 2. Lọc theo trạng thái
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND a.Status = ? ");
+        }
+
+        // 3. Lọc theo tên bệnh nhân
+        if (patientName != null && !patientName.trim().isEmpty()) {
+            sql.append("AND p.FullName LIKE ?");
+        }
+
+        // Sắp xếp: Ưu tiên người nào đến trước (hoặc đang khám) lên đầu
+        sql.append("ORDER BY ");
+        sql.append("CASE a.Status WHEN 'IN_PROGRESS' THEN 1 WHEN 'WAITING' THEN 2 WHEN 'COMPLETED' THEN 3 ELSE 4 END, ");
+        sql.append("a.AppointmentTime ASC");
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            // Nạp DoctorId nếu KHÔNG PHẢI Admin
+            if (!isAdmin) {
+                st.setInt(paramIndex++, doctorId);
+            }
+
+            // Nạp Ngày
+            if (dateStr != null && !dateStr.trim().isEmpty()) {
+                st.setString(paramIndex++, dateStr);
+            }
+
+            // Nạp Trạng thái
+            if (status != null && !status.trim().isEmpty()) {
+                st.setString(paramIndex++, status);
+            }
+
+            //Thêm patient name
+            if (patientName != null && !patientName.trim().isEmpty()) {
+                st.setString(paramIndex++, "%" + patientName.trim() + "%");
+            }
+
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Appointment app = new Appointment();
+                    app.setAppointmentId(rs.getInt("AppointmentId"));
+                    app.setAppointmentTime(rs.getTimestamp("AppointmentTime"));
+                    app.setStatus(rs.getString("Status"));
+                    app.setPatientName(rs.getString("PatientName"));
+                    app.setPatientPhone(rs.getString("PatientPhone"));
+                    app.setPatientGender(rs.getString("PatientGender"));
+                    app.setPatientDob(rs.getDate("PatientDob"));
+                    app.setRoomName(rs.getString("RoomName"));
+
+                    // Bạn có thể tạo thêm biến String doctorName trong model Appointment để hứng cái này 
+                    // cho Admin hiển thị ngoài view (app.setDoctorName(rs.getString("DoctorName"));)
+                    list.add(app);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public boolean updateStatusToInProgress(int appointmentId) {
+        // Chỉ cập nhật nếu người đó đang thực sự chờ (tránh lỗi bác sĩ click đúp 2 lần)
+        String sql = "UPDATE Appointment SET Status = 'IN_PROGRESS' WHERE AppointmentId = ? AND Status = 'WAITING'";
+
+        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, appointmentId);
+            return st.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

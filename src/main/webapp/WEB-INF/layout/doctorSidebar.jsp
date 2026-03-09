@@ -22,8 +22,8 @@
 
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+            <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/doctor/queue/list">
                 <i class="fa-solid fa-calendar-check me-2"></i>
                 Manage queue
             </a>
