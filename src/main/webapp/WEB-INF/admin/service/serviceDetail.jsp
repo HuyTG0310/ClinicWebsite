@@ -13,12 +13,12 @@
             <p class="text-muted mb-0">View and update service information</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="${pageContext.request.contextPath}/admin/service/list" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-1"></i>Back to list
-            </a>
             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editServiceModal">
                 <i class="fa-solid fa-pen-to-square me-1"></i>Edit
             </button>
+            <a href="${pageContext.request.contextPath}/admin/service/list" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back to list
+            </a>
         </div>
     </div>
 
@@ -39,23 +39,81 @@
     </c:if>
 
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white py-3"><h5 class="mb-0"><i class="fa-solid fa-info-circle text-primary me-2"></i>Service Information</h5></div>
+
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-notes-medical text-primary me-2"></i>
+                Service Information
+            </h5>
+        </div>
+
         <div class="card-body">
+
             <div class="row g-4">
-                <div class="col-md-3"><label class="text-muted small">Service ID</label><div class="fw-semibold">#${service.serviceId}</div></div>
-                <div class="col-md-3"><label class="text-muted small">Category</label><div><span class="badge bg-light text-dark border">${service.category}</span></div></div>
-                <div class="col-md-3"><label class="text-muted small">Price</label><div class="fw-semibold text-danger"><fmt:formatNumber value="${service.currentPrice}" pattern="#,###"/> ₫</div></div>
-                <div class="col-md-3"><label class="text-muted small">Status</label>
+
+                <!-- Service ID -->
+                <div class="col-md-6">
+                    <label class="text-muted small">Service ID</label>
+                    <div class="fw-semibold">
+                        #${service.serviceId}
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="col-md-6">
+                    <label class="text-muted small">Category</label>
+                    <div>
+                        <span class="badge bg-light text-dark border">
+                            ${service.category}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Price -->
+                <div class="col-md-6">
+                    <label class="text-muted small">Price</label>
+                    <div class="fw-semibold text-danger">
+                        <fmt:formatNumber value="${service.currentPrice}" pattern="#,###"/> ₫
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-6">
+                    <label class="text-muted small">Status</label>
+
                     <div>
                         <c:choose>
-                            <c:when test="${service.isActive}"><span class="badge bg-success"><i class="fa-solid fa-check-circle me-1"></i>Active</span></c:when>
-                            <c:otherwise><span class="badge bg-danger"><i class="fa-solid fa-ban me-1"></i>Inactive</span></c:otherwise>
+
+                            <c:when test="${service.isActive}">
+                                <span class="badge bg-success">
+                                    <i class="fa-solid fa-check-circle me-1"></i>
+                                    Active
+                                </span>
+                            </c:when>
+
+                            <c:otherwise>
+                                <span class="badge bg-danger">
+                                    <i class="fa-solid fa-ban me-1"></i>
+                                    Inactive
+                                </span>
+                            </c:otherwise>
+
                         </c:choose>
                     </div>
                 </div>
-                <div class="col-12"><label class="text-muted small">Service Name</label><div class="fs-5 fw-medium">${service.serviceName}</div></div>
+
+                <!-- Service Name -->
+                <div class="col-12">
+                    <label class="text-muted small">Service Name</label>
+                    <div class="fs-5 fw-medium">
+                        ${service.serviceName}
+                    </div>
+                </div>
+
             </div>
+
         </div>
+
     </div>
 
     <c:if test="${service.category == 'Xét nghiệm' && labTest != null}">
@@ -146,7 +204,7 @@
 <div class="modal fade" id="editServiceModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered ${service.category == 'Xét nghiệm' ? 'modal-xl' : 'modal-lg'}">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-warning border-0 py-3 rounded-top-4">
+            <div class="modal-header bg-white border-0 py-3 rounded-top-4">
                 <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Information</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -252,7 +310,7 @@
                 </div>
                 <div class="modal-footer bg-white border-top py-3 rounded-bottom-4">
                     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning text-dark fw-bold shadow-sm px-5"><i class="fa-solid fa-floppy-disk me-2"></i>Save</button>
+                    <button type="submit" class="btn btn-primary text-white fw-bold shadow-sm px-5"><i class="fa-solid fa-floppy-disk me-2"></i>Save</button>
                 </div>
             </form>
         </div>
@@ -266,6 +324,12 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-4">
+                <div class="alert alert-info small">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    <b>Note:</b> Age is calculated by <b>Day</b>
+                    (Newborns: 0-30 days, Adult: > 6570 days.
+                    Default 36500 = 100 year olds).
+                </div>
                 <div class="table-responsive rounded-3 border bg-white shadow-sm">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light text-center small">
@@ -275,7 +339,7 @@
                                 <th width="20%">MAX AGE (DAY)</th>
                                 <th width="15%">MIN VALUE</th>
                                 <th width="15%">MAX VALUE</th>
-                                <th width="15%"><button type="button" class="btn btn-sm btn-success fw-bold w-100" onclick="addModalRangeRow()"><i class="fa-solid fa-plus"></i> Add</button></th>
+                                <th width="15%"><button type="button" class="btn btn-sm btn-outline-primary fw-bold w-100" onclick="addModalRangeRow()"><i class="fa-solid fa-plus"></i> Add</button></th>
                             </tr>
                         </thead>
                         <tbody id="modalRangeBody" class="text-center"></tbody>
@@ -289,7 +353,6 @@
         </div>
     </div>
 </div>
-
 
 <style>
     .reference-rules{
@@ -394,13 +457,13 @@
     function addModalRangeRow(gender = 'ALL', ageMin = '0', ageMax = '36500', refMin = '', refMax = '') {
         let tr = document.createElement('tr');
         let html = '<td><select class="form-select form-select-sm modal-gender fw-bold">' +
-                '<option value="ALL" ' + (gender === 'ALL' ? 'selected' : '') + '>Tất cả</option>' +
-                '<option value="M" ' + (gender === 'M' ? 'selected' : '') + '>Nam</option>' +
-                '<option value="F" ' + (gender === 'F' ? 'selected' : '') + '>Nữ</option></select></td>' +
+                '<option value="ALL" ' + (gender === 'ALL' ? 'selected' : '') + '>All</option>' +
+                '<option value="M" ' + (gender === 'M' ? 'selected' : '') + '>Male</option>' +
+                '<option value="F" ' + (gender === 'F' ? 'selected' : '') + '>Female</option></select></td>' +
                 '<td><input type="number" class="form-control form-control-sm text-center modal-agemin" value="' + ageMin + '"></td>' +
                 '<td><input type="number" class="form-control form-control-sm text-center modal-agemax" value="' + ageMax + '"></td>' +
-                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmin border-primary" value="' + refMin + '" placeholder="Trống"></td>' +
-                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmax border-danger" value="' + refMax + '" placeholder="Trống"></td>' +
+                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmin border-primary" value="' + refMin + '" placeholder="Empty"></td>' +
+                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmax border-danger" value="' + refMax + '" placeholder="Empty"></td>' +
                 '<td><button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest(\'tr\').remove()"><i class="fa-solid fa-trash"></i></button></td>';
         tr.innerHTML = html;
         document.getElementById('modalRangeBody').appendChild(tr);
@@ -434,7 +497,7 @@
 
             // 1. VALIDATE: Không được nhập tuổi âm
             if (amin < 0 || amax < 0) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Tuổi không được là số âm!");
+                alert("❌ Error in row " + (index + 1) + ": Age can not be a negative!");
                 if (amin < 0)
                     aminInput.classList.add('is-invalid');
                 if (amax < 0)
@@ -444,7 +507,7 @@
 
             // 2. VALIDATE: Tuổi Max phải >= Tuổi Min
             if (amax < amin) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Tuổi MAX phải lớn hơn hoặc bằng Tuổi MIN!");
+                alert("❌ Error in row " + (index + 1) + ": MAX age must be greater than or equal to MIN age!");
                 aminInput.classList.add('is-invalid');
                 amaxInput.classList.add('is-invalid');
                 isValid = false;
@@ -452,12 +515,12 @@
 
             // 3. VALIDATE: Không được nhập tham chiếu âm
             if (rmin !== "" && parseFloat(rmin) < 0) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Ngưỡng MIN không được là số âm!");
+                alert("❌ Error in row " + (index + 1) + ": MIN value can not be a negative!");
                 rminInput.classList.add('is-invalid');
                 isValid = false;
             }
             if (rmax !== "" && parseFloat(rmax) < 0) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Ngưỡng MAX không được là số âm!");
+                alert("❌ Error in row " + (index + 1) + ": MAX value can not be a negative!");
                 rmaxInput.classList.add('is-invalid');
                 isValid = false;
             }
@@ -465,7 +528,7 @@
             // 4. VALIDATE: Ngưỡng Max > Ngưỡng Min (Nếu nhập cả 2)
             if (rmin !== "" && rmax !== "") {
                 if (parseFloat(rmin) >= parseFloat(rmax)) {
-                    alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Ngưỡng MAX phải lớn hơn ngưỡng MIN!");
+                    alert("❌ Error in row " + (index + 1) + ": MAX value must be greater than MIN value!");
                     rminInput.classList.add('is-invalid');
                     rmaxInput.classList.add('is-invalid');
                     isValid = false;

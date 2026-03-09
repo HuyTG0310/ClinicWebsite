@@ -47,7 +47,7 @@ public class AppointmentCreateServlet extends HttpServlet {
         List<Patient> patients = patientDAO.getAllPatients();
 
         RoomDAO roomDAO = new RoomDAO();
-        List<RoomView> activeRooms = roomDAO.getAllView();
+        List<RoomView> activeRooms = roomDAO.getAllActiveRoomsForAppointment();
 
         SpecialtyDAO specialtyDAO = new SpecialtyDAO();
         List<Specialty> specialties = specialtyDAO.getAll();

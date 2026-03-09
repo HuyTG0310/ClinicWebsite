@@ -16,10 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "SePayWebhookServlet", urlPatterns = {"/api/sepay-webhook"})
 public class SePayWebhookServlet extends HttpServlet {
 

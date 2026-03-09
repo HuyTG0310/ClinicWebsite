@@ -8,7 +8,36 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class RoomDAO extends DBContext {
+    
+    public List<RoomView> getAllActiveRoomsForAppointment() {
+        List<RoomView> list = new ArrayList<>();
 
+        String sql = "        SELECT r.RoomId, r.RoomName, r.IsActive,\n"
+                + "               s.SpecialtyName, s.SpecialtyId, \n"
+                + "               u.FullName AS DoctorName\n"
+                + "        FROM Room r\n"
+                + "        JOIN Specialty s ON r.SpecialtyId = s.SpecialtyId\n"
+                + "        LEFT JOIN [User] u ON r.CurrentDoctorId = u.UserId\n"
+                + "        WHERE r.IsActive = 1";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                RoomView rv = new RoomView();
+                rv.setRoomId(rs.getInt("RoomId"));
+                rv.setRoomName(rs.getString("RoomName"));
+                rv.setSpecialtyName(rs.getString("SpecialtyName"));
+                rv.setDoctorName(rs.getString("DoctorName"));
+                rv.setSpecialtyId(rs.getInt("SpecialtyId"));
+                rv.setIsActive(rs.getBoolean("IsActive"));
+                list.add(rv);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
     public List<RoomView> getAllView() {
         List<RoomView> list = new ArrayList<>();
 

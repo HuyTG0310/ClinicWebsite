@@ -189,7 +189,7 @@
                                     <td class="text-center">
                                         <input type="hidden" name="paramRanges[]" class="range-hidden-val" value="ALL|0|36500||">
                                         <button type="button" class="btn btn-sm btn-outline-primary fw-bold param-config-btn" onclick="openRangeModal(this)">
-                                            <i class="fa-solid fa-gears"></i> Cấu hình
+                                            <i class="fa-solid fa-gears"></i> Configure
                                         </button>
                                     </td>
                                     <td class="text-center">
@@ -235,31 +235,43 @@
 </form>
 
 
-
 <div class="modal fade" id="rangeModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0 rounded-4">
-            <div class="modal-header bg-primary text-white py-3 rounded-top-4">
-                <h5 class="modal-title fw-bold"><i class="fa-solid fa-sliders me-2"></i>Cấu Hình Khoảng Tham Chiếu</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-sliders me-2"></i>
+                    Reference Range Configuration
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body bg-light p-4">
-                <div class="alert alert-info py-2 small mb-3 border-0 shadow-sm">
-                    <i class="fa-solid fa-circle-info me-1"></i> <b>Lưu ý:</b> Tuổi được tính bằng <b>Ngày</b> (Trẻ sơ sinh: 0-30 ngày, Người lớn: > 6570 ngày. Mặc định 36500 = 100 tuổi).
+
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    <b>Note:</b> Age is calculated by <b>Day</b>
+                    (Newborns: 0-30 days, Adult: > 6570 days.
+                    Default 36500 = 100 year olds).
                 </div>
 
-                <div class="table-responsive rounded-3 border bg-white shadow-sm">
+                <div class="table-responsive border rounded">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light text-center small">
+                        <thead class="table-light text-center">
                             <tr>
-                                <th width="15%">GIỚI TÍNH</th>
-                                <th width="20%">TUỔI MIN (Ngày)</th>
-                                <th width="20%">TUỔI MAX (Ngày)</th>
-                                <th width="15%">NGƯỠNG MIN</th>
-                                <th width="15%">NGƯỠNG MAX</th>
+                                <th width="15%">SEX</th>
+                                <th width="20%">MIN AGE (Day)</th>
+                                <th width="20%">MAX AGE (Day)</th>
+                                <th width="15%">MIN VALUE</th>
+                                <th width="15%">MAX VALUE</th>
                                 <th width="15%">
-                                    <button type="button" class="btn btn-sm btn-success fw-bold w-100" onclick="addModalRangeRow()">
-                                        <i class="fa-solid fa-plus"></i> Thêm
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary w-100"
+                                            onclick="addModalRangeRow()">
+
+                                        <i class="fa-solid fa-plus"></i>
+                                        Add
                                     </button>
                                 </th>
                             </tr>
@@ -269,15 +281,25 @@
                     </table>
                 </div>
             </div>
-            <div class="modal-footer bg-white border-top">
-                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary fw-bold px-4" onclick="saveRangeData()">
-                    <i class="fa-solid fa-check me-2"></i>Xác Nhận Lưu
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary px-4"
+                        onclick="saveRangeData()">
+
+                    <i class="fa-solid fa-check me-1"></i>
+                    Save
                 </button>
             </div>
         </div>
     </div>
-</div>    
+</div>
 
 
 <style>
@@ -335,13 +357,13 @@
         const row = document.createElement('tr');
         // 🔥 Value mặc định giờ là 1 chuỗi JSON hợp lệ
         row.innerHTML = `
-            <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required  pattern=".*\\S+.*" title="Vui lòng nhập mã chỉ số hợp lệ"></td>
-            <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]" required pattern=".*\\S+.*" title="Vui lòng nhập tên chỉ số hợp lệ"></td>
+            <td><input type="text" class="form-control form-control-sm text-uppercase param-req" name="paramCode[]" required  pattern=".*\\S+.*" title="Please enter a valid parameter code"></td>
+            <td><input type="text" class="form-control form-control-sm param-req" name="paramName[]" required pattern=".*\\S+.*" title="Please enter a valid parameter name"></td>
             <td><input type="text" class="form-control form-control-sm" name="paramUnit[]"></td>
             <td class="text-center">
                 <input type="hidden" name="paramRanges[]" class="range-hidden-val" value='[{"gender":"ALL","ageMinDays":0,"ageMaxDays":36500}]'>
                 <button type="button" class="btn btn-sm btn-outline-primary fw-bold param-config-btn" onclick="openRangeModal(this)">
-                    <i class="fa-solid fa-gears"></i> Cấu hình
+                    <i class="fa-solid fa-gears"></i> Configure
                 </button>
             </td>
             <td class="text-center">
@@ -386,15 +408,15 @@
         // Nối chuỗi HTML bằng dấu '+' siêu an toàn, không dùng tới ký tự $
         let html = '<td>' +
                 '<select class="form-select form-select-sm modal-gender fw-bold">' +
-                '<option value="ALL" ' + (gender === 'ALL' ? 'selected' : '') + '>Tất cả</option>' +
-                '<option value="M" ' + (gender === 'M' ? 'selected' : '') + '>Nam</option>' +
-                '<option value="F" ' + (gender === 'F' ? 'selected' : '') + '>Nữ</option>' +
+                '<option value="ALL" ' + (gender === 'ALL' ? 'selected' : '') + '>All</option>' +
+                '<option value="M" ' + (gender === 'M' ? 'selected' : '') + '>Male</option>' +
+                '<option value="F" ' + (gender === 'F' ? 'selected' : '') + '>Female</option>' +
                 '</select>' +
                 '</td>' +
                 '<td><input type="number" class="form-control form-control-sm text-center modal-agemin" value="' + ageMin + '"></td>' +
                 '<td><input type="number" class="form-control form-control-sm text-center modal-agemax" value="' + ageMax + '"></td>' +
-                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmin border-primary" value="' + refMin + '" placeholder="Trống"></td>' +
-                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmax border-danger" value="' + refMax + '" placeholder="Trống"></td>' +
+                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmin border-primary" value="' + refMin + '" placeholder="Empty"></td>' +
+                '<td><input type="number" step="any" class="form-control form-control-sm text-center modal-refmax border-danger" value="' + refMax + '" placeholder="Empty"></td>' +
                 '<td><button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest(\'tr\').remove()"><i class="fa-solid fa-trash"></i></button></td>';
 
         tr.innerHTML = html;
@@ -429,7 +451,7 @@
 
             // 1. VALIDATE: Không được nhập tuổi âm
             if (amin < 0 || amax < 0) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Tuổi không được là số âm!");
+                alert("❌ Error in row " + (index + 1) + ": Age can not be a negative!");
                 if (amin < 0)
                     aminInput.classList.add('is-invalid');
                 if (amax < 0)
@@ -439,7 +461,7 @@
 
             // 2. VALIDATE: Tuổi Max phải >= Tuổi Min
             if (amax < amin) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Tuổi MAX phải lớn hơn hoặc bằng Tuổi MIN!");
+                alert("❌ Error in row " + (index + 1) + ": MAX age must be greater than or equal to MIN age!");
                 aminInput.classList.add('is-invalid');
                 amaxInput.classList.add('is-invalid');
                 isValid = false;
@@ -447,12 +469,12 @@
 
             // 3. VALIDATE: Không được nhập tham chiếu âm
             if (rmin !== "" && parseFloat(rmin) < 0) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Ngưỡng MIN không được là số âm!");
+                alert("❌ Error in row " + (index + 1) + ": MIN value can not be a negative!");
                 rminInput.classList.add('is-invalid');
                 isValid = false;
             }
             if (rmax !== "" && parseFloat(rmax) < 0) {
-                alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Ngưỡng MAX không được là số âm!");
+                alert("❌ Error in row " + (index + 1) + ": MAX value cannot be a negative!");
                 rmaxInput.classList.add('is-invalid');
                 isValid = false;
             }
@@ -460,7 +482,7 @@
             // 4. VALIDATE: Ngưỡng Max > Ngưỡng Min (Nếu nhập cả 2)
             if (rmin !== "" && rmax !== "") {
                 if (parseFloat(rmin) >= parseFloat(rmax)) {
-                    alert("❌ Lỗi ở dòng thứ " + (index + 1) + ": Ngưỡng MAX phải lớn hơn ngưỡng MIN!");
+                    alert("❌ Error in row " + (index + 1) + ": MAX value must be greater than MIN value!");
                     rminInput.classList.add('is-invalid');
                     rmaxInput.classList.add('is-invalid');
                     isValid = false;
