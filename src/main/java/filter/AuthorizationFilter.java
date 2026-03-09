@@ -216,7 +216,6 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "APPOINTMENT_VIEW";
         }
 
-
         if (requiredPriv != null) {
             System.out.println("🔍 Hệ thống nhận diện Module cần quyền: " + requiredPriv);
 

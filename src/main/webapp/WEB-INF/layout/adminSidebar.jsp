@@ -103,6 +103,13 @@
         </c:if>
 
 
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/queue/list">
+                <i class="fa-solid fa-calendar-check me-2"></i>
+                Manage queue
+            </a>
+        </li>
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
