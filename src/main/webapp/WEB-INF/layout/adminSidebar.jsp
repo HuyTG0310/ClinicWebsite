@@ -91,6 +91,17 @@
             </li>
         </c:if>
 
+            
+        <c:if test="${hasAppointmentView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/appointment/list">
+                    <i class="fa-solid fa-gauge me-2"></i>
+                    Manage appointment
+                </a>
+            </li>
+        </c:if>
+
 
         <!-- Logout -->
         <li class="nav-item mt-3">
