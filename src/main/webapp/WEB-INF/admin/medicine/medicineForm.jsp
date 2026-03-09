@@ -114,17 +114,10 @@
 
                             <option value="">-- Select Unit --</option>
 
-                            <option value="Tablet" ${medicine.unit == 'Tablet' ? 'selected' : ''}>Tablet</option>
-                            <option value="Blister" ${medicine.unit == 'Blister' ? 'selected' : ''}>Blister</option>
-                            <option value="Box" ${medicine.unit == 'Box' ? 'selected' : ''}>Box</option>
-                            <option value="Bottle" ${medicine.unit == 'Bottle' ? 'selected' : ''}>Bottle</option>
-                            <option value="Vial" ${medicine.unit == 'Vial' ? 'selected' : ''}>Vial</option>
-                            <option value="Tube" ${medicine.unit == 'Tube' ? 'selected' : ''}>Tube</option>
-                            <option value="Sachet" ${medicine.unit == 'Sachet' ? 'selected' : ''}>Sachet</option>
-                            <option value="Effervescent tablet" ${medicine.unit == 'Effervescent tablet' ? 'selected' : ''}>Effervescent Tablet</option>
-                            <option value="Capsule" ${medicine.unit == 'Capsule' ? 'selected' : ''}>Capsule</option>
-                            <option value="Bag" ${medicine.unit == 'Bag' ? 'selected' : ''}>Bag</option>
-
+                            <option value="Viên" ${medicine.unit == 'Viên' ? 'selected' : ''}>Viên</option>
+                            <option value="Ống" ${medicine.unit == 'Ống' ? 'selected' : ''}>Ống</option>
+                            <option value="Lọ" ${medicine.unit == 'Lọ' ? 'selected' : ''}>Lọ</option>
+                            <option value="Gói" ${medicine.unit == 'Gói' ? 'selected' : ''}>Gói</option>
                         </select>
 
                     </div>

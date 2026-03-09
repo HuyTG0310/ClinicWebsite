@@ -80,7 +80,8 @@ public class PrintReceiptServlet extends HttpServlet {
 
                     if (app != null) {
                         request.setAttribute("app", app); // Đóng gói cục app
-
+                        String amountInWords = util.MoneyConvertUtil.convertToVietnameseWords((long) app.getPrice());
+                        request.setAttribute("amountInWords", amountInWords);
                         request.getRequestDispatcher("/WEB-INF/receptionist/serviceorder/printExamReceipt.jsp").forward(request, response);
                     } else {
                         response.getWriter().print("Không tìm thấy thông tin Lịch Khám!");
