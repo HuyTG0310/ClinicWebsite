@@ -30,8 +30,8 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+            <a class="nav-link ${activePage == 'manageMedicalRecord' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/doctor/medical-record/list">
                 <i class="fa-solid fa-file-medical me-2"></i>
                 Manage medical record
             </a>

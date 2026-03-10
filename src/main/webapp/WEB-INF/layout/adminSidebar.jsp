@@ -102,7 +102,15 @@
             </li>
         </c:if>
 
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/service-order/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage service order
+            </a>
+        </li>
 
+        
         <li class="nav-item">
             <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/queue/list">
@@ -111,13 +119,16 @@
             </a>
         </li>
 
+
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/admin/service-order/list">
-                <i class="fa-solid fa-vials me-2"></i>
-                Manage service order
+            <a class="nav-link ${activePage == 'manageMedicalRecord' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/medical-record/list">
+                <i class="fa-solid fa-file-medical me-2"></i>
+                Manage medical record
             </a>
         </li>
+
+
 
         <!-- Logout -->
         <li class="nav-item mt-3">
