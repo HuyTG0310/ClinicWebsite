@@ -4,8 +4,10 @@
  */
 package dao;
 
+import java.sql.*;
 import model.LabTest;
 import util.DBContext;
+import java.util.*;
 
 /**
  *
@@ -550,6 +552,204 @@ public class LabTestDAO extends DBContext {
             } catch (Exception e) {
             }
         }
+    }
+
+    public java.util.List<java.util.Map<String, Object>> getConsolidatedLabResults(int medicalRecordId) {
+        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+
+        String sql = "SELECT "
+                + "c.CategoryName, "
+                + "b.BatchId, "
+                + "t.TestName, "
+                + "t.IsPanel, "
+                + "p.ParameterName, "
+                // 🔥 SNAPSHOT LOGIC: Ưu tiên LabResult (đã lưu). Nếu chưa lưu, mò vào Quy tắc tham chiếu (rr)
+                + "COALESCE(r.Unit, p.Unit) AS Unit, "
+                + "COALESCE(r.RefMin, rr.RefMin) AS RefMin, "
+                + "COALESCE(r.RefMax, rr.RefMax) AS RefMax, "
+                + "r.ResultValue, "
+                + "r.Flag, "
+                + "r.ResultTime, " // THỜI GIAN KTV BẤM LƯU KẾT QUẢ
+                + "lot.Status, "
+                + "lot.RejectReason "
+                + "FROM LabTestBatch b "
+                + "JOIN Patient pat ON b.PatientId = pat.PatientId " // 🔥 Cần bảng Patient để tính Tuổi, Giới tính
+                + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
+                + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
+                + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
+                + "JOIN LabTestParameter p ON t.LabTestId = p.LabTestId "
+                // 🔥 LEFT JOIN Quyết định: Tìm Range phù hợp nếu chưa có Snapshot
+                + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId "
+                + "     AND rr.IsActive = 1 "
+                + "     AND ("
+                + "         rr.Gender = 'ALL' "
+                + "         OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
+                + "         OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
+                + "     ) "
+                + "     AND DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays "
+                + "LEFT JOIN LabResult r ON lot.LabOrderTestId = r.LabOrderTestId AND p.ParameterId = r.ParameterId "
+                + "WHERE b.MedicalRecordId = ? "
+                + "AND lot.Status != 'CANCELLED' "
+                // CHẶN RÁC LỊCH SỬ: Chỉ hiện chỉ số Active nếu phiếu chưa COMPLETED. Nếu đã COMPLETED thì dứt khoát phải có ResultValue mới hiện.
+                + "AND ( (p.IsActive = 1 AND lot.Status != 'COMPLETED') OR r.ResultValue IS NOT NULL ) "
+                + "ORDER BY c.SortOrder ASC, t.SortOrder ASC, p.SortOrder ASC";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+
+                    // Giữ nguyên 100% logic Map Data của Chủ tịch
+                    map.put("categoryName", rs.getString("CategoryName"));
+                    map.put("batchId", rs.getInt("BatchId"));
+                    map.put("testName", rs.getString("TestName"));
+                    map.put("isPanel", rs.getBoolean("IsPanel"));
+                    map.put("parameterName", rs.getString("ParameterName"));
+                    map.put("unit", rs.getString("Unit"));
+                    map.put("resultValue", rs.getString("ResultValue"));
+                    map.put("status", rs.getString("Status"));
+                    map.put("rejectReason", rs.getString("RejectReason"));
+
+                    // Xử lý chuỗi Normal Range 
+                    Object refMin = rs.getObject("RefMin");
+                    Object refMax = rs.getObject("RefMax");
+                    String normalRange = (refMin != null ? refMin.toString() : "") + " - " + (refMax != null ? refMax.toString() : "");
+                    map.put("normalRange", normalRange.equals(" - ") ? "___" : normalRange);
+
+                    // Xử lý Cờ bất thường (Flag)
+                    String flag = rs.getString("Flag");
+                    map.put("isAbnormal", (flag != null && !flag.trim().isEmpty()));
+
+                    // Lấy thời gian trả kết quả
+                    map.put("resultTime", rs.getTimestamp("ResultTime")); // Lưu ý lấy Timestamp để giữ nguyên giờ phút
+                    map.put("flag", flag != null ? flag.trim().toUpperCase() : "");
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Integer> getOrderedTestIds(int medicalRecordId) {
+        List<Integer> list = new java.util.ArrayList<>();
+        // Truy vấn qua bảng trung gian Batch và OrderTest
+        String sql = "SELECT lot.LabTestId "
+                + "FROM LabOrderTest lot "
+                + "JOIN LabTestBatch ltb ON lot.BatchId = ltb.BatchId "
+                + "WHERE ltb.MedicalRecordId = ?"
+                + "AND lot.Status != 'CANCELLED' AND lot.Status != 'REJECTED'";
+        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setInt(1, medicalRecordId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(rs.getInt("LabTestId"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public java.util.List<model.LabTestBatch> getBatchesForMedicalRecord(int medicalRecordId) {
+        java.util.List<model.LabTestBatch> list = new java.util.ArrayList<>();
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stBatch = null;
+        java.sql.PreparedStatement stTest = null;
+
+        try {
+            conn = new DBContext().conn;
+
+            // 🔥 1. THÊM b.Status AS PhysicalStatus ĐỂ LẤY TRẠNG THÁI GỐC CỦA LỄ TÂN
+            String sqlBatch = "SELECT b.BatchId, b.Status AS PhysicalStatus, u.FullName AS DoctorName, b.CreatedAt, "
+                    + "SUM(CASE WHEN lot.Status != 'REJECTED' AND lot.Status != 'CANCELLED' THEN 1 ELSE 0 END) AS TotalValid, "
+                    + "SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) AS TotalCompleted "
+                    + "FROM LabTestBatch b "
+                    + "LEFT JOIN [User] u ON b.CreatedByDoctorId = u.UserId "
+                    + "LEFT JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
+                    + "WHERE b.MedicalRecordId = ? AND b.Status != 'CANCELLED' "
+                    + "GROUP BY b.BatchId, b.Status, u.FullName, b.CreatedAt " // Nhớ thêm b.Status vào GROUP BY
+                    + "ORDER BY b.BatchId DESC";
+
+            stBatch = conn.prepareStatement(sqlBatch);
+            stBatch.setInt(1, medicalRecordId);
+            java.sql.ResultSet rsBatch = stBatch.executeQuery();
+
+            String sqlTest = "SELECT t.LabTestId, t.TestName FROM LabOrderTest lot "
+                    + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
+                    + "WHERE lot.BatchId = ? "
+                    + "AND lot.Status != 'CANCELLED' "
+                    + "AND lot.Status != 'REJECTED'";
+
+            stTest = conn.prepareStatement(sqlTest);
+
+            while (rsBatch.next()) {
+                model.LabTestBatch batch = new model.LabTestBatch();
+                batch.setBatchId(rsBatch.getInt("BatchId"));
+                batch.setDoctorName(rsBatch.getString("DoctorName"));
+                batch.setOrderTime(rsBatch.getTimestamp("CreatedAt"));
+
+                // =========================================================
+                // 🔥 LOGIC TÍNH TOÁN TRẠNG THÁI LAI (HYBRID STATUS)
+                // =========================================================
+                int totalValid = rsBatch.getInt("TotalValid");
+                int totalCompleted = rsBatch.getInt("TotalCompleted");
+                String physicalStatus = rsBatch.getString("PhysicalStatus"); // Lấy trạng thái thực tế từ DB
+
+                String finalStatus;
+
+                // Cảnh 1: Nếu đã làm xong 100% các test hợp lệ (hoặc Lab từ chối sạch sành sanh)
+                if (totalValid == 0 || totalCompleted == totalValid) {
+                    finalStatus = "COMPLETED";
+                } // Cảnh 2: Nếu chưa xong, lấy đúng trạng thái gốc dưới DB 
+                // (Chưa đóng tiền = CREATED, Đã đóng tiền = IN_PROGRESS)
+                else {
+                    finalStatus = physicalStatus;
+                }
+
+                batch.setStatus(finalStatus);
+                // =========================================================
+
+                java.util.List<Integer> testIds = new java.util.ArrayList<>();
+                java.util.List<String> testNames = new java.util.ArrayList<>();
+                stTest.setInt(1, batch.getBatchId());
+                java.sql.ResultSet rsTest = stTest.executeQuery();
+                while (rsTest.next()) {
+                    testIds.add(rsTest.getInt("LabTestId"));
+                    testNames.add(rsTest.getString("TestName"));
+                }
+                batch.setTestIds(testIds);
+                batch.setTestNames(testNames);
+
+                list.add(batch);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (stTest != null) {
+                    stTest.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stBatch != null) {
+                    stBatch.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+        return list;
     }
 
 }
