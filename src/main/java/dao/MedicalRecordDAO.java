@@ -498,4 +498,35 @@ public class MedicalRecordDAO extends DBContext {
         }
     }
 
+    public MedicalRecord getRecordByAppointment(int appointmentId) {
+        int foundMedicalRecordId = -1;
+
+        // Chỉ lấy đúng cái ID ra thôi cho nhẹ
+        String sql = "SELECT TOP 1 m.MedicalRecordId "
+                + "FROM MedicalRecord m "
+                + "WHERE m.PatientId = (SELECT PatientId FROM Appointment WHERE AppointmentId = ?) "
+                + "AND CAST(m.CompletedAt AS DATE) = (SELECT CAST(AppointmentTime AS DATE) FROM Appointment WHERE AppointmentId = ?) "
+                + "ORDER BY m.CompletedAt DESC";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, appointmentId);
+            st.setInt(2, appointmentId);
+
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    foundMedicalRecordId = rs.getInt("MedicalRecordId");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (foundMedicalRecordId != -1) {
+            return getRecordById(foundMedicalRecordId);
+        }
+
+        return null;
+    }
+
 }
