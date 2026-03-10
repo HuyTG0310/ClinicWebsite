@@ -752,4 +752,35 @@ public class LabTestDAO extends DBContext {
         return list;
     }
 
+    // 1. Lấy danh sách xét nghiệm cho Bác sĩ Tick chọn (Sắp xếp theo Nhóm)
+    public List<LabTest> getAllActiveTestsForDoctor() {
+        List<LabTest> list = new ArrayList<>();
+        // Query join 3 bảng để lấy Tên XN, Tên Nhóm và Giá Tiền
+        String sql = "SELECT t.LabTestId, t.TestCode, t.TestName, t.IsPanel, t.ServiceId, "
+                + "c.CategoryName, s.CurrentPrice "
+                + "FROM LabTest t "
+                + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
+                + "JOIN Service s ON t.ServiceId = s.ServiceId "
+                + "WHERE t.IsActive = 1 AND s.IsActive = 1 "
+                + "ORDER BY c.SortOrder ASC, t.SortOrder ASC";
+
+        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                LabTest test = new LabTest();
+                test.setLabTestId(rs.getInt("LabTestId"));
+                test.setTestCode(rs.getString("TestCode"));
+                test.setTestName(rs.getString("TestName"));
+                test.setIsPanel(rs.getBoolean("IsPanel"));
+                test.setServiceId(rs.getInt("ServiceId"));
+                test.setCategoryName(rs.getString("CategoryName"));
+                test.setCurrentPrice(rs.getDouble("CurrentPrice"));
+                list.add(test);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }
