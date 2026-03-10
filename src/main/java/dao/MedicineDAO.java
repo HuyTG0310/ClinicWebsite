@@ -221,6 +221,52 @@ public class MedicineDAO extends DBContext {
         }
     }
 
+    public java.util.List<model.Prescription> getPrescriptionsByRecordId(int medicalRecordId) {
+        java.util.List<model.Prescription> list = new java.util.ArrayList<>();
+
+        // Nhớ đổi tên bảng PrescriptionDetail cho khớp với DB của bạn nhé
+        String sql = "SELECT MedicineId, Quantity, Dosage, Note "
+                + "FROM Prescription WHERE MedicalRecordId = ?";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    model.Prescription p = new model.Prescription();
+                    p.setMedicineId(rs.getInt("MedicineId"));
+                    p.setQuantity(rs.getInt("Quantity"));
+                    p.setDosage(rs.getString("Dosage"));
+                    p.setNote(rs.getString("Note"));
+                    list.add(p);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Medicine> getAllActiveMedicines() {
+        List<Medicine> list = new ArrayList<>();
+        String sql = "SELECT * FROM Medicine WHERE IsActive = 1 ORDER BY MedicineName ASC";
+        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Medicine m = new Medicine();
+                m.setMedicineId(rs.getInt("MedicineId"));
+                m.setMedicineName(rs.getString("MedicineName"));
+                m.setUnit(rs.getString("Unit"));
+                m.setUsage(rs.getString("Usage"));
+                m.setContraindication(rs.getString("Contraindication"));
+                m.setIngredients(rs.getString("Ingredients"));
+                list.add(m);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public static void main(String[] args) {
         Medicine m = new Medicine(1, "pARAMACE", "Vỉ", "Ko", "ko", "ko", true);
         new MedicineDAO().update(m);

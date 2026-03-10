@@ -9,7 +9,6 @@ import java.util.*;
 import model.*;
 import util.DBContext;
 
-
 /**
  *
  * @author TRUONGTHINHNGUYEN
@@ -322,4 +321,128 @@ public class MedicalRecordDAO extends DBContext {
             }
         }
     }
+
+    public model.MedicalRecord getRecordById(int medicalRecordId) {
+        model.MedicalRecord mr = null;
+        java.sql.Connection conn = null;
+
+        String sql = "SELECT m.*, p.FullName AS PatientName, p.Gender, p.DateOfBirth, p.Address, p.Phone, u.FullName AS DoctorName "
+                + "FROM MedicalRecord m "
+                + "JOIN Patient p ON m.PatientId = p.PatientId "
+                + "JOIN [User] u ON m.ResponsibleDoctorId = u.UserId "
+                + "WHERE m.MedicalRecordId = ?";
+
+        try {
+            conn = new DBContext().conn;
+            try (java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+                st.setInt(1, medicalRecordId);
+                try (java.sql.ResultSet rs = st.executeQuery()) {
+                    if (rs.next()) {
+                        mr = new model.MedicalRecord();
+
+                        // 1. Map thông tin Bệnh án & Bệnh nhân
+                        mr.setMedicalRecordId(rs.getInt("MedicalRecordId"));
+                        mr.setPatientId(rs.getInt("PatientId"));
+                        mr.setResponsibleDoctorId(rs.getInt("ResponsibleDoctorId"));
+                        mr.setSymptom(rs.getString("Symptom"));
+                        mr.setPhysicalExam(rs.getString("PhysicalExam"));
+                        mr.setDiagnosis(rs.getString("Diagnosis"));
+                        mr.setTreatmentPlan(rs.getString("TreatmentPlan"));
+                        mr.setDoctorNotes(rs.getString("DoctorNotes"));
+                        mr.setBloodPressure(rs.getString("BloodPressure"));
+                        mr.setHeartRate(rs.getObject("HeartRate") != null ? rs.getInt("HeartRate") : null);
+                        mr.setTemperature(rs.getObject("Temperature") != null ? rs.getDouble("Temperature") : null);
+                        mr.setWeight(rs.getObject("Weight") != null ? rs.getDouble("Weight") : null);
+                        mr.setHeight(rs.getObject("Height") != null ? rs.getDouble("Height") : null);
+                        mr.setCompletedAt(rs.getTimestamp("CompletedAt"));
+                        mr.setFollowUpDate(rs.getDate("FollowUpDate"));
+                        mr.setFollowUpStatus(rs.getString("FollowUpStatus"));
+
+                        mr.setPatientName(rs.getString("PatientName"));
+                        mr.setPatientGender(rs.getString("Gender"));
+                        mr.setPatientDob(rs.getDate("DateOfBirth"));
+                        mr.setPatientPhone(rs.getString("Phone"));
+                        mr.setPatientAddress(rs.getString("Address"));
+                        mr.setDoctorName(rs.getString("DoctorName"));
+                    }
+                }
+            }
+
+            // 2. Nếu tìm thấy Bệnh án -> Quét luôn Đơn thuốc đính kèm
+            if (mr != null) {
+                String sqlPres = "SELECT p.*, m.MedicineName, m.Unit "
+                        + "FROM Prescription p "
+                        + "JOIN Medicine m ON p.MedicineId = m.MedicineId "
+                        + "WHERE p.MedicalRecordId = ?";
+                try (java.sql.PreparedStatement stPres = conn.prepareStatement(sqlPres)) {
+                    stPres.setInt(1, mr.getMedicalRecordId());
+                    try (java.sql.ResultSet rsPres = stPres.executeQuery()) {
+                        java.util.List<model.Prescription> presList = new java.util.ArrayList<>();
+                        while (rsPres.next()) {
+                            model.Prescription p = new model.Prescription();
+                            p.setPrescriptionId(rsPres.getInt("PrescriptionId"));
+                            p.setMedicineId(rsPres.getInt("MedicineId"));
+                            p.setQuantity(rsPres.getInt("Quantity"));
+                            p.setDosage(rsPres.getString("Dosage"));
+                            p.setNote(rsPres.getString("Note"));
+                            p.setMedicineName(rsPres.getString("MedicineName"));
+                            p.setUnit(rsPres.getString("Unit"));
+                            presList.add(p);
+                        }
+                        mr.setPrescriptions(presList);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+        return mr;
+    }
+
+    public boolean[] checkPermissionDetail(int medicalRecordId, int currentUserId, boolean isAdmin) {
+        if (isAdmin) {
+            return new boolean[]{true, true}; // Admin trùm cuối
+        }
+        boolean[] perms = new boolean[]{false, false};
+        String sql = "SELECT "
+                + "CASE WHEN mr.ResponsibleDoctorId = ? THEN 1 ELSE 0 END AS IsOwner, "
+                + "CASE WHEN EXISTS (SELECT 1 FROM MedicalRecord mr_sub WHERE mr_sub.PatientId = mr.PatientId AND mr_sub.ResponsibleDoctorId = ?) THEN 1 ELSE 0 END AS IsPastCaregiver, "
+                + "CASE WHEN EXISTS (SELECT 1 FROM DoctorSpecialty ds1 JOIN DoctorSpecialty ds2 ON ds1.SpecialtyId = ds2.SpecialtyId WHERE ds1.UserId = ? AND ds2.UserId = mr.ResponsibleDoctorId) THEN 1 ELSE 0 END AS IsSameSpecialty "
+                + "FROM MedicalRecord mr WHERE mr.MedicalRecordId = ?";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setInt(1, currentUserId);
+            st.setInt(2, currentUserId);
+            st.setInt(3, currentUserId);
+            st.setInt(4, medicalRecordId);
+
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    boolean isOwner = rs.getInt("IsOwner") == 1;
+                    boolean isPastCaregiver = rs.getInt("IsPastCaregiver") == 1;
+                    boolean isSameSpecialty = rs.getInt("IsSameSpecialty") == 1;
+
+                    if (isOwner) {
+                        perms[0] = true;
+                        perms[1] = true; // canView = true, canEdit = true
+                    } else if (isPastCaregiver || isSameSpecialty) {
+                        perms[0] = true;
+                        perms[1] = false; // canView = true, canEdit = false
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return perms;
+    }
+
 }
