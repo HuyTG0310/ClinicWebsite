@@ -420,4 +420,136 @@ public class LabTestDAO extends DBContext {
         return new java.util.ArrayList<>(paramMap.values());
     }
 
+    public boolean createLabOrders(int patientId, int medicalRecordId, int doctorId, String[] labTestIds) {
+        if (labTestIds == null || labTestIds.length == 0) {
+            return false;
+        }
+
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stBatch = null, stOrder = null, stOrderTest = null, stGetPrice = null;
+
+        try {
+            // Lưu ý: Nếu DBContext của bạn gọi getConnection() thì sửa lại chỗ này nhé
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false); // Bắt đầu Transaction riêng cho Xét nghiệm
+
+            // 1. Tạo Lô (Batch)
+            String sqlBatch = "INSERT INTO LabTestBatch (PatientId, MedicalRecordId, CreatedByDoctorId, Status) VALUES (?, ?, ?, 'CREATED')";
+            stBatch = conn.prepareStatement(sqlBatch, java.sql.Statement.RETURN_GENERATED_KEYS);
+            stBatch.setInt(1, patientId);
+            stBatch.setInt(2, medicalRecordId);
+            stBatch.setInt(3, doctorId);
+            stBatch.executeUpdate();
+
+            int batchId = -1;
+            try (java.sql.ResultSet rs = stBatch.getGeneratedKeys()) {
+                if (rs.next()) {
+                    batchId = rs.getInt(1);
+                }
+            }
+            if (batchId == -1) {
+                conn.rollback();
+                return false;
+            }
+
+            // Chuẩn bị SQL
+            String sqlPrice = "SELECT t.ServiceId, s.CurrentPrice FROM LabTest t JOIN Service s ON t.ServiceId = s.ServiceId WHERE t.LabTestId = ?";
+            stGetPrice = conn.prepareStatement(sqlPrice);
+
+            String sqlOrder = "INSERT INTO ServiceOrder (PatientId, MedicalRecordId, ServiceId, AssignedById, PriceAtTime, Status) VALUES (?, ?, ?, ?, ?, 'UNPAID')";
+            stOrder = conn.prepareStatement(sqlOrder, java.sql.Statement.RETURN_GENERATED_KEYS);
+
+            String sqlOrderTest = "INSERT INTO LabOrderTest (ServiceOrderId, LabTestId, BatchId, Status) VALUES (?, ?, ?, 'ORDERED')";
+            stOrderTest = conn.prepareStatement(sqlOrderTest);
+
+            // 2. Duyệt qua mảng checkbox Bác sĩ chọn
+            for (String idStr : labTestIds) {
+                int labTestId = Integer.parseInt(idStr);
+
+                // Lấy giá thực tế
+                stGetPrice.setInt(1, labTestId);
+                try (java.sql.ResultSet rsPrice = stGetPrice.executeQuery()) {
+
+                    // 🔥 FIX BUG: Phải tìm thấy Dịch vụ & Giá tiền thì mới bắt đầu Insert hóa đơn
+                    if (rsPrice.next()) {
+                        int serviceId = rsPrice.getInt("ServiceId");
+                        double price = rsPrice.getDouble("CurrentPrice");
+
+                        // Tạo Hóa đơn (UNPAID)
+                        stOrder.setInt(1, patientId);
+                        stOrder.setInt(2, medicalRecordId);
+                        stOrder.setInt(3, serviceId);
+                        stOrder.setInt(4, doctorId);
+                        stOrder.setDouble(5, price);
+                        stOrder.executeUpdate();
+
+                        int orderId = -1;
+                        try (java.sql.ResultSet rsOrder = stOrder.getGeneratedKeys()) {
+                            if (rsOrder.next()) {
+                                orderId = rsOrder.getInt(1);
+                            }
+                        }
+
+                        // Liên kết Xét nghiệm vào Lô VÀ Hóa đơn
+                        if (orderId != -1) {
+                            stOrderTest.setInt(1, orderId);
+                            stOrderTest.setInt(2, labTestId);
+                            stOrderTest.setInt(3, batchId);
+                            stOrderTest.addBatch();
+                        }
+                    }
+                }
+            }
+
+            // Thực thi loạt Insert chi tiết
+            stOrderTest.executeBatch();
+            conn.commit(); // Chốt đơn thành công!
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (Exception ex) {
+            }
+            return false;
+        } finally {
+            // Đóng các resource an toàn
+            try {
+                if (stOrderTest != null) {
+                    stOrderTest.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stOrder != null) {
+                    stOrder.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stGetPrice != null) {
+                    stGetPrice.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stBatch != null) {
+                    stBatch.close();
+                }
+            } catch (Exception e) {
+            }
+            // CỰC KỲ QUAN TRỌNG: Phải trả lại AutoCommit cho Connection Pool
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+
 }
