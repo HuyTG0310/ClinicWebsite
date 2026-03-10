@@ -783,4 +783,302 @@ public class LabTestDAO extends DBContext {
         return list;
     }
 
+    public boolean editLabOrders(int batchId, int patientId, int medicalRecordId, int doctorId, String[] newTestIds) {
+        // 1. NẾU BÁC SĨ BỎ TICK HẾT -> Tự động gọi hàm Hủy toàn bộ Lô
+        if (newTestIds == null || newTestIds.length == 0) {
+            return cancelLabBatch(batchId); // Gọi lại hàm lúc nãy anh em mình viết!
+        }
+
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stGetCurrent = null;
+        java.sql.PreparedStatement stCancelTest = null;
+        java.sql.PreparedStatement stCancelOrder = null;
+        java.sql.PreparedStatement stGetPrice = null;
+        java.sql.PreparedStatement stOrder = null;
+        java.sql.PreparedStatement stOrderTest = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false); // Vẫn phải dùng Transaction để Kế toán không bị lệch
+
+            // 2. LẤY DANH SÁCH CÁC CHỈ SỐ CŨ (Đang có trong Lô này)
+            java.util.List<Integer> currentTestIds = new java.util.ArrayList<>();
+            java.util.Map<Integer, Integer> testToOrderMap = new java.util.HashMap<>(); // Lưu cặp <TestId, ServiceOrderId> để lát Hủy hóa đơn
+
+            String sqlCurrent = "SELECT LabTestId, ServiceOrderId FROM LabOrderTest WHERE BatchId = ? AND Status != 'CANCELLED'";
+            stGetCurrent = conn.prepareStatement(sqlCurrent);
+            stGetCurrent.setInt(1, batchId);
+            try (java.sql.ResultSet rs = stGetCurrent.executeQuery()) {
+                while (rs.next()) {
+                    currentTestIds.add(rs.getInt("LabTestId"));
+                    testToOrderMap.put(rs.getInt("LabTestId"), rs.getInt("ServiceOrderId"));
+                }
+            }
+
+            // 3. PHÂN LOẠI: CÁI NÀO CẦN XÓA? CÁI NÀO CẦN THÊM?
+            java.util.List<Integer> newIdsList = new java.util.ArrayList<>();
+            for (String id : newTestIds) {
+                newIdsList.add(Integer.parseInt(id));
+            }
+
+            // Danh sách Xóa = Cũ - Mới (Có trong cũ nhưng Bác sĩ đã bỏ tick)
+            java.util.List<Integer> testsToRemove = new java.util.ArrayList<>(currentTestIds);
+            testsToRemove.removeAll(newIdsList);
+
+            // Danh sách Thêm = Mới - Cũ (Có trong mới nhưng Cũ chưa có)
+            java.util.List<Integer> testsToAdd = new java.util.ArrayList<>(newIdsList);
+            testsToAdd.removeAll(currentTestIds);
+
+            // ==========================================
+            // 4. THỰC THI XÓA (Cập nhật thành CANCELLED)
+            // ==========================================
+            if (!testsToRemove.isEmpty()) {
+                String sqlCancelTest = "UPDATE LabOrderTest SET Status = 'CANCELLED' WHERE BatchId = ? AND LabTestId = ?";
+                String sqlCancelOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' WHERE ServiceOrderId = ?";
+                stCancelTest = conn.prepareStatement(sqlCancelTest);
+                stCancelOrder = conn.prepareStatement(sqlCancelOrder);
+
+                for (int testId : testsToRemove) {
+                    stCancelTest.setInt(1, batchId);
+                    stCancelTest.setInt(2, testId);
+                    stCancelTest.addBatch();
+
+                    stCancelOrder.setInt(1, testToOrderMap.get(testId)); // Xóa đúng cái Hóa đơn của Test này
+                    stCancelOrder.addBatch();
+                }
+                stCancelTest.executeBatch();
+                stCancelOrder.executeBatch();
+            }
+
+            // ==========================================
+            // 5. THỰC THI THÊM MỚI (Copy logic y hệt hàm Create của bạn)
+            // ==========================================
+            if (!testsToAdd.isEmpty()) {
+                String sqlPrice = "SELECT t.ServiceId, s.CurrentPrice FROM LabTest t JOIN Service s ON t.ServiceId = s.ServiceId WHERE t.LabTestId = ?";
+                stGetPrice = conn.prepareStatement(sqlPrice);
+
+                String sqlOrder = "INSERT INTO ServiceOrder (PatientId, MedicalRecordId, ServiceId, AssignedById, PriceAtTime, Status) VALUES (?, ?, ?, ?, ?, 'UNPAID')";
+                stOrder = conn.prepareStatement(sqlOrder, java.sql.Statement.RETURN_GENERATED_KEYS);
+
+                String sqlOrderTest = "INSERT INTO LabOrderTest (ServiceOrderId, LabTestId, BatchId, Status) VALUES (?, ?, ?, 'ORDERED')";
+                stOrderTest = conn.prepareStatement(sqlOrderTest);
+
+                for (int labTestId : testsToAdd) {
+                    stGetPrice.setInt(1, labTestId);
+                    try (java.sql.ResultSet rsPrice = stGetPrice.executeQuery()) {
+                        if (rsPrice.next()) {
+                            int serviceId = rsPrice.getInt("ServiceId");
+                            double price = rsPrice.getDouble("CurrentPrice");
+
+                            // Tạo hóa đơn
+                            stOrder.setInt(1, patientId);
+                            stOrder.setInt(2, medicalRecordId);
+                            stOrder.setInt(3, serviceId);
+                            stOrder.setInt(4, doctorId);
+                            stOrder.setDouble(5, price);
+                            stOrder.executeUpdate();
+
+                            int orderId = -1;
+                            try (java.sql.ResultSet rsOrder = stOrder.getGeneratedKeys()) {
+                                if (rsOrder.next()) {
+                                    orderId = rsOrder.getInt(1);
+                                }
+                            }
+
+                            // Liên kết
+                            if (orderId != -1) {
+                                stOrderTest.setInt(1, orderId);
+                                stOrderTest.setInt(2, labTestId);
+                                stOrderTest.setInt(3, batchId);
+                                stOrderTest.addBatch();
+                            }
+                        }
+                    }
+                }
+                stOrderTest.executeBatch();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (Exception ex) {
+            }
+            return false;
+        } finally {
+            // Nhớ đóng các Statement ở đây nhé (mình rút gọn cho đỡ dài)
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public boolean cancelLabBatch(int batchId) {
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stCheck = null;
+        java.sql.PreparedStatement stCancelOrders = null;
+        java.sql.PreparedStatement stCancelOrderTests = null;
+        java.sql.PreparedStatement stCancelBatch = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+
+            // 1. KIỂM TRA BẢO MẬT: Đảm bảo không có hóa đơn nào trong Lô này đã được thanh toán
+            String sqlCheck = "SELECT COUNT(*) FROM LabOrderTest lot "
+                    + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
+                    + "WHERE lot.BatchId = ? AND so.Status = 'PAID'";
+            stCheck = conn.prepareStatement(sqlCheck);
+            stCheck.setInt(1, batchId);
+            try (java.sql.ResultSet rs = stCheck.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return false; // Đã đóng tiền rồi -> Không cho Hủy!
+                }
+            }
+
+            // 2. HỦY TẤT CẢ HÓA ĐƠN (ServiceOrder) liên quan đến Lô này
+            // Phép thuật SQL: Dùng IN kết hợp SubQuery để tìm ra đúng hóa đơn của Lô
+            String sqlCancelOrders = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
+                    + "WHERE ServiceOrderId IN (SELECT ServiceOrderId FROM LabOrderTest WHERE BatchId = ?)";
+            stCancelOrders = conn.prepareStatement(sqlCancelOrders);
+            stCancelOrders.setInt(1, batchId);
+            stCancelOrders.executeUpdate();
+
+            // 3. HỦY TẤT CẢ CHI TIẾT XÉT NGHIỆM (LabOrderTest)
+            String sqlCancelOrderTests = "UPDATE LabOrderTest SET Status = 'CANCELLED' WHERE BatchId = ?";
+            stCancelOrderTests = conn.prepareStatement(sqlCancelOrderTests);
+            stCancelOrderTests.setInt(1, batchId);
+            stCancelOrderTests.executeUpdate();
+
+            // 4. HỦY LÔ (LabTestBatch)
+            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED' WHERE BatchId = ?";
+            stCancelBatch = conn.prepareStatement(sqlCancelBatch);
+            stCancelBatch.setInt(1, batchId);
+            stCancelBatch.executeUpdate();
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (Exception ex) {
+            }
+            return false;
+        } finally {
+            try {
+                if (stCheck != null) {
+                    stCheck.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stCancelOrders != null) {
+                    stCancelOrders.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stCancelOrderTests != null) {
+                    stCancelOrderTests.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stCancelBatch != null) {
+                    stCancelBatch.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public java.util.List<model.LabTest> getLabTestsByBatchId(int batchId) {
+        java.util.List<model.LabTest> list = new java.util.ArrayList<>();
+
+        // Cần JOIN 3 bảng: Bảng trung gian (LabOrderTest), Bảng XN (LabTest) và Bảng Giá (Service)
+        String sql = "SELECT t.LabTestId, t.TestCode, t.TestName, t.IsPanel, s.CurrentPrice "
+                + "FROM LabOrderTest lot "
+                + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
+                + "JOIN Service s ON t.ServiceId = s.ServiceId " // Nối để lấy giá tiền
+                + "WHERE lot.BatchId = ?"
+                + "AND lot.Status != 'CANCELLED' AND lot.Status != 'REJECTED'";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, batchId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    model.LabTest test = new model.LabTest();
+
+                    // Gán các giá trị cần thiết để in ra phiếu
+                    test.setLabTestId(rs.getInt("LabTestId"));
+                    test.setTestCode(rs.getString("TestCode"));
+                    test.setTestName(rs.getString("TestName"));
+                    test.setIsPanel(rs.getBoolean("IsPanel"));
+                    test.setCurrentPrice(rs.getDouble("CurrentPrice"));
+
+                    // Nếu trên phiếu in cần thêm nhóm (Category) thì bạn Join thêm bảng Category và set vào đây nhé
+                    list.add(test);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi tại getLabTestsByBatchId: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public java.util.Map<String, String> getPrintInvoiceInfo(int batchId) {
+        java.util.Map<String, String> info = new java.util.HashMap<>();
+
+        // Nối 4 bảng: Lô XN + Bệnh nhân + Bệnh án + Bác sĩ (Bảng User)
+        String sql = "SELECT p.FullName AS PatientName, p.Gender, YEAR(p.DateOfBirth) AS YOB, p.Address, "
+                + "mr.Diagnosis, u.FullName AS DoctorName "
+                + "FROM LabTestBatch b "
+                + "JOIN Patient p ON b.PatientId = p.PatientId "
+                + "JOIN MedicalRecord mr ON b.MedicalRecordId = mr.MedicalRecordId "
+                + "JOIN [User] u ON b.CreatedByDoctorId = u.UserId "
+                + "WHERE b.BatchId = ?";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, batchId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    info.put("PatientName", rs.getString("PatientName"));
+                    info.put("Gender", rs.getString("Gender"));
+                    info.put("YOB", rs.getString("YOB"));
+                    // Xử lý null cho Address và Diagnosis tránh bị lỗi chữ "null" trên giấy
+                    info.put("Address", rs.getString("Address") != null ? rs.getString("Address") : "Chưa cập nhật");
+                    info.put("Diagnosis", rs.getString("Diagnosis") != null ? rs.getString("Diagnosis") : "Chưa có chẩn đoán");
+                    info.put("DoctorName", rs.getString("DoctorName"));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi tại getPrintInvoiceInfo: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return info;
+    }
+
 }
