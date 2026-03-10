@@ -445,4 +445,57 @@ public class MedicalRecordDAO extends DBContext {
         return perms;
     }
 
+    public void updateCompletedMedicalRecord(model.MedicalRecord mr) {
+        String sql = "UPDATE MedicalRecord SET Symptom = ?, PhysicalExam = ?, DoctorNotes = ?, "
+                + "Diagnosis = ?, TreatmentPlan = ?, BloodPressure = ?, HeartRate = ?, "
+                + "Temperature = ?, Weight = ?, Height = ?, FollowUpDate = ? "
+                + "WHERE MedicalRecordId = ?";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setString(1, mr.getSymptom());
+            st.setString(2, mr.getPhysicalExam());
+            st.setString(3, mr.getDoctorNotes());
+            st.setString(4, mr.getDiagnosis());
+            st.setString(5, mr.getTreatmentPlan());
+            st.setString(6, mr.getBloodPressure());
+
+            if (mr.getHeartRate() != null) {
+                st.setInt(7, mr.getHeartRate());
+            } else {
+                st.setNull(7, java.sql.Types.INTEGER);
+            }
+
+            if (mr.getTemperature() != null) {
+                st.setDouble(8, mr.getTemperature());
+            } else {
+                st.setNull(8, java.sql.Types.DECIMAL);
+            }
+
+            if (mr.getWeight() != null) {
+                st.setDouble(9, mr.getWeight());
+            } else {
+                st.setNull(9, java.sql.Types.DECIMAL);
+            }
+
+            if (mr.getHeight() != null) {
+                st.setDouble(10, mr.getHeight());
+            } else {
+                st.setNull(10, java.sql.Types.DECIMAL);
+            }
+
+            if (mr.getFollowUpDate() != null) {
+                st.setDate(11, new java.sql.Date(mr.getFollowUpDate().getTime()));
+            } else {
+                st.setNull(11, java.sql.Types.DATE);
+            }
+
+            st.setInt(12, mr.getMedicalRecordId());
+
+            st.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
