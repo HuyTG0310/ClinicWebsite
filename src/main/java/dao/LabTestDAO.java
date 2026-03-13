@@ -1167,4 +1167,105 @@ public class LabTestDAO extends DBContext {
         return queue;
     }
 
+    //cập nhật trạng thái của 1 chỉ định xét nghiệm (LabOrderTest)
+    public boolean updateLabTestStatus(int labOrderTestId, String status, String rejectReason) {
+        String sqlTest = "UPDATE LabOrderTest SET Status = ?, RejectReason = ? WHERE LabOrderTestId = ?";
+
+        // Cú pháp thần thánh: Tìm Hóa đơn thông qua ID của LabOrderTest để Hủy
+        String sqlOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
+                + "WHERE ServiceOrderId = (SELECT ServiceOrderId FROM LabOrderTest WHERE LabOrderTestId = ?)";
+
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stTest = null;
+        java.sql.PreparedStatement stOrder = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false); // 🔥 Bật khiên Transaction lên
+
+            // 1. Cập nhật bảng Xét nghiệm
+            stTest = conn.prepareStatement(sqlTest);
+            stTest.setString(1, status);
+            if (rejectReason != null && !rejectReason.trim().isEmpty()) {
+                stTest.setString(2, rejectReason);
+            } else {
+                stTest.setNull(2, java.sql.Types.NVARCHAR);
+            }
+            stTest.setInt(3, labOrderTestId);
+            stTest.executeUpdate();
+
+            // 2. Nếu là REJECTED -> Chém luôn cái Hóa đơn (ServiceOrder) tương ứng
+            if ("REJECTED".equals(status)) {
+                stOrder = conn.prepareStatement(sqlOrder);
+                stOrder.setInt(1, labOrderTestId);
+                stOrder.executeUpdate();
+            }
+
+            conn.commit(); // Chốt sổ 2 bảng cùng lúc!
+            return true;
+
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                if (stTest != null) {
+                    stTest.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (stOrder != null) {
+                    stOrder.close();
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+        return false;
+    }
+
+    //lấy danh sách các dịch vụ xét nghiệm của một bệnh án để làm thủ tục checkin
+    public List<Map<String, Object>> getOrderedServicesForCheckin(int medicalRecordId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        // Lấy thông tin dịch vụ, nhóm theo Category để dễ nhìn
+        String sql = "SELECT lot.LabOrderTestId, lt.TestName, lt.TestCode, ltc.CategoryName, lot.Status, lot.RejectReason "
+                + "FROM LabOrderTest lot "
+                + "JOIN LabTest lt ON lot.LabTestId = lt.LabTestId "
+                + "JOIN LabTestCategory ltc ON lt.CategoryId = ltc.CategoryId "
+                + "JOIN LabTestBatch ltb ON lot.BatchId = ltb.BatchId "
+                + "WHERE ltb.MedicalRecordId = ? AND ltb.Status != 'CANCELLED' AND lot.status != 'CANCELLED'"
+                + "ORDER BY ltc.SortOrder, lt.SortOrder";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("labOrderTestId", rs.getInt("LabOrderTestId"));
+                    map.put("testName", rs.getString("TestName"));
+                    map.put("testCode", rs.getString("TestCode"));
+                    map.put("categoryName", rs.getString("CategoryName"));
+                    map.put("status", rs.getString("Status"));
+                    map.put("rejectReason", rs.getString("RejectReason"));
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
