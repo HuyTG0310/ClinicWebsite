@@ -21,7 +21,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+               href="${pageContext.request.contextPath}/lab/queue/list">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Manage test result
             </a>
