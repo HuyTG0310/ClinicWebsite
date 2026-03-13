@@ -1081,4 +1081,90 @@ public class LabTestDAO extends DBContext {
         return info;
     }
 
+    public java.util.List<java.util.Map<String, Object>> getLabQueue(String searchKeyword, String status) {
+        java.util.List<java.util.Map<String, Object>> queue = new java.util.ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT "
+                + "mr.MedicalRecordId, "
+                + "p.PatientId, "
+                + "p.FullName AS PatientName, "
+                + "p.Gender, "
+                + "(YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, "
+                + "u.FullName AS DoctorName, "
+                // 🔥 SỬA ĐỔI 1: Chỉ đếm Tổng Test HỢP LỆ (Bỏ qua các test bị Lab từ chối)
+                + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) AS TotalValidTests, "
+                // Đếm Test đã hoàn thành
+                + "SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) AS CompletedTests "
+                + "FROM MedicalRecord mr "
+                + "JOIN Patient p ON mr.PatientId = p.PatientId "
+                + "JOIN [User] u ON mr.ResponsibleDoctorId = u.UserId "
+                + "JOIN LabTestBatch b ON mr.MedicalRecordId = b.MedicalRecordId "
+                + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
+                + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
+                // 🔥 SỬA ĐỔI 2: Chặn đứng các Lô (Batch) đã bị Bác sĩ hủy
+                + "WHERE so.Status = 'PAID' AND b.Status != 'CANCELLED' "
+        );
+
+        // 1. Lọc theo Tên bệnh nhân hoặc Mã BA
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql.append("AND (p.FullName LIKE ? OR CAST(mr.MedicalRecordId AS VARCHAR) = ?) ");
+        }
+
+        sql.append("GROUP BY mr.MedicalRecordId, p.PatientId, p.FullName, p.Gender, p.DateOfBirth, u.FullName ");
+
+        // 2. Lọc theo Trạng thái (Phép thuật nằm ở câu HAVING)
+        if ("COMPLETED".equals(status)) {
+            // 🔥 SỬA ĐỔI 3: Ca XONG là ca có (Số Hoàn Thành = Số Hợp Lệ)
+            sql.append("HAVING SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) = "
+                    + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) ");
+        } else if ("PENDING".equals(status)) {
+            // 🔥 SỬA ĐỔI 4: Ca CHỜ là ca có (Số Hoàn Thành < Số Hợp Lệ)
+            sql.append("HAVING SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) < "
+                    + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) ");
+        }
+
+        sql.append("ORDER BY mr.MedicalRecordId DESC"); // Xếp mới nhất lên đầu
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
+
+            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+                st.setString(1, "%" + searchKeyword.trim() + "%");
+                st.setString(2, searchKeyword.trim());
+            }
+
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> row = new java.util.HashMap<>();
+                    row.put("medicalRecordId", rs.getInt("MedicalRecordId"));
+                    row.put("patientId", rs.getInt("PatientId"));
+                    row.put("patientName", rs.getString("PatientName"));
+                    row.put("gender", rs.getString("Gender"));
+                    row.put("age", rs.getInt("Age"));
+                    row.put("doctorName", rs.getString("DoctorName"));
+
+                    // 🔥 SỬA ĐỔI 5: Lấy số liệu mới để tính toán Tiến độ
+                    int totalValid = rs.getInt("TotalValidTests");
+                    int completed = rs.getInt("CompletedTests");
+
+                    row.put("totalTests", totalValid);
+                    row.put("completedTests", completed);
+
+                    // Hiển thị 2/2 thay vì 2/3 nếu có 1 mẫu bị reject
+                    row.put("progress", completed + "/" + totalValid);
+
+                    // Cờ xác nhận: Đã xong 100% nếu số Completed = Số Valid 
+                    // (Nếu Lab từ chối cả 3/3 dịch vụ, totalValid = 0, completed = 0 -> Vẫn tính là xong và đá sang tab COMPLETED)
+                    boolean isFullyCompleted = (totalValid == completed);
+                    row.put("isFullyCompleted", isFullyCompleted);
+
+                    queue.add(row);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return queue;
+    }
+
 }
