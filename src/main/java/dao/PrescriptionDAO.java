@@ -187,4 +187,60 @@ public class PrescriptionDAO extends DBContext {
         }
         return list;
     }
+
+    public boolean savePrescription(int medicalRecordId, String[] medicineIds, String[] quantities, String[] dosages, String[] notes) {
+        java.sql.Connection conn = null;
+        String sqlDelete = "DELETE FROM Prescription WHERE MedicalRecordId = ?";
+        String sqlInsert = "INSERT INTO Prescription (MedicalRecordId, MedicineId, Quantity, Dosage, Note) VALUES (?, ?, ?, ?, ?)";
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false); // Bắt đầu Transaction để an toàn dữ liệu
+
+            // 1. Xóa các dòng thuốc cũ của hồ sơ này
+            try (java.sql.PreparedStatement psDel = conn.prepareStatement(sqlDelete)) {
+                psDel.setInt(1, medicalRecordId);
+                psDel.executeUpdate();
+            }
+
+            // 2. Chèn danh sách thuốc mới vào
+            if (medicineIds != null && medicineIds.length > 0) {
+                try (java.sql.PreparedStatement psIns = conn.prepareStatement(sqlInsert)) {
+                    for (int i = 0; i < medicineIds.length; i++) {
+                        if (medicineIds[i] == null || medicineIds[i].isEmpty()) {
+                            continue;
+                        }
+
+                        psIns.setInt(1, medicalRecordId);
+                        psIns.setInt(2, Integer.parseInt(medicineIds[i]));
+                        psIns.setInt(3, Integer.parseInt(quantities[i]));
+                        psIns.setString(4, dosages[i]);
+                        psIns.setString(5, notes[i]);
+                        psIns.addBatch(); // Dùng Batch để thực thi nhanh
+                    }
+                    psIns.executeBatch();
+                }
+            }
+
+            conn.commit(); // Chốt đơn!
+            return true;
+        } catch (Exception e) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (java.sql.SQLException ex) {
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (java.sql.SQLException e) {
+            }
+        }
+    }
 }

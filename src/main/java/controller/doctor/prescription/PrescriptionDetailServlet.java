@@ -97,5 +97,52 @@ public class PrescriptionDetailServlet extends HttpServlet {
         }
     }
 
-    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        // 1. Đọc dữ liệu từ Form (Các mảng dữ liệu từ các ô input trùng tên)
+        String mrIdStr = request.getParameter("medicalRecordId");
+        String[] medicineIds = request.getParameterValues("medicineIds");
+        String[] quantities = request.getParameterValues("quantities");
+        String[] dosages = request.getParameterValues("dosages");
+        String[] notes = request.getParameterValues("notes");
+
+        try {
+            int medicalRecordId = Integer.parseInt(mrIdStr);
+            PrescriptionDAO dao = new PrescriptionDAO();
+
+            // 2. Gọi hàm lưu vào Database
+            boolean success = dao.savePrescription(medicalRecordId, medicineIds, quantities, dosages, notes);
+
+            if (success) {
+                request.getSession().setAttribute("success", "Đã cập nhật đơn thuốc thành công!");
+            } else {
+                request.getSession().setAttribute("error", "Có lỗi xảy ra khi lưu đơn thuốc.");
+            }
+
+            // 3. Quay trở lại trang chi tiết của chính hồ sơ đó
+            response.sendRedirect(basePath + "/prescription/detail?id=" + medicalRecordId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(basePath + "/prescription/list?error=UpdateFailed");
+        }
+
+    }
+
 }
