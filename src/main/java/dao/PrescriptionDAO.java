@@ -114,7 +114,47 @@ public class PrescriptionDAO extends DBContext {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
         StringBuilder sql = new StringBuilder(BASE_PR_SQL);
 
-        
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasDate = dateStr != null && !dateStr.trim().isEmpty();
+
+        // Thêm điều kiện lọc Từ khóa
+        if (hasKeyword) {
+            sql.append("AND (p.FullName LIKE ? OR CAST(mr.MedicalRecordId AS VARCHAR) = ?) ");
+        }
+
+        // Thêm điều kiện lọc Ngày
+        if (hasDate) {
+            sql.append("AND CAST(mr.CompletedAt AS DATE) = ? ");
+        }
+
+        // Ráp Group By và Order By vào cuối
+        sql.append(GROUP_BY_SQL);
+        sql.append("ORDER BY mr.MedicalRecordId DESC");
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
+
+            // Truyền User ID cho 3 logic phân quyền
+            st.setInt(1, currentUserId);
+            st.setInt(2, currentUserId);
+            st.setInt(3, currentUserId);
+
+            int paramIndex = 4;
+            if (hasKeyword) {
+                st.setString(paramIndex++, "%" + keyword.trim() + "%");
+                st.setString(paramIndex++, keyword.trim());
+            }
+            if (hasDate) {
+                st.setString(paramIndex++, dateStr.trim());
+            }
+
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToPrescription(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return list;
     }
 }
