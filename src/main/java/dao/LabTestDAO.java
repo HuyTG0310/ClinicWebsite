@@ -1268,4 +1268,116 @@ public class LabTestDAO extends DBContext {
         }
         return list;
     }
+
+    //kiểm tra xem bệnh án này còn dịch vụ nào đang "ORDERED" (chờ nhận mẫu) không
+    public boolean requiresCheckin(int medicalRecordId) {
+        // Đếm số lượng Test đang ở trạng thái ORDERED của bệnh án này
+        String sql = "SELECT COUNT(*) FROM LabOrderTest lot "
+                + "JOIN LabTestBatch ltb ON lot.BatchId = ltb.BatchId " // Đã sửa đúng tên bảng LabTestBatch
+                + "WHERE ltb.MedicalRecordId = ? AND lot.Status = 'ORDERED'"
+                + "AND ltb.Status != 'CANCELLED'";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // Nếu > 0 nghĩa là BẮT BUỘC phải qua trang Check-in
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //lấy danh sách chi tiết các chỉ số xét nghiệm để kỹ thuật viên nhập kết quả
+    public java.util.List<java.util.Map<String, Object>> getTestsForProcessing(int medicalRecordId) {
+        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+
+        // Join với LabReferenceRange dựa trên Tuổi và Giới tính bệnh nhân
+        String sql = "SELECT "
+                + "c.CategoryName, "
+                + "b.BatchId, "
+                + "lot.LabOrderTestId, "
+                + "lot.Status AS TestStatus, "
+                + "lot.RejectReason, "
+                + "t.TestName, "
+                + "p.ParameterId, "
+                + "p.ParameterName, "
+                + "COALESCE(r.Unit, p.Unit) AS Unit, "
+                // Ưu tiên lấy RefMin/Max từ bảng LabResult nếu đã nhập. Nếu chưa nhập thì lấy từ quy tắc phù hợp (rr)
+                + "COALESCE(r.RefMin, rr.RefMin) AS RefMin, "
+                + "COALESCE(r.RefMax, rr.RefMax) AS RefMax, "
+                + "r.ResultId, "
+                + "r.ResultValue, "
+                + "r.Flag "
+                + "FROM LabTestBatch b "
+                + "JOIN Patient pat ON b.PatientId = pat.PatientId " // Cần bảng Patient để lấy Tuổi, Giới tính
+                + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
+                + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
+                + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
+                + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
+                + "JOIN LabTestParameter p ON t.LabTestId = p.LabTestId "
+                // 💎 LEFT JOIN Quyết định: Tìm Range phù hợp với bệnh nhân này
+                + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId "
+                + "     AND rr.IsActive = 1 "
+                + "     AND ("
+                + "         rr.Gender = 'ALL' "
+                + "         OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
+                + "         OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
+                + "     ) "
+                + "     AND DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays "
+                + "LEFT JOIN LabResult r ON lot.LabOrderTestId = r.LabOrderTestId AND p.ParameterId = r.ParameterId "
+                + "WHERE b.MedicalRecordId = ? "
+                + "AND so.Status = 'PAID' "
+                + "AND b.Status != 'CANCELLED' "
+                + "AND lot.Status != 'CANCELLED' "
+                + "AND (t.IsActive = 1 OR r.ResultValue IS NOT NULL) "
+                + "AND ( (p.IsActive = 1 AND lot.Status != 'COMPLETED') OR r.ResultId IS NOT NULL ) "
+                + "ORDER BY c.SortOrder ASC, t.SortOrder ASC, p.SortOrder ASC";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("batchId", rs.getInt("BatchId"));
+                    map.put("categoryName", rs.getString("CategoryName"));
+                    map.put("labOrderTestId", rs.getInt("LabOrderTestId"));
+                    map.put("status", rs.getString("TestStatus"));
+                    map.put("rejectReason", rs.getString("RejectReason"));
+                    map.put("testName", rs.getString("TestName"));
+                    map.put("parameterId", rs.getInt("ParameterId"));
+                    map.put("parameterName", rs.getString("ParameterName"));
+                    map.put("unit", rs.getString("Unit"));
+
+                    // Nối dải tham chiếu bình thường (VD: 4.0 - 5.5)
+                    Object refMin = rs.getObject("RefMin");
+                    Object refMax = rs.getObject("RefMax");
+                    String normalRange = (refMin != null ? refMin.toString() : "") + " - " + (refMax != null ? refMax.toString() : "");
+                    map.put("normalRange", normalRange.equals(" - ") ? "___" : normalRange);
+
+                    map.put("isNumeric", (refMin != null || refMax != null));
+                    map.put("refMin", refMin);
+                    map.put("refMax", refMax);
+
+                    // Lấy kết quả (nếu đã nhập)
+                    map.put("resultId", rs.getObject("ResultId"));
+                    map.put("resultValue", rs.getString("ResultValue"));
+
+                    // Cờ bất thường (Flag)
+                    String flag = rs.getString("Flag");
+                    map.put("isAbnormal", (flag != null && !flag.trim().isEmpty()));
+                    map.put("flag", flag);
+
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
