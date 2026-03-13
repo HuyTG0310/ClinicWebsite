@@ -1380,4 +1380,169 @@ public class LabTestDAO extends DBContext {
         }
         return list;
     }
+
+    //hàm lưu kết quả xét nghiệm
+    public boolean saveLabResults(int medicalRecordId, String[] orderTestIds, String[] paramIds, java.util.Map<String, String[]> parameterMap) {
+        java.sql.Connection conn = null;
+
+        // 🔥 SỬA LẠI CÂU LỆNH LẤY SNAPSHOT: Truyền MedicalRecordId để truy vết ra Bệnh nhân, từ đó tìm đúng Range
+        String sqlGetSnapshot = "SELECT TOP 1 rr.RefMin, rr.RefMax, p.Unit "
+                + "FROM LabTestParameter p "
+                + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId AND rr.IsActive = 1 "
+                + "JOIN MedicalRecord mr ON mr.MedicalRecordId = ? "
+                + "JOIN Patient pat ON mr.PatientId = pat.PatientId "
+                + "WHERE p.ParameterId = ? "
+                + "AND ("
+                + "     rr.Gender IS NULL "
+                + "     OR rr.Gender = 'ALL' "
+                + "     OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
+                + "     OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
+                + ") "
+                + "AND (rr.AgeMinDays IS NULL OR DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays) "
+                // Ưu tiên Rule càng hẹp (có giới tính cụ thể) càng tốt
+                + "ORDER BY CASE WHEN rr.Gender = 'ALL' THEN 2 ELSE 1 END ASC";
+
+        String sqlCheckResult = "SELECT ResultId FROM LabResult WHERE LabOrderTestId = ? AND ParameterId = ?";
+        String sqlInsertResult = "INSERT INTO LabResult (LabOrderTestId, ParameterId, ResultValue, Flag, RefMin, RefMax, Unit, ResultTime) VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
+        String sqlUpdateResult = "UPDATE LabResult SET ResultValue = ?, Flag = ?, RefMin = ?, RefMax = ?, Unit = ?, ResultTime = GETDATE() WHERE ResultId = ?";
+        String sqlUpdateOrderTest = "UPDATE LabOrderTest SET Status = 'COMPLETED' WHERE LabOrderTestId = ?";
+        String sqlUpdateBatch = "UPDATE LabTestBatch SET Status = 'COMPLETED' "
+                + "WHERE BatchId IN (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
+                + "AND NOT EXISTS ("
+                + "    SELECT 1 FROM LabOrderTest lot2 "
+                + "    WHERE lot2.BatchId = (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
+                + "    AND lot2.Status != 'COMPLETED'"
+                + "    AND lot2.Status != 'CANCELLED'"
+                + ")";
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+
+            java.sql.PreparedStatement stGetSnapshot = conn.prepareStatement(sqlGetSnapshot);
+            java.sql.PreparedStatement stCheckResult = conn.prepareStatement(sqlCheckResult);
+            java.sql.PreparedStatement stInsert = conn.prepareStatement(sqlInsertResult);
+            java.sql.PreparedStatement stUpdateResult = conn.prepareStatement(sqlUpdateResult);
+            java.sql.PreparedStatement stUpdateOrder = conn.prepareStatement(sqlUpdateOrderTest);
+            java.sql.PreparedStatement stUpdateBatch = conn.prepareStatement(sqlUpdateBatch);
+
+            boolean hasInsert = false;
+            boolean hasUpdate = false;
+            boolean hasStatusUpdate = false;
+
+            if (orderTestIds != null && paramIds != null) {
+                for (int i = 0; i < orderTestIds.length; i++) {
+                    String orderTestId = orderTestIds[i];
+                    String paramId = paramIds[i];
+
+                    String[] resultValues = parameterMap.get("result_" + orderTestId + "_" + paramId);
+                    String resultValue = (resultValues != null && resultValues.length > 0) ? resultValues[0] : "";
+
+                    if (resultValue != null && !resultValue.trim().isEmpty()) {
+
+                        java.math.BigDecimal refMin = null;
+                        java.math.BigDecimal refMax = null;
+                        String unit = null;
+
+                        stGetSnapshot.setInt(1, medicalRecordId);
+                        stGetSnapshot.setInt(2, Integer.parseInt(paramId));
+
+                        try (java.sql.ResultSet rsSnap = stGetSnapshot.executeQuery()) {
+                            if (rsSnap.next()) {
+                                refMin = rsSnap.getBigDecimal("RefMin");
+                                refMax = rsSnap.getBigDecimal("RefMax");
+                                unit = rsSnap.getString("Unit");
+                            }
+                        }
+
+                        // AUTO FLAG LOGIC (Giữ nguyên của bạn)
+                        String finalFlag = null;
+                        try {
+                            double val = Double.parseDouble(resultValue.replace(",", ".").trim());
+                            if (refMin != null && val < refMin.doubleValue()) {
+                                finalFlag = "L";
+                            } else if (refMax != null && val > refMax.doubleValue()) {
+                                finalFlag = "H";
+                            }
+                        } catch (Exception e) {
+                        }
+
+                        if (finalFlag == null) {
+                            String[] flags = parameterMap.get("flag_" + orderTestId + "_" + paramId);
+                            if (flags != null && flags.length > 0 && flags[0] != null) {
+                                String uiFlag = flags[0].trim().toLowerCase();
+                                if (uiFlag.equals("on") || uiFlag.equals("true") || uiFlag.equals("y") || uiFlag.equals("1")) {
+                                    finalFlag = "Y";
+                                }
+                            }
+                        }
+
+                        Integer existResultId = null;
+                        stCheckResult.setInt(1, Integer.parseInt(orderTestId));
+                        stCheckResult.setInt(2, Integer.parseInt(paramId));
+                        try (java.sql.ResultSet rsCheck = stCheckResult.executeQuery()) {
+                            if (rsCheck.next()) {
+                                existResultId = rsCheck.getInt("ResultId");
+                            }
+                        }
+
+                        if (existResultId == null) {
+                            stInsert.setInt(1, Integer.parseInt(orderTestId));
+                            stInsert.setInt(2, Integer.parseInt(paramId));
+                            stInsert.setString(3, resultValue.trim());
+                            stInsert.setString(4, finalFlag);
+                            stInsert.setBigDecimal(5, refMin);
+                            stInsert.setBigDecimal(6, refMax);
+                            stInsert.setString(7, unit);
+                            stInsert.addBatch();
+                            hasInsert = true;
+                        } else {
+                            stUpdateResult.setString(1, resultValue.trim());
+                            stUpdateResult.setString(2, finalFlag);
+                            stUpdateResult.setBigDecimal(3, refMin);
+                            stUpdateResult.setBigDecimal(4, refMax);
+                            stUpdateResult.setString(5, unit);
+                            stUpdateResult.setInt(6, existResultId);
+                            stUpdateResult.addBatch();
+                            hasUpdate = true;
+                        }
+
+                        stUpdateOrder.setInt(1, Integer.parseInt(orderTestId));
+                        stUpdateOrder.addBatch();
+
+                        stUpdateBatch.setInt(1, Integer.parseInt(orderTestId));
+                        stUpdateBatch.setInt(2, Integer.parseInt(orderTestId));
+                        stUpdateBatch.addBatch();
+                        hasStatusUpdate = true;
+                    }
+                }
+            }
+
+            if (hasInsert) {
+                stInsert.executeBatch();
+            }
+            if (hasUpdate) {
+                stUpdateResult.executeBatch();
+            }
+            if (hasStatusUpdate) {
+                stUpdateOrder.executeBatch();
+                stUpdateBatch.executeBatch();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (Exception ex) {
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            // (Bạn copy lại đoạn Finally đóng PreparedStatement vào nhé)
+        }
+    }
 }
