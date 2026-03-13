@@ -72,12 +72,12 @@ public class LabOrderEditServlet extends HttpServlet {
             // Thông báo kết quả
             if (success) {
                 if (labTestIds == null || labTestIds.length == 0) {
-                    session.setAttribute("success", "Đã gỡ toàn bộ chỉ định. Lô xét nghiệm đã tự động được hủy!");
+                    session.setAttribute("success", "Cancel lab test batch successful!");
                 } else {
-                    session.setAttribute("success", "Cập nhật Lô xét nghiệm thành công! Hóa đơn đã được điều chỉnh.");
+                    session.setAttribute("success", "Update lab test batch successful!");
                 }
             } else {
-                session.setAttribute("error", "Không thể cập nhật! Lô này có thể đã được thu tiền hoặc đang xử lý.");
+                session.setAttribute("error", "Error update lab test batch!");
             }
 
             // Quay xe về lại đúng trang Bệnh án
