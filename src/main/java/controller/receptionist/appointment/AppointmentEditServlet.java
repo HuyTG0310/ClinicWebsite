@@ -54,17 +54,17 @@ public class AppointmentEditServlet extends HttpServlet {
                 boolean success = appDAO.updateAppointmentRoom(appointmentId, roomId);
 
                 if (success) {
-                    request.getSession().setAttribute("success", "Đã chuyển phòng khám thành công!");
+                    request.getSession().setAttribute("success", "Changed room successfully!");
                 } else {
-                    request.getSession().setAttribute("error", "Chuyển phòng thất bại. Vui lòng thử lại!");
+                    request.getSession().setAttribute("error", "Change room error!");
                 }
             } else if ("cancel".equals(action)) {
                 boolean success = appDAO.cancelAppointment(appointmentId);
 
                 if (success) {
-                    request.getSession().setAttribute("success", "Đã hủy phiếu khám thành công!");
+                    request.getSession().setAttribute("success", "Cancel appointment successfully!");
                 } else {
-                    request.getSession().setAttribute("error", "Hủy thất bại. Có thể phiếu khám này đã được xử lý!");
+                    request.getSession().setAttribute("error", "Cancel error!");
                 }
             }
 

@@ -46,7 +46,7 @@ public class AppointmentListServlet extends HttpServlet {
 
         String msg = request.getParameter("msg");
         if ("success".equals(msg)) {
-            request.setAttribute("successMessage", "Đã tạo phiếu khám thành công! Bệnh nhân đã vào hàng đợi.");
+            request.setAttribute("successMessage", "Create appointment successfully. Patient is currently in queue");
         }
 
         HttpSession session = request.getSession(false);

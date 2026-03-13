@@ -103,7 +103,7 @@ public class AppointmentCreateServlet extends HttpServlet {
             String paymentMethod = request.getParameter("paymentMethod");
 
             if (patientIdRaw == null || roomIdRaw == null || patientIdRaw.isEmpty() || roomIdRaw.isEmpty()) {
-                request.setAttribute("error", "Vui lòng chọn đầy đủ Bệnh nhân và Phòng khám!");
+                request.setAttribute("error", "Please choose patient and room!");
                 doGet(request, response);
                 return;
             }
@@ -125,13 +125,13 @@ public class AppointmentCreateServlet extends HttpServlet {
                     response.sendRedirect(basePath + "/service-order/detail?soId=" + newServiceOrderId);
                 }
             } else {
-                request.setAttribute("error", "Lỗi hệ thống: Không thể tạo phiếu khám và hóa đơn");
+                request.setAttribute("error", "Erorr system: Can not create appointment!");
                 doGet(request, response);
             }
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            request.setAttribute("error", "Dữ liệu ID không hợp lệ!");
+            request.setAttribute("error", "ID is invalid!");
             doGet(request, response);
         } catch (Exception e) {
             e.printStackTrace();
