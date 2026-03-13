@@ -529,4 +529,47 @@ public class MedicalRecordDAO extends DBContext {
         return null;
     }
 
+    public java.util.Map<String, String> getPrescriptionPrintInfo(int medicalRecordId) {
+        java.util.Map<String, String> info = new java.util.HashMap<>();
+
+        // Cần xem lại cấu trúc DB của bạn để JOIN cho chuẩn nhé (Dưới đây là form chuẩn chung)
+        String sql = "SELECT \n"
+                + "    p.FullName AS PatientName, \n"
+                + "    (YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, \n"
+                + "    p.Gender, \n"
+                + "    mr.Weight, \n"
+                + "    p.Address, \n"
+                + "    mr.Diagnosis, \n"
+                + "    u.FullName AS DoctorName \n"
+                + "FROM MedicalRecord mr \n"
+                + "JOIN Appointment a ON mr.MedicalRecordId = a.MedicalRecordId \n"
+                + "JOIN Patient p ON a.PatientId = p.PatientId \n"
+                + "LEFT JOIN [User] u ON mr.ResponsibleDoctorId = u.UserId \n"
+                + "WHERE mr.MedicalRecordId = ?;";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    info.put("PatientName", rs.getString("PatientName"));
+                    info.put("Age", String.valueOf(rs.getInt("Age")));
+                    info.put("Gender", rs.getString("Gender"));
+
+                    // Cân nặng có thể null
+                    double weight = rs.getDouble("Weight");
+                    info.put("Weight", rs.wasNull() ? "__" : String.valueOf(weight));
+
+                    info.put("Address", rs.getString("Address") != null ? rs.getString("Address") : "Chưa cập nhật");
+                    info.put("Diagnosis", rs.getString("Diagnosis") != null ? rs.getString("Diagnosis") : "Chưa có chẩn đoán");
+                    info.put("DoctorName", rs.getString("DoctorName"));
+                    info.put("HealthInsuranceCode", "Không có BHYT"); // Có thể móc từ bảng Patient nếu có
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return info;
+    }
+
 }

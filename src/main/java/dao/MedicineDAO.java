@@ -266,6 +266,36 @@ public class MedicineDAO extends DBContext {
         }
         return list;
     }
+    
+    
+    public java.util.List<model.PrescriptionItem> getPrescriptionItems(int medicalRecordId) {
+        java.util.List<model.PrescriptionItem> list = new java.util.ArrayList<>();
+
+        // Giả sử bạn lưu đơn thuốc vào bảng PrescriptionDetail
+        String sql = "SELECT m.MedicineName, m.Unit, pd.Quantity, pd.Dosage, pd.Note "
+                + "FROM Prescription pd "
+                + "JOIN Medicine m ON pd.MedicineId = m.MedicineId "
+                + "WHERE pd.MedicalRecordId = ?"; // Hoặc nối qua bảng Prescription nếu bạn tách riêng
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+            
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    model.PrescriptionItem item = new model.PrescriptionItem();
+                    item.setMedicineName(rs.getString("MedicineName"));
+                    item.setUnit(rs.getString("Unit"));
+                    item.setQuantity(rs.getInt("Quantity"));
+                    item.setDosage(rs.getString("Dosage"));
+                    item.setNote(rs.getString("Note"));
+                    list.add(item);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public static void main(String[] args) {
         Medicine m = new Medicine(1, "pARAMACE", "Vỉ", "Ko", "ko", "ko", true);
