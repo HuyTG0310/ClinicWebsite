@@ -22,7 +22,19 @@ public class MedicalRecordPrintServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String basePath;
 
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
         HttpSession session = request.getSession(false);
         User currentUser = (session != null) ? (User) session.getAttribute("user") : null;
 
@@ -46,8 +58,7 @@ public class MedicalRecordPrintServlet extends HttpServlet {
 
             if (mr == null) {
                 request.getSession().setAttribute("error", "Medical record not found!");
-                String referer = request.getHeader("Referer");
-                response.sendRedirect(referer != null ? referer : request.getContextPath() + "/");
+                response.sendRedirect(basePath + "/medical-record/list");
                 return;
             }
 
@@ -59,8 +70,7 @@ public class MedicalRecordPrintServlet extends HttpServlet {
 
             if (!canView) {
                 request.getSession().setAttribute("error", "SECURITY: You HAVE NO PERMISSION to print this medical record!");
-                String referer = request.getHeader("Referer");
-                response.sendRedirect(referer != null ? referer : request.getContextPath() + "/");
+                response.sendRedirect(basePath + "/medical-record/list");
                 return;
             }
 

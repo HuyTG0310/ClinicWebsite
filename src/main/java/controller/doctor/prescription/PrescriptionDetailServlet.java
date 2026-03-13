@@ -25,6 +25,23 @@ public class PrescriptionDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         model.User currentUser = (model.User) request.getSession().getAttribute("user");
         int currentUserId = currentUser.getUserId();
 
@@ -35,7 +52,7 @@ public class PrescriptionDetailServlet extends HttpServlet {
             // 1. Lấy ID của Bệnh án từ URL (ví dụ: ?id=105)
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "doctor/prescription/list");
+                response.sendRedirect(basePath + "/prescription/list");
                 return;
             }
             int medicalRecordId = Integer.parseInt(idParam);
@@ -45,14 +62,20 @@ public class PrescriptionDetailServlet extends HttpServlet {
             PrescriptionDAO pDao = new PrescriptionDAO();
             MedicineDAO mDao = new MedicineDAO();
 
+            if (!pDao.isExistPrescription(medicalRecordId)) {
+                request.getSession().setAttribute("error", "Prescription not found");
+                response.sendRedirect(basePath + "/prescription/list");
+                return;
+            }
+
             boolean[] perms = meDao.checkPermissionDetail(medicalRecordId, currentUserId, isAdmin);
             boolean canView = perms[0];
             boolean canEdit = perms[1];
 
             if (!canView) {
                 // Có Bác sĩ nào cố tình gõ URL để xem lén -> Đá văng ra ngoài!
-                request.getSession().setAttribute("error", "Bạn không có quyền xem đơn thuốc này!");
-                response.sendRedirect(request.getContextPath() + "/doctor/prescription/list");
+                request.getSession().setAttribute("error", "You have no permission to view this prescription!");
+                response.sendRedirect(basePath + "/prescription/list");
                 return;
             }
 
@@ -60,23 +83,6 @@ public class PrescriptionDetailServlet extends HttpServlet {
             Map<String, Object> recordInfo = pDao.getMedicalRecordDetail(medicalRecordId);
             List<Map<String, Object>> prescribedMedicines = pDao.getPrescribedMedicines(medicalRecordId);
             List<Medicine> allMedicines = mDao.getAllActiveMedicines(); // HÀM CŨ CỦA BẠN ĐÂY!
-
-            String uri = request.getRequestURI();
-            String ctx = request.getContextPath();
-
-            String layout;
-            String basePath;
-
-            if (uri.startsWith(ctx + "/admin")) {
-                layout = "/WEB-INF/layout/adminLayout.jsp";
-                basePath = ctx + "/admin";
-            } else if (uri.startsWith(ctx + "/doctor")) {
-                layout = "/WEB-INF/layout/doctorLayout.jsp";
-                basePath = ctx + "/doctor";
-            } else {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
 
             request.setAttribute("basePath", basePath);
             request.setAttribute("record", recordInfo);
@@ -93,7 +99,7 @@ public class PrescriptionDetailServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/prescription/list?error=InvalidRequest");
+            response.sendRedirect(basePath + "/prescription/list?error=InvalidRequest");
         }
     }
 

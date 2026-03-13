@@ -4,6 +4,8 @@
  */
 package dao;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import util.DBContext;
 
 /**
@@ -56,6 +58,20 @@ public class PrescriptionDAO extends DBContext {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public boolean isExistPrescription(int mrId) {
+        String sql = "SELECT * FROM Prescription WHERE MedicalRecordId = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, mrId);
+            
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private java.util.Map<String, Object> mapResultSetToPrescription(java.sql.ResultSet rs) throws Exception {

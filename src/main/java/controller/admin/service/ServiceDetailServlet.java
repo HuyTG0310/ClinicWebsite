@@ -36,6 +36,7 @@ public class ServiceDetailServlet extends HttpServlet {
             Service service = serviceDAO.getById(id);
 
             if (service == null) {
+                request.getSession().setAttribute("error", "Service not found!");
                 response.sendRedirect(request.getContextPath() + "/admin/service/list");
                 return;
             }

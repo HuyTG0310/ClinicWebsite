@@ -56,14 +56,12 @@ public class MedicalRecordDetailServlet extends HttpServlet {
             }
 
             if (mr == null) {
-                request.getSession().setAttribute("error", "Không tìm thấy Bệnh án!");
-                response.sendRedirect(request.getContextPath() + "/medical-record/list");
+                request.getSession().setAttribute("error", "Medical record not found!");
+                response.sendRedirect(basePath + "/medical-record/list");
                 return;
             }
 
-            // ==========================================
-            // 3. BỨC TƯỜNG LỬA BẢO MẬT (PHÂN QUYỀN)
-            // ==========================================
+
             model.User currentUser = (model.User) request.getSession().getAttribute("user");
             int currentUserId = currentUser.getUserId();
             boolean isAdmin = (currentUser.getRoleId() == 1);
@@ -75,8 +73,8 @@ public class MedicalRecordDetailServlet extends HttpServlet {
 
             if (!canView) {
                 // Ai đó cố tình gõ URL lụi -> Đá văng ra ngoài!
-                request.getSession().setAttribute("error", "⛔ BẢO MẬT: Bạn không có quyền xem bệnh án này!");
-                response.sendRedirect(request.getContextPath() + "/medical-record/list");
+                request.getSession().setAttribute("error", "⛔ SECURITY: You have no permission to view this medical record!");
+                response.sendRedirect(basePath + "/medical-record/list");
                 return;
             }
 

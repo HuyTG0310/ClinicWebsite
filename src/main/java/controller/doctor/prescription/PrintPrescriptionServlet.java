@@ -4,6 +4,7 @@
  */
 package controller.doctor.prescription;
 
+import dao.PrescriptionDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -12,23 +13,41 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 @WebServlet(name = "PrintPrescriptionServlet", urlPatterns = {"/doctor/prescription/print", "/admin/prescription/print"})
 public class PrintPrescriptionServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         String mrIdStr = request.getParameter("medicalRecordId");
 
         if (mrIdStr == null || mrIdStr.trim().isEmpty()) {
-            response.getWriter().print("<h3>Không tìm thấy Mã Bệnh Án để in đơn thuốc!</h3>");
+            request.getSession().setAttribute("error", "Prescription not found");
+            response.sendRedirect(basePath + "/prescription/list");
             return;
         }
 
         try {
             int medicalRecordId = Integer.parseInt(mrIdStr);
+            PrescriptionDAO pDao = new PrescriptionDAO();
+            if (!pDao.isExistPrescription(medicalRecordId)) {
+                request.getSession().setAttribute("error", "Prescription not found");
+                response.sendRedirect(basePath + "/prescription/list");
+                return;
+            }
 
             // 1. Gọi DAO lấy thông tin Bệnh nhân & Chẩn đoán
             dao.MedicalRecordDAO mrDAO = new dao.MedicalRecordDAO();
@@ -48,8 +67,8 @@ public class PrintPrescriptionServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/doctor/prescription/printPrescription.jsp").forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            response.getWriter().print("<h3>Lỗi hệ thống khi tải dữ liệu Đơn thuốc!</h3>");
+            request.getSession().setAttribute("error", "Prescription not found");
+            response.sendRedirect(basePath + "/prescription/list");
         }
     }
 

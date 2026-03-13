@@ -84,7 +84,7 @@ public class MedicalRecordEditServlet extends HttpServlet {
 
                 if (mr == null) {
                     request.getSession().setAttribute("error", "Medical record not found!");
-                    response.sendRedirect(request.getContextPath() + "/medical-record/list");
+                    response.sendRedirect(basePath + "/medical-record/list");
                     return;
                 }
             }
@@ -98,7 +98,7 @@ public class MedicalRecordEditServlet extends HttpServlet {
                 boolean[] perms = mrDAO.checkPermissionDetail(actualRecordId, currentUser.getUserId(), isAdmin);
                 if (!perms[1]) { // perms[1] là cờ canEdit
                     request.getSession().setAttribute("error", "SECURITY: You DON'T HAVE PERMISSION to edit this medical record!");
-                    response.sendRedirect(request.getContextPath() + "/medical-record/list");
+                    response.sendRedirect(basePath + "/medical-record/list");
                     return;
                 }
 
