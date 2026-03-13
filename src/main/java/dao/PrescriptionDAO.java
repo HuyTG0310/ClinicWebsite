@@ -109,7 +109,7 @@ public class PrescriptionDAO extends DBContext {
         }
         return map;
     }
-    
+
     public java.util.List<java.util.Map<String, Object>> searchPrescriptions(String keyword, String dateStr, int currentUserId) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
         StringBuilder sql = new StringBuilder(BASE_PR_SQL);
@@ -150,6 +150,36 @@ public class PrescriptionDAO extends DBContext {
             try (java.sql.ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToPrescription(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public java.util.List<java.util.Map<String, Object>> getPrescribedMedicines(int medicalRecordId) {
+        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+        String sql = "SELECT pr.PrescriptionId, pr.MedicineId, m.MedicineName, m.Unit, "
+                + "pr.Quantity, pr.Dosage, pr.Note, m.Usage "
+                + "FROM Prescription pr "
+                + "JOIN Medicine m ON pr.MedicineId = m.MedicineId "
+                + "WHERE pr.MedicalRecordId = ?";
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setInt(1, medicalRecordId);
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("prescriptionId", rs.getInt("PrescriptionId"));
+                    map.put("medicineId", rs.getInt("MedicineId"));
+                    map.put("medicineName", rs.getString("MedicineName"));
+                    map.put("unit", rs.getString("Unit"));
+                    map.put("quantity", rs.getInt("Quantity"));
+                    map.put("dosage", rs.getString("Dosage"));
+                    map.put("note", rs.getString("Note"));
+                    map.put("usage", rs.getString("Usage")); // Cách dùng mặc định của thuốc
+                    list.add(map);
                 }
             }
         } catch (Exception e) {
