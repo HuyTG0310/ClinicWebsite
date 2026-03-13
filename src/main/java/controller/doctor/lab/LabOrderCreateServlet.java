@@ -79,9 +79,9 @@ public class LabOrderCreateServlet extends HttpServlet {
 
             // 3. Xử lý kết quả và thông báo
             if (success) {
-                session.setAttribute("success", "Đã tạo Phiếu Chỉ Định Cận lâm sàng thành công!");
+                session.setAttribute("success", "The Clinical Laboratory Order Form has been successfully created.!");
             } else {
-                session.setAttribute("error", "Lỗi hệ thống khi tạo phiếu. Vui lòng thử lại!");
+                session.setAttribute("error", "Error. Please try again!");
             }
 
             // 4. QUAY XE: Bắn Bác sĩ về lại đúng trang Bệnh án đang mở
