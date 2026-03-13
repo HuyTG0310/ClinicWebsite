@@ -127,6 +127,14 @@
                 Manage medical record
             </a>
         </li>
+        
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'managePrescription' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/prescription/list">
+                <i class="fa-solid fa-prescription me-2"></i>
+                Manage prescription
+            </a>
+        </li>
 
 
 
