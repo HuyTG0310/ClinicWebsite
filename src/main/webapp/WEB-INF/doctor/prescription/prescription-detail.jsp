@@ -4,25 +4,6 @@
 
 
 <div class="container-fluid mb-5">
-
-    <c:if test="${sessionScope.success != null}">
-        <div class="alert alert-success alert-dismissible fade show shadow-sm">
-            <i class="fas fa-check-circle me-2"></i>${sessionScope.success}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <% session.removeAttribute("success"); %>
-    </c:if>
-
-    <c:if test="${sessionScope.error != null}">
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
-            <i class="fas fa-exclamation-triangle me-2"></i>${sessionScope.error}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <% session.removeAttribute("error");%>
-    </c:if>
-
-
-
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -62,6 +43,21 @@
 
     </div>
 
+    <c:if test="${sessionScope.success != null}">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm">
+            <i class="fas fa-check-circle me-2"></i>${sessionScope.success}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% session.removeAttribute("success"); %>
+    </c:if>
+
+    <c:if test="${sessionScope.error != null}">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+            <i class="fas fa-exclamation-triangle me-2"></i>${sessionScope.error}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% session.removeAttribute("error");%>
+    </c:if>
 
 
     <!-- PATIENT INFORMATION -->

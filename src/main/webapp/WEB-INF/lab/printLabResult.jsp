@@ -156,7 +156,7 @@
                         <tr>
                             <td class="ps-4">${r.parameterName}</td>
                             <td class="text-center fw-bold ${r.isAbnormal ? 'text-danger' : ''}">
-                                ${not empty r.resultValue ? r.resultValue : ''}
+                                ${not empty r.resultValue ? r.resultValue : 'Hủy'}
 
                                 <c:if test="${r.isAbnormal}">
                                     <span style="font-size: 14pt; margin-left: 2px;">
@@ -179,14 +179,14 @@
                     <div class="fw-bold">Xem xét kết quả:</div>
                     <div class="fst-italic" style="font-size: 9pt;">Reviewed Result</div>
                     <div style="height: 80px;"></div>
-                    <div class="fw-bold">BS. CKI Nguyễn Văn A</div>
+                    <div class="fw-bold">BS. ${mr.doctorName}</div>
                 </div>
                 <div class="col-6 text-center">
                     <div class="fw-bold">Khoa Xét Nghiệm</div>
                     <div class="fst-italic" style="font-size: 9pt;">Laboratory Department</div>
                     <div style="height: 80px;">
                     </div>
-                    <div class="fw-bold">KTV. ${sessionScope.user.fullName}</div>
+                    <div class="fw-bold">KTV. ${inChargeLab}</div>
                 </div>
             </div>
 

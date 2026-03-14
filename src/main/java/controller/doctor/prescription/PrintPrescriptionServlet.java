@@ -4,7 +4,7 @@
  */
 package controller.doctor.prescription;
 
-import dao.PrescriptionDAO;
+import dao.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -62,7 +62,7 @@ public class PrintPrescriptionServlet extends HttpServlet {
             request.setAttribute("info", info);
             request.setAttribute("prescriptionList", prescriptionList);
             request.setAttribute("currentDate", new java.util.Date()); // Ngày giờ in hiện tại
-
+            
             // 4. Chuyển hướng ra trang JSP mẫu giấy A4
             request.getRequestDispatcher("/WEB-INF/doctor/prescription/printPrescription.jsp").forward(request, response);
 

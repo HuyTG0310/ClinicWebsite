@@ -1545,4 +1545,26 @@ public class LabTestDAO extends DBContext {
             // (Bạn copy lại đoạn Finally đóng PreparedStatement vào nhé)
         }
     }
+
+    public int getInChargeLabTechinicianId(int mrId) {
+        String sql = "SELECT TOP 1 (TechnicianId) FROM LabTestBatch WHERE MedicalRecordId = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, mrId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("TechnicianId");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(new LabTestDAO().getInChargeLabTechinicianId(19));
+    }
 }
