@@ -17,20 +17,18 @@
         </div>
 
         <div class="d-flex gap-2">
-
-            <c:if test="${currentStatus == 'PAID'}">
-                <a href="${basePath}/receipt/print?mrId=${mrId}&soId=${soId}&patientId=${patientId}&time=${param.time}"
-                   target="_blank"
-                   class="btn btn-primary">
-                    <i class="fa-solid fa-print me-2"></i>Print receipt
-                </a>
-            </c:if>
-
             <a href="${basePath}/service-order/list"
                class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-2"></i>Back to list
             </a>
-
+               
+            <c:if test="${currentStatus == 'PAID'}">
+                <a href="${basePath}/receipt/print?mrId=${mrId}&soId=${soId}&patientId=${patientId}&time=${param.time}"
+                   target="_blank"
+                   class="btn btn-primary">
+                    <i class="fa-solid fa-print me-2"></i>Print
+                </a>
+            </c:if>
         </div>
 
     </div>

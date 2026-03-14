@@ -17,11 +17,30 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author huytr
  */
-@WebServlet(name = "LabCheckinServlet", urlPatterns = {"/lab/test/checkin"})
+@WebServlet(name = "LabCheckinServlet", urlPatterns = {"/lab/lab-test/checkin", "/admin/lab-test/checkin"})
 public class LabCheckinServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+
         try {
             int mrId = Integer.parseInt(request.getParameter("mrId"));
             dao.LabTestDAO labDao = new dao.LabTestDAO();
@@ -38,15 +57,30 @@ public class LabCheckinServlet extends HttpServlet {
             request.setAttribute("activePage", "manageTest");
             request.setAttribute("contentPage", "/WEB-INF/lab/labTestCheckin.jsp");
 
-            request.getRequestDispatcher("/WEB-INF/layout/labLayout.jsp").forward(request, response);
+            request.getRequestDispatcher(layout).forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/lab/queue/list");
+            response.sendRedirect(basePath + "/lab-queue/list");
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+        
         try {
             int mrId = Integer.parseInt(request.getParameter("mrId"));
             String action = request.getParameter("action");
@@ -68,10 +102,10 @@ public class LabCheckinServlet extends HttpServlet {
             }
 
             // Xử lý Check-in xong -> Chuyển thẳng sang trang Nhập liệu (Edit)
-            response.sendRedirect(request.getContextPath() + "/lab/test/edit?mrId=" + mrId);
+            response.sendRedirect(basePath + "/lab-test/edit?mrId=" + mrId);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/lab/queue/list");
+            response.sendRedirect(basePath + "/lab-queue/list");
         }
     }
 }

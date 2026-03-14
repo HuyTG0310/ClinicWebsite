@@ -19,7 +19,7 @@ import java.util.*;
  *
  * @author huytr
  */
-@WebServlet(name = "PrintLabResultServlet", urlPatterns = {"/lab/test/print", "/doctor/test/print", "/admin/test/print"})
+@WebServlet(name = "PrintLabResultServlet", urlPatterns = {"/lab/lab-test/print", "/doctor/lab-test/print", "/admin/lab-test/print"})
 public class PrintLabResultServlet extends HttpServlet {
 
     @Override

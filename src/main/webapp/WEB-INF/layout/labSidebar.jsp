@@ -21,7 +21,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageTest' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/queue/list">
+               href="${pageContext.request.contextPath}/lab/lab-queue/list">
                 <i class="fa-solid fa-vials me-2"></i>
                 Manage test
             </a>

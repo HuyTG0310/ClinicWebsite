@@ -18,7 +18,11 @@
         </div>
 
         <div class="d-flex gap-2">
-
+            <a href="${basePath}/prescription/list"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+               
             <a href="${basePath}/prescription/print?medicalRecordId=${record.medicalRecordId}"
                target="_blank"
                class="btn btn-primary">
@@ -33,11 +37,6 @@
                     <i class="fas fa-edit me-2"></i>Edit
                 </button>
             </c:if>
-
-            <a href="${basePath}/prescription/list"
-               class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to list
-            </a>
 
         </div>
 

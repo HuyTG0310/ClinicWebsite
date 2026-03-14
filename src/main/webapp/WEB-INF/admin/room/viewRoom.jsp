@@ -18,19 +18,17 @@
         </div>
 
         <div class="d-flex gap-2">
-
+            <a href="${basePath}/room/list"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+               
             <c:if test="${hasRoomEdit}">
                 <button class="btn btn-warning"
                         onclick="openEditModal(${room.roomId})">
                     <i class="fas fa-edit me-2"></i>Edit
                 </button>
             </c:if>
-
-            <a href="${basePath}/room/list"
-               class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to list
-            </a>
-
         </div>
 
     </div>

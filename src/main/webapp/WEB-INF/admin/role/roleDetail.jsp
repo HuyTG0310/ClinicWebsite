@@ -15,6 +15,11 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="list" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Back to list
+            </a>
+
             <button type="button"
                     class="btn btn-warning px-4"
                     data-bs-toggle="modal"
@@ -23,11 +28,6 @@
                 <i class="fa-solid fa-pen-to-square me-2"></i>
                 Edit
             </button>
-
-            <a href="list" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Back to list
-            </a>
         </div>
 
     </div>

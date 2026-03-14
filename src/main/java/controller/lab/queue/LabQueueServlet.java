@@ -18,12 +18,31 @@ import java.util.*;
  *
  * @author huytr
  */
-@WebServlet(name = "LabQueueServlet", urlPatterns = {"/lab/queue/list"})
+@WebServlet(name = "LabQueueServlet", urlPatterns = {"/lab/lab-queue/list", "/admin/lab-queue/list"})
 public class LabQueueServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+
         String search = request.getParameter("search");
         String status = request.getParameter("status");
 
@@ -40,7 +59,7 @@ public class LabQueueServlet extends HttpServlet {
         request.setAttribute("pageTitle", "Manage Test");
         request.setAttribute("activePage", "manageTest");
         request.setAttribute("contentPage", "/WEB-INF/lab/queue.jsp");
-        request.getRequestDispatcher("/WEB-INF/layout/labLayout.jsp").forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override

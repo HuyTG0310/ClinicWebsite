@@ -13,12 +13,12 @@
             <p class="text-muted mb-0">View and update service information</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editServiceModal">
-                <i class="fa-solid fa-pen-to-square me-1"></i>Edit
-            </button>
             <a href="${pageContext.request.contextPath}/admin/service/list" class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i>Back to list
             </a>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editServiceModal">
+                <i class="fa-solid fa-pen-to-square me-1"></i>Edit
+            </button>
         </div>
     </div>
 

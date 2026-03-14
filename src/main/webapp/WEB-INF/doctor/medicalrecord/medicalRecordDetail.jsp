@@ -22,13 +22,6 @@
                 <i class="fas fa-arrow-left me-2"></i>Back to list
             </a>
 
-            <c:if test="${canEdit}">
-                <a href="${basePath}/medical-record/edit?id=${mr.medicalRecordId}"
-                   class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>Edit
-                </a>
-            </c:if>
-
             <c:if test="${not empty consolidatedResults}">
                 <a href="${basePath}/test/print?mrId=${mr.medicalRecordId}"
                    target="_blank"
@@ -50,6 +43,13 @@
                class="btn btn-primary">
                 <i class="fas fa-print me-2"></i>Print Record
             </a>
+
+            <c:if test="${canEdit}">
+                <a href="${basePath}/medical-record/edit?id=${mr.medicalRecordId}"
+                   class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+            </c:if>
 
         </div>
     </div>
@@ -237,84 +237,84 @@
 
                             <tbody>
 
-                            <c:set var="currCat" value="" />
-                            <c:set var="currTest" value="" />
+                                <c:set var="currCat" value="" />
+                                <c:set var="currTest" value="" />
 
-                            <c:forEach items="${consolidatedResults}" var="r">
+                                <c:forEach items="${consolidatedResults}" var="r">
 
-                                <!-- CATEGORY -->
-                                <c:if test="${r.categoryName != currCat}">
-                                    <tr class="table-secondary">
-                                        <td colspan="4" class="fw-bold">
-                                            <i class="fas fa-layer-group me-2"></i>${r.categoryName}
-                                        </td>
-                                    </tr>
-                                    <c:set var="currCat" value="${r.categoryName}" />
-                                    <c:set var="currTest" value="" />
-                                </c:if>
-
-                                <!-- PANEL TEST -->
-                                <c:if test="${r.testName != currTest}">
-                                    <c:if test="${r.isPanel}">
-                                        <tr class="bg-light">
-                                            <td colspan="4" class="fw-semibold fst-italic">
-                                                <i class="fas fa-vial me-2 text-secondary"></i>
-                                                ${r.testName}
+                                    <!-- CATEGORY -->
+                                    <c:if test="${r.categoryName != currCat}">
+                                        <tr class="table-secondary">
+                                            <td colspan="4" class="fw-bold">
+                                                <i class="fas fa-layer-group me-2"></i>${r.categoryName}
                                             </td>
                                         </tr>
+                                        <c:set var="currCat" value="${r.categoryName}" />
+                                        <c:set var="currTest" value="" />
                                     </c:if>
-                                    <c:set var="currTest" value="${r.testName}" />
-                                </c:if>
 
-                                <!-- PARAMETER -->
-                                <tr>
+                                    <!-- PANEL TEST -->
+                                    <c:if test="${r.testName != currTest}">
+                                        <c:if test="${r.isPanel}">
+                                            <tr class="bg-light">
+                                                <td colspan="4" class="fw-semibold fst-italic">
+                                                    <i class="fas fa-vial me-2 text-secondary"></i>
+                                                    ${r.testName}
+                                                </td>
+                                            </tr>
+                                        </c:if>
+                                        <c:set var="currTest" value="${r.testName}" />
+                                    </c:if>
 
-                                    <td class="ps-4">
-                                        ${r.parameterName}
-                                    </td>
+                                    <!-- PARAMETER -->
+                                    <tr>
 
-                                    <td class="text-center">
+                                        <td class="ps-4">
+                                            ${r.parameterName}
+                                        </td>
 
-                                <c:choose>
+                                        <td class="text-center">
 
-                                    <c:when test="${r.status == 'REJECTED'}">
-                                        <span class="badge bg-danger text-wrap text-start lh-base"
-                                              style="max-width:150px;"
-                                              title="${r.rejectReason}">
-                                            <i class="fas fa-ban me-1"></i>
-                                            Cancelled: ${r.rejectReason}
-                                        </span>
-                                    </c:when>
+                                            <c:choose>
 
-                                    <c:when test="${not empty r.resultValue}">
-                                        <span class="${r.isAbnormal ? 'text-danger fw-bold' : ''}">
-                                            ${r.resultValue}
-                                        </span>
-                                    </c:when>
+                                                <c:when test="${r.status == 'REJECTED'}">
+                                                    <span class="badge bg-danger text-wrap text-start lh-base"
+                                                          style="max-width:150px;"
+                                                          title="${r.rejectReason}">
+                                                        <i class="fas fa-ban me-1"></i>
+                                                        Cancelled: ${r.rejectReason}
+                                                    </span>
+                                                </c:when>
 
-                                    <c:otherwise>
-                                        <span class="badge bg-warning text-dark">
-                                            Running
-                                        </span>
-                                    </c:otherwise>
+                                                <c:when test="${not empty r.resultValue}">
+                                                    <span class="${r.isAbnormal ? 'text-danger fw-bold' : ''}">
+                                                        ${r.resultValue}
+                                                    </span>
+                                                </c:when>
 
-                                </c:choose>
+                                                <c:otherwise>
+                                                    <span class="badge bg-warning text-dark">
+                                                        Running
+                                                    </span>
+                                                </c:otherwise>
 
-                                </td>
+                                            </c:choose>
 
-                                <td class="text-center text-muted">
-                                    ${r.normalRange}
-                                </td>
+                                        </td>
 
-                                <td class="text-center text-muted small">
-                                <c:if test="${not empty r.resultTime}">
-                                    <fmt:formatDate value="${r.resultTime}" pattern="HH:mm dd/MM/yyyy"/>
-                                </c:if>
-                                </td>
+                                        <td class="text-center text-muted">
+                                            ${r.normalRange}
+                                        </td>
 
-                                </tr>
+                                        <td class="text-center text-muted small">
+                                            <c:if test="${not empty r.resultTime}">
+                                                <fmt:formatDate value="${r.resultTime}" pattern="HH:mm dd/MM/yyyy"/>
+                                            </c:if>
+                                        </td>
 
-                            </c:forEach>
+                                    </tr>
+
+                                </c:forEach>
 
                             </tbody>
 
@@ -401,40 +401,40 @@
 
                             <tbody>
 
-                            <c:forEach items="${mr.prescriptions}" var="p" varStatus="loop">
+                                <c:forEach items="${mr.prescriptions}" var="p" varStatus="loop">
 
-                                <tr>
+                                    <tr>
 
-                                    <td class="text-muted">
-                                        ${loop.index + 1}
-                                    </td>
+                                        <td class="text-muted">
+                                            ${loop.index + 1}
+                                        </td>
 
-                                    <td class="fw-semibold">
-                                        ${p.medicineName}
-                                    </td>
+                                        <td class="fw-semibold">
+                                            ${p.medicineName}
+                                        </td>
 
-                                    <td class="text-center">
-                                        ${p.unit}
-                                    </td>
+                                        <td class="text-center">
+                                            ${p.unit}
+                                        </td>
 
-                                    <td class="text-center fw-bold text-primary">
-                                        ${p.quantity}
-                                    </td>
+                                        <td class="text-center fw-bold text-primary">
+                                            ${p.quantity}
+                                        </td>
 
-                                    <td>
-                                        ${p.dosage}
+                                        <td>
+                                            ${p.dosage}
 
-                                <c:if test="${not empty p.note}">
-                                    <div class="small text-muted mt-1">
-                                        ${p.note}
-                                    </div>
-                                </c:if>
+                                            <c:if test="${not empty p.note}">
+                                                <div class="small text-muted mt-1">
+                                                    ${p.note}
+                                                </div>
+                                            </c:if>
 
-                                </td>
+                                        </td>
 
-                                </tr>
+                                    </tr>
 
-                            </c:forEach>
+                                </c:forEach>
 
                             </tbody>
 

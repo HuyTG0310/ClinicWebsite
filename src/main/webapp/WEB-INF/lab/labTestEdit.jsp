@@ -23,14 +23,14 @@
 
         <div class="d-flex gap-2">
 
-            <a href="${pageContext.request.contextPath}/lab/queue/list"
+            <a href="${basePath}/lab-queue/list"
                class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Back to list
             </a>
 
             <c:if test="${isViewMode}">
-                <a href="${pageContext.request.contextPath}/lab/test/print?mrId=${mrId}"
+                <a href="${basePath}/lab-test/print?mrId=${mrId}"
                    target="_blank"
                    class="btn btn-primary">
                     <i class="fa-solid fa-print me-2"></i>
@@ -39,7 +39,7 @@
             </c:if>
 
             <c:if test="${isViewMode}">
-                <a href="${pageContext.request.contextPath}/lab/test/edit?mrId=${mrId}&forceEdit=true"
+                <a href="${basePath}/lab-test/edit?mrId=${mrId}&forceEdit=true"
                    class="btn btn-warning">
                     <i class="fa-solid fa-pen-to-square me-2"></i>
                     Edit
@@ -146,7 +146,7 @@
 
         <div class="card-body p-0">
 
-            <form action="${pageContext.request.contextPath}/lab/test/save" method="post">
+            <form action="${basePath}/lab-test/save" method="post">
 
                 <input type="hidden" name="medicalRecordId" value="${mrId}">
 
@@ -414,7 +414,7 @@
 
 
 
-            <form action="${pageContext.request.contextPath}/lab/test/checkin" method="post">
+            <form action="${basePath}/lab-test/checkin" method="post">
 
                 <div class="modal-body p-4">
 
