@@ -85,7 +85,7 @@ public class LabOrderEditServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Dữ liệu gửi lên không hợp lệ!");
+            request.getSession().setAttribute("error", "Invalid input!");
             if (appIdStr != null && !appIdStr.isEmpty()) {
                 response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appIdStr);
             } else {
@@ -93,7 +93,7 @@ public class LabOrderEditServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Lỗi hệ thống khi cập nhật phiếu!");
+            request.getSession().setAttribute("error", "System error!");
             response.sendRedirect(basePath + "/queue/list");
         }
     }

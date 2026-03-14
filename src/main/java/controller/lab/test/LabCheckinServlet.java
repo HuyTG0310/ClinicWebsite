@@ -59,12 +59,12 @@ public class LabCheckinServlet extends HttpServlet {
                         dao.updateLabTestStatus(Integer.parseInt(idStr), "ACCEPTED", null);
                     }
                 }
-                request.getSession().setAttribute("success", "Đã tiếp nhận mẫu! Vui lòng nhập kết quả.");
+                request.getSession().setAttribute("success", "Samples received! Please enter results.");
             } else if ("REJECT_SINGLE".equals(action)) {
                 int rejectTestId = Integer.parseInt(request.getParameter("rejectTestId"));
                 String rejectReason = request.getParameter("rejectReason");
                 dao.updateLabTestStatus(rejectTestId, "REJECTED", rejectReason);
-                request.getSession().setAttribute("success", "Đã từ chối dịch vụ thành công.");
+                request.getSession().setAttribute("success", "Rejected service successfully.");
             }
 
             // Xử lý Check-in xong -> Chuyển thẳng sang trang Nhập liệu (Edit)

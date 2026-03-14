@@ -136,9 +136,9 @@ public class PrescriptionDetailServlet extends HttpServlet {
             boolean success = dao.savePrescription(medicalRecordId, medicineIds, quantities, dosages, notes);
 
             if (success) {
-                request.getSession().setAttribute("success", "Đã cập nhật đơn thuốc thành công!");
+                request.getSession().setAttribute("success", "Update prescription successfully!");
             } else {
-                request.getSession().setAttribute("error", "Có lỗi xảy ra khi lưu đơn thuốc.");
+                request.getSession().setAttribute("error", "Update error.");
             }
 
             // 3. Quay trở lại trang chi tiết của chính hồ sơ đó

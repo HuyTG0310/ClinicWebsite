@@ -64,7 +64,7 @@ public class LabOrderCreateServlet extends HttpServlet {
 
             // 1. Kiểm tra an toàn: Bác sĩ chưa lưu bệnh án hoặc chưa chọn XN
             if (recordIdStr == null || recordIdStr.isEmpty() || labTestIds == null || labTestIds.length == 0) {
-                session.setAttribute("error", "Vui lòng Lưu Tạm bệnh án trước và chọn ít nhất 1 dịch vụ!");
+                session.setAttribute("error", "Please SAVE medical record first and choose AT LEAST one service!");
                 // Quay lại đúng cái ca bệnh đang khám
                 response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appointmentId);
                 return;
@@ -89,7 +89,7 @@ public class LabOrderCreateServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Dữ liệu gửi lên không hợp lệ!");
+            request.getSession().setAttribute("error", "Invalid input!");
             // Nếu lỗi nặng (VD: mất ID lịch hẹn) thì mới đá ra ngoài Hàng chờ
             response.sendRedirect(basePath + "/queue/list");
         }

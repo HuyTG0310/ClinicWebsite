@@ -56,14 +56,14 @@ public class LabOrderCancelServlet extends HttpServlet {
             boolean success = dao.cancelLabBatch(batchId);
 
             if (success) {
-                session.setAttribute("success", "Đã hủy Lô xét nghiệm thành công! Hóa đơn đã được thu hồi.");
+                session.setAttribute("success", "Cancelled lab test batch successfully!");
             } else {
-                session.setAttribute("error", "Không thể hủy! Lô này đã được thanh toán hoặc đang xử lý.");
+                session.setAttribute("error", "Can not cancel!");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("error", "Dữ liệu không hợp lệ.");
+            session.setAttribute("error", "Invalid input.");
         }
 
         response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appointmentId);
