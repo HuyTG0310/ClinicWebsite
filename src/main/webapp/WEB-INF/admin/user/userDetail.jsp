@@ -31,20 +31,18 @@
         </div>
 
         <div class="d-flex gap-2">
-
+            <a href="${pageContext.request.contextPath}/admin/user/list"
+               class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Back to list
+            </a>
+               
             <button class="btn btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#editUserModal">
                 <i class="fa-solid fa-pen-to-square me-2"></i>
                 Edit
             </button>
-
-            <a href="${pageContext.request.contextPath}/admin/user/list"
-               class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Back to list
-            </a>
-
         </div>
 
     </div>

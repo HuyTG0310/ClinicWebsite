@@ -1382,7 +1382,7 @@ public class LabTestDAO extends DBContext {
     }
 
     //hàm lưu kết quả xét nghiệm
-    public boolean saveLabResults(int medicalRecordId, String[] orderTestIds, String[] paramIds, java.util.Map<String, String[]> parameterMap) {
+    public boolean saveLabResults(int medicalRecordId, String[] orderTestIds, String[] paramIds, java.util.Map<String, String[]> parameterMap, int technicianId) {
         java.sql.Connection conn = null;
 
         // 🔥 SỬA LẠI CÂU LỆNH LẤY SNAPSHOT: Truyền MedicalRecordId để truy vết ra Bệnh nhân, từ đó tìm đúng Range
@@ -1406,7 +1406,7 @@ public class LabTestDAO extends DBContext {
         String sqlInsertResult = "INSERT INTO LabResult (LabOrderTestId, ParameterId, ResultValue, Flag, RefMin, RefMax, Unit, ResultTime) VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
         String sqlUpdateResult = "UPDATE LabResult SET ResultValue = ?, Flag = ?, RefMin = ?, RefMax = ?, Unit = ?, ResultTime = GETDATE() WHERE ResultId = ?";
         String sqlUpdateOrderTest = "UPDATE LabOrderTest SET Status = 'COMPLETED' WHERE LabOrderTestId = ?";
-        String sqlUpdateBatch = "UPDATE LabTestBatch SET Status = 'COMPLETED' "
+        String sqlUpdateBatch = "UPDATE LabTestBatch SET Status = 'COMPLETED', TechnicianId = ? "
                 + "WHERE BatchId IN (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
                 + "AND NOT EXISTS ("
                 + "    SELECT 1 FROM LabOrderTest lot2 "
@@ -1509,9 +1509,10 @@ public class LabTestDAO extends DBContext {
 
                         stUpdateOrder.setInt(1, Integer.parseInt(orderTestId));
                         stUpdateOrder.addBatch();
-
-                        stUpdateBatch.setInt(1, Integer.parseInt(orderTestId));
+                        
+                        stUpdateBatch.setInt(1, technicianId);
                         stUpdateBatch.setInt(2, Integer.parseInt(orderTestId));
+                        stUpdateBatch.setInt(3, Integer.parseInt(orderTestId));
                         stUpdateBatch.addBatch();
                         hasStatusUpdate = true;
                     }
@@ -1544,5 +1545,27 @@ public class LabTestDAO extends DBContext {
         } finally {
             // (Bạn copy lại đoạn Finally đóng PreparedStatement vào nhé)
         }
+    }
+
+    public int getInChargeLabTechinicianId(int mrId) {
+        String sql = "SELECT TOP 1 (TechnicianId) FROM LabTestBatch WHERE MedicalRecordId = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, mrId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("TechnicianId");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(new LabTestDAO().getInChargeLabTechinicianId(19));
     }
 }

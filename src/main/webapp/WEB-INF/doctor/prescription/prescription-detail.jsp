@@ -4,6 +4,43 @@
 
 
 <div class="container-fluid mb-5">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-file-medical text-primary me-2"></i>
+                Prescription Detail
+            </h2>
+            <p class="text-muted mb-0">
+                Medical Record #${record.medicalRecordId}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="${basePath}/prescription/list"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+               
+            <a href="${basePath}/prescription/print?medicalRecordId=${record.medicalRecordId}"
+               target="_blank"
+               class="btn btn-primary">
+                <i class="fas fa-print me-2"></i>Print
+            </a>
+
+            <c:if test="${canEdit}">
+                <button type="button"
+                        class="btn btn-warning"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editPrescriptionModal">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </button>
+            </c:if>
+
+        </div>
+
+    </div>
 
     <c:if test="${sessionScope.success != null}">
         <div class="alert alert-success alert-dismissible fade show shadow-sm">
@@ -20,48 +57,6 @@
         </div>
         <% session.removeAttribute("error");%>
     </c:if>
-
-
-
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <h2 class="mb-1">
-                <i class="fas fa-file-medical text-primary me-2"></i>
-                Prescription Detail
-            </h2>
-            <p class="text-muted mb-0">
-                Medical Record #${record.medicalRecordId}
-            </p>
-        </div>
-
-        <div class="d-flex gap-2">
-
-            <a href="${basePath}/prescription/print?medicalRecordId=${record.medicalRecordId}"
-               target="_blank"
-               class="btn btn-primary">
-                <i class="fas fa-print me-2"></i>Print
-            </a>
-
-            <c:if test="${canEdit}">
-                <button type="button"
-                        class="btn btn-warning"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editPrescriptionModal">
-                    <i class="fas fa-edit me-2"></i>Edit
-                </button>
-            </c:if>
-
-            <a href="${basePath}/prescription/list"
-               class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to list
-            </a>
-
-        </div>
-
-    </div>
-
 
 
     <!-- PATIENT INFORMATION -->

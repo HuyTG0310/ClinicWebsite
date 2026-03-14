@@ -34,7 +34,7 @@
 <!-- Search Form -->
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form action="${pageContext.request.contextPath}/lab/queue/list" method="get">
+        <form action="${basePath}/lab-queue/list" method="get">
             <div class="row g-3">
 
                 <div class="col-md-5">
@@ -71,7 +71,7 @@
                     </button>
 
                     <c:if test="${not empty param.search or param.status == 'COMPLETED' or param.status == 'ALL'}">
-                        <a href="${pageContext.request.contextPath}/lab/queue/list"
+                        <a href="${basePath}/lab-queue/list"
                            class="btn btn-outline-secondary" title="Reset filter">
                             <i class="fas fa-times"></i>
                         </a>
@@ -173,7 +173,7 @@
 
                                     <c:when test="${row.isFullyCompleted}">
 
-                                        <a href="${pageContext.request.contextPath}/lab/test/detail?mrId=${row.medicalRecordId}" 
+                                        <a href="${basePath}/lab-test/detail?mrId=${row.medicalRecordId}" 
                                            class="btn btn-sm btn-outline-primary"
                                            title="View Details">
                                             <i class="fas fa-eye"></i> View
@@ -183,7 +183,7 @@
 
                                     <c:otherwise>
 
-                                        <a href="${pageContext.request.contextPath}/lab/test/edit?mrId=${row.medicalRecordId}"
+                                        <a href="${basePath}/lab-test/edit?mrId=${row.medicalRecordId}"
                                            class="btn btn-sm btn-success">
                                             <i class="fa-solid fa-microscope me-1"></i>
                                             Process

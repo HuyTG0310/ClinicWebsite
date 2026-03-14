@@ -406,7 +406,7 @@ public class UserDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        System.out.println(new UserDAO().login("duongnc", "123").toString());
+        System.out.println(new UserDAO().getUserById(1).getFullName());
     }
 
 }

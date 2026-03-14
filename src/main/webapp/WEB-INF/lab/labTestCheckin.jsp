@@ -19,7 +19,7 @@
             </p>
         </div>
 
-        <a href="${pageContext.request.contextPath}/lab/queue/list"
+        <a href="${basePath}/lab-queue/list"
            class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-left me-2"></i>
             Back to list
@@ -135,7 +135,7 @@
         <div class="card-body p-0">
 
             <form id="acceptAllForm"
-                  action="${pageContext.request.contextPath}/lab/test/checkin"
+                  action="${basePath}/lab-test/checkin"
                   method="post">
 
                 <input type="hidden" name="mrId" value="${mrId}">
@@ -314,7 +314,7 @@
 
 
 
-            <form action="${pageContext.request.contextPath}/lab/test/checkin" method="post">
+            <form action="${basePath}/lab-test/checkin" method="post">
 
                 <div class="modal-body p-4">
 

@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author huytr
  */
-@WebServlet(name = "LabTestSaveServlet", urlPatterns = {"/lab/test/save"})
+@WebServlet(name = "LabTestSaveServlet", urlPatterns = {"/lab/lab-test/save", "/admin/lab-test/save"})
 public class LabTestSaveServlet extends HttpServlet {
 
     @Override
@@ -29,25 +29,43 @@ public class LabTestSaveServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+        
         try {
             int medicalRecordId = Integer.parseInt(request.getParameter("medicalRecordId"));
 
             String[] orderTestIds = request.getParameterValues("orderTestId");
             String[] paramIds = request.getParameterValues("paramId");
 
+            model.User currentUser = (model.User) request.getSession().getAttribute("user");
+            int technicianId = currentUser.getUserId();
+
             LabTestDAO dao = new LabTestDAO();
-            boolean success = dao.saveLabResults(medicalRecordId, orderTestIds, paramIds, request.getParameterMap());
+            boolean success = dao.saveLabResults(medicalRecordId, orderTestIds, paramIds, request.getParameterMap(), technicianId);
 
             if (success) {
                 request.getSession().setAttribute("success", "Saved result successfully!");
             } else {
                 request.getSession().setAttribute("error", "Save result error");
             }
-            response.sendRedirect(request.getContextPath() + "/lab/test/detail?mrId=" + medicalRecordId);
+            response.sendRedirect(basePath + "/lab-test/detail?mrId=" + medicalRecordId);
         } catch (Exception e) {
             e.printStackTrace();
             request.getSession().setAttribute("error", "Invalid input!");
-            response.sendRedirect(request.getContextPath() + "/lab/queue/list");
+            response.sendRedirect(basePath + "/lab-queue/list");
         }
     }
 

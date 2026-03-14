@@ -83,6 +83,8 @@ public class Login extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/doctor/dashboard");
         } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/receptionist/dashboard");
+        } else if ("LAB TECHNICIAN".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/lab/dashboard");
         } else {
             response.sendRedirect(request.getContextPath() + "/home"); // Hoặc trang mặc định
         }

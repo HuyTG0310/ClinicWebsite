@@ -4,6 +4,8 @@
  */
 package controller.lab.test;
 
+import dao.LabTestDAO;
+import dao.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -17,7 +19,7 @@ import java.util.*;
  *
  * @author huytr
  */
-@WebServlet(name = "PrintLabResultServlet", urlPatterns = {"/lab/test/print", "/doctor/test/print", "/admin/test/print"})
+@WebServlet(name = "PrintLabResultServlet", urlPatterns = {"/lab/lab-test/print", "/doctor/lab-test/print", "/admin/lab-test/print"})
 public class PrintLabResultServlet extends HttpServlet {
 
     @Override
@@ -32,7 +34,7 @@ public class PrintLabResultServlet extends HttpServlet {
             model.MedicalRecord mr = mrDao.getRecordById(mrId);
 
             if (mr == null) {
-                response.getWriter().print("Không tìm thấy thông tin Bệnh án!");
+                response.getWriter().print("Medical record information not found!");
                 return;
             }
             request.setAttribute("mr", mr);
@@ -41,7 +43,7 @@ public class PrintLabResultServlet extends HttpServlet {
             dao.LabTestDAO labDao = new dao.LabTestDAO();
             List<Map<String, Object>> results = labDao.getConsolidatedLabResults(mrId);
             request.setAttribute("results", results);
-
+                        request.setAttribute("inChargeLab", new UserDAO().getUserById(new LabTestDAO().getInChargeLabTechinicianId(mrId)).getFullName());
             // Đẩy ra trang JSP In Ấn
             request.getRequestDispatcher("/WEB-INF/lab/printLabResult.jsp").forward(request, response);
 

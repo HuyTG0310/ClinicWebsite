@@ -48,7 +48,6 @@ public class PrintLabOrderServlet extends HttpServlet {
             request.setAttribute("currentDate", new java.util.Date());
             java.util.Map<String, String> info = testDAO.getPrintInvoiceInfo(batchId);
             request.setAttribute("info", info);
-
             request.getRequestDispatcher("/WEB-INF/doctor/medicalrecord/printLabOrder.jsp").forward(request, response);
 
         } catch (Exception e) {

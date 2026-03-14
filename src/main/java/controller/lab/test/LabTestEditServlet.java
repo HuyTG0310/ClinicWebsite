@@ -18,12 +18,30 @@ import java.util.*;
  *
  * @author huytr
  */
-@WebServlet(name = "LabTestEditServlet", urlPatterns = {"/lab/test/edit"})
+@WebServlet(name = "LabTestEditServlet", urlPatterns = {"/lab/lab-test/edit", "/admin/lab-test/edit"})
 public class LabTestEditServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         try {
             int mrId = Integer.parseInt(request.getParameter("mrId"));
@@ -31,7 +49,7 @@ public class LabTestEditServlet extends HttpServlet {
 
             // Nếu lọt vào đây mà chưa Check-in, đá ngược về trang Check-in
             if (labDao.requiresCheckin(mrId)) {
-                response.sendRedirect(request.getContextPath() + "/lab/test/checkin?mrId=" + mrId);
+                response.sendRedirect(basePath + "/lab-test/checkin?mrId=" + mrId);
                 return;
             }
 
@@ -52,10 +70,10 @@ public class LabTestEditServlet extends HttpServlet {
             request.setAttribute("activePage", "manageTest");
             request.setAttribute("contentPage", "/WEB-INF/lab/labTestEdit.jsp");
 
-            request.getRequestDispatcher("/WEB-INF/layout/labLayout.jsp").forward(request, response);
+            request.getRequestDispatcher(layout).forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/lab/queue/list");
+            response.sendRedirect(basePath + "/lab-queue/list");
         }
 
     }

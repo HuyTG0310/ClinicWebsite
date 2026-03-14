@@ -23,14 +23,14 @@
 
         <div class="d-flex gap-2">
 
-            <a href="${pageContext.request.contextPath}/lab/queue/list"
+            <a href="${basePath}/lab-queue/list"
                class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Back to list
             </a>
 
             <c:if test="${isViewMode}">
-                <a href="${pageContext.request.contextPath}/lab/test/print?mrId=${mrId}"
+                <a href="${basePath}/lab-test/print?mrId=${mrId}"
                    target="_blank"
                    class="btn btn-primary">
                     <i class="fa-solid fa-print me-2"></i>
@@ -39,7 +39,7 @@
             </c:if>
 
             <c:if test="${isViewMode}">
-                <a href="${pageContext.request.contextPath}/lab/test/edit?mrId=${mrId}&forceEdit=true"
+                <a href="${basePath}/lab-test/edit?mrId=${mrId}&forceEdit=true"
                    class="btn btn-warning">
                     <i class="fa-solid fa-pen-to-square me-2"></i>
                     Edit
@@ -146,7 +146,7 @@
 
         <div class="card-body p-0">
 
-            <form action="${pageContext.request.contextPath}/lab/test/save" method="post">
+            <form action="${basePath}/lab-test/save" method="post">
 
                 <input type="hidden" name="medicalRecordId" value="${mrId}">
 
@@ -198,25 +198,28 @@
 
 
                             <c:if test="${t.testName != currentTest}">
-
                                 <tr class="bg-light">
+                                    <td colspan="7" class="px-4 py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="fw-semibold">
+                                                <i class="fa-solid fa-vial-virus me-2 text-primary"></i>
+                                                ${t.testName}
+                                                <span class="badge bg-white text-dark border ms-2 shadow-sm">
+                                                    Batch #${t.batchId}
+                                                </span>
+                                            </div>
 
-                                    <td colspan="7" class="fw-semibold px-4 py-2">
-
-                                        <i class="fa-solid fa-vial-virus me-2 text-primary"></i>
-
-                                        ${t.testName}
-
-                                        <span class="badge bg-light text-dark border ms-2">
-                                            Batch #${t.batchId}
-                                        </span>
-
+                                            <c:if test="${not isViewMode and t.status != 'COMPLETED' and t.status != 'REJECTED'}">
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="openRejectModal(${t.labOrderTestId}, '${t.testName}')">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </button>
+                                            </c:if>
+                                        </div>
                                     </td>
-
                                 </tr>
-
                                 <c:set var="currentTest" value="${t.testName}" />
-
                             </c:if>
 
 
@@ -390,6 +393,130 @@
 
 
 
+<div class="modal fade" id="rejectModal" tabindex="-1" data-bs-backdrop="static">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-triangle-exclamation text-dark me-2"></i>
+                    Reject Laboratory Test
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+
+            </div>
+
+
+
+            <form action="${basePath}/lab-test/checkin" method="post">
+
+                <div class="modal-body p-4">
+
+                    <input type="hidden" name="mrId" value="${mrId}">
+                    <input type="hidden" name="action" value="REJECT_SINGLE">
+                    <input type="hidden" name="rejectTestId" id="rejectTestId">
+
+
+                    <p class="mb-3 text-muted">
+                        You are rejecting the following test:
+                    </p>
+
+
+                    <div class="border rounded p-3 text-center fw-bold text-danger bg-light">
+                        <span id="rejectTestName"></span>
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Reject Reason
+                        </label>
+
+
+                        <select class="form-select mb-2"
+                                id="quickRejectReason"
+                                onchange="updateRejectReason()">
+
+                            <option value="">-- Select common reason --</option>
+
+                            <option value="Blood sample clotted">
+                                Blood sample clotted
+                            </option>
+
+                            <option value="Hemolyzed sample">
+                                Hemolyzed sample
+                            </option>
+
+                            <option value="Insufficient specimen volume">
+                                Insufficient specimen volume
+                            </option>
+
+                            <option value="Contaminated specimen">
+                                Contaminated specimen
+                            </option>
+
+                            <option value="Analyzer under maintenance">
+                                Analyzer under maintenance
+                            </option>
+
+                            <option value="Patient refused sample collection">
+                                Patient refused sample collection
+                            </option>
+
+                        </select>
+
+
+                        <textarea class="form-control"
+                                  name="rejectReason"
+                                  id="rejectReasonText"
+                                  rows="2"
+                                  required
+                                  placeholder="Or enter another reason..."></textarea>
+
+                    </div>
+
+
+                    <p class="text-muted small mb-0">
+                        <i class="fa-solid fa-circle-info me-1 text-warning"></i>
+                        Rejected services will be sent to cashier for refund.
+                    </p>
+
+                </div>
+
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Confirm Reject
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
 <script>
 
     function checkAutoFlag(inputElement) {
@@ -433,6 +560,30 @@
 
         }
 
+    }
+
+    function openRejectModal(testId, testName) {
+        // Gắn data vào Modal
+        document.getElementById('rejectTestId').value = testId;
+        document.getElementById('rejectTestName').innerText = testName;
+
+        // Reset dữ liệu cũ
+        document.getElementById('quickRejectReason').value = '';
+        document.getElementById('rejectReasonText').value = '';
+
+        // Bật Modal
+        var rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        rejectModal.show();
+    }
+
+    function updateRejectReason() {
+        var select = document.getElementById('quickRejectReason');
+        var textarea = document.getElementById('rejectReasonText');
+        if (select.value !== "") {
+            textarea.value = select.value;
+        } else {
+            textarea.value = '';
+        }
     }
 
 </script>
