@@ -10,12 +10,6 @@
         </h2>
         <p class="text-muted mb-0">List of patients who have paid and are waiting for sample collection and result entry </p>
     </div>
-
-    <div>
-        <button class="btn btn-primary" onclick="window.location.reload()">
-            <i class="fa-solid fa-rotate-right me-2"></i>Reload
-        </button>
-    </div>
 </div>
 
 
@@ -125,7 +119,7 @@
                             </td>
 
                             <td>
-                                <strong class="text-primary text-uppercase">${row.patientName}</strong>
+                                <strong class="text-primary">${row.patientName}</strong>
                                 <div class="small text-muted">
                                     Patient code: ${row.patientId}
                                 </div>
@@ -133,7 +127,7 @@
 
                             <td class="text-center">
 
-                                <span class="badge ${row.gender == 'Nam' ? 'bg-info' : 'bg-danger'}">
+                                <span class="badge ${row.gender == 'Male' ? 'bg-primary' : 'bg-danger'}">
                                     ${row.gender}
                                 </span>
 
@@ -211,80 +205,3 @@
         </div>
     </div>
 </div>
-
-
-<style>
-
-    /* Hover table */
-    .table-hover tbody tr:hover {
-        background-color: rgba(13,110,253,0.05);
-        transition: background-color 0.2s ease;
-    }
-
-    /* Card style */
-    .card {
-        border: none;
-        border-radius: 12px;
-    }
-
-    .card-header {
-        border-bottom: 1px solid rgba(0,0,0,0.08);
-        border-radius: 12px 12px 0 0 !important;
-    }
-
-    /* Badge */
-    .badge {
-        padding: 0.4em 0.8em;
-        font-weight: 500;
-        border-radius: 6px;
-    }
-
-    /* Button */
-    .btn {
-        border-radius: 8px;
-        padding: 0.5rem 1.2rem;
-        font-weight: 500;
-        transition: all 0.25s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    /* Input group */
-    .input-group-text {
-        border-right: none;
-        border-radius: 8px 0 0 8px;
-    }
-
-    .input-group .form-control {
-        border-left: none;
-        border-radius: 0 8px 8px 0;
-    }
-
-    .input-group .form-control:focus {
-        border-left: none;
-        box-shadow: none;
-    }
-
-    .input-group:focus-within .input-group-text {
-        border-color: #86b7fe;
-    }
-
-    /* Alert */
-    .alert {
-        border: none;
-        border-radius: 10px;
-        border-left: 4px solid;
-    }
-
-    .alert-success {
-        border-left-color: #28a745;
-    }
-
-    .alert-danger {
-        border-left-color: #dc3545;
-    }
-
-</style>

@@ -65,14 +65,14 @@ public class ServiceOrderCheckoutServlet extends HttpServlet {
             }
 
             if (success) {
-                session.setAttribute("success", "Đã thu tiền thành công!");
+                session.setAttribute("success", "Collect money successfully!");
             } else {
-                session.setAttribute("error", "Lỗi: Không thể thu tiền ca này.");
+                session.setAttribute("error", "Error: Can not collect money.");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Dữ liệu không hợp lệ!");
+            request.getSession().setAttribute("error", "Invalid input!");
         }
 
         response.sendRedirect(basePath + "/service-order/list");

@@ -48,7 +48,7 @@ public class LabTestEditServlet extends HttpServlet {
 
             // 🔥 CỜ BÁO HIỆU CHO JSP: ĐÂY LÀ CHẾ ĐỘ NHẬP LIỆU
             request.setAttribute("isViewMode", false);
-            request.setAttribute("pageTitle", "Cập Nhật Kết Quả Xét Nghiệm");
+            request.setAttribute("pageTitle", "Update Result");
             request.setAttribute("activePage", "manageTest");
             request.setAttribute("contentPage", "/WEB-INF/lab/labTestEdit.jsp");
 

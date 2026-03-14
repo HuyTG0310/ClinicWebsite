@@ -39,14 +39,14 @@ public class LabTestSaveServlet extends HttpServlet {
             boolean success = dao.saveLabResults(medicalRecordId, orderTestIds, paramIds, request.getParameterMap());
 
             if (success) {
-                request.getSession().setAttribute("success", "Đã lưu kết quả xét nghiệm");
+                request.getSession().setAttribute("success", "Saved result successfully!");
             } else {
-                request.getSession().setAttribute("error", "Có lỗi xảy ra khi lưu kết quả");
+                request.getSession().setAttribute("error", "Save result error");
             }
             response.sendRedirect(request.getContextPath() + "/lab/test/detail?mrId=" + medicalRecordId);
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Dữ liệu không hợp lệ!");
+            request.getSession().setAttribute("error", "Invalid input!");
             response.sendRedirect(request.getContextPath() + "/lab/queue/list");
         }
     }

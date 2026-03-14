@@ -36,7 +36,7 @@ public class LabResultDetailServlet extends HttpServlet {
             model.MedicalRecord mr = mrDao.getRecordById(mrId);
             request.setAttribute("mr", mr); // Ném qua JSP
 
-            request.setAttribute("pageTitle", "Chi Tiết Kết Quả Xét Nghiệm");
+            request.setAttribute("pageTitle", "Result Detail");
             request.setAttribute("activePage", "manageTest");
 
             // Dùng chung file JSP Nhập liệu, nhờ cờ isViewMode để khóa Form lại

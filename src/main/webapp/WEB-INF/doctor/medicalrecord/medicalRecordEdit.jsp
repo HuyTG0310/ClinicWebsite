@@ -61,9 +61,12 @@
 
     <div class="row g-3">
         <div class="col-xl-3 col-lg-4">
-            <div class="card shadow-sm border-0 mb-3 border-top border-primary border-4">
+            <div class="card shadow-sm border-0 mb-3 border-4">
+                <div class="card-header bg-white py-2">
+                    <h5 class="text-primary fw-bold mb-1">${empty app ? mr.patientName : app.patientName}</h5>
+                </div>
                 <div class="card-body p-3">
-                    <h5 class="text-primary fw-bold text-uppercase mb-1">${empty app ? mr.patientName : app.patientName}</h5>
+
                     <div class="text-muted mb-3 small">
                         <i class="fa-solid fa-venus-mars me-1"></i>${empty app ? mr.patientGender : app.patientGender} | 
                         <i class="fa-solid fa-cake-candles me-1 ms-1"></i><fmt:formatDate value="${empty app ? mr.patientDob : app.patientDob}" pattern="dd/MM/yyyy"/>
@@ -158,7 +161,8 @@
 
                         <div class="tab-pane fade" id="lab" role="tabpanel">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="fw-bold text-primary mb-0"><i class="fa-solid fa-list-check me-2"></i>Designation List</h5>
+                                <!--<h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-check me-2"></i>Designation List</h5>-->
+                                <div class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-check me-2"></i>Designation List</div>
                                 <c:if test="${not empty app}">
                                     <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="openLabModal()">
                                         <i class="fa-solid fa-plus me-2"></i>Assign new service
@@ -241,9 +245,12 @@
                             <c:if test="${not empty consolidatedResults}">
                                 <hr class="my-4 border-secondary opacity-25">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-bold text-success mb-0">
+                                    <!--                                    <h5 class="fw-bold text-dark mb-0">
+                                                                            <i class="fa-solid fa-chart-line me-2"></i>Summary of Results
+                                                                        </h5>-->
+                                    <div class="fw-bold text-dark mb-0">
                                         <i class="fa-solid fa-chart-line me-2"></i>Summary of Results
-                                    </h5>
+                                    </div>
                                     <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="filterResults('all')">
                                         <i class="fa-solid fa-rotate me-1"></i>View all
                                     </button>
@@ -253,7 +260,7 @@
                                     <table class="table table-sm table-hover align-middle mb-0 bg-white" id="consolidatedTable">
                                         <thead class="table-success text-center border-bottom border-success">
                                             <tr>
-                                                <th width="30%" class="text-start ps-3">Chỉ số xét nghiệm</th>
+                                                <th width="30%" class="text-start ps-3">Lab test</th>
                                                 <th width="15%">Result</th>
                                                 <th width="20%">Reference range</th>
                                                 <th width="10%">Unit</th>
@@ -340,17 +347,17 @@
 
                         <div class="tab-pane fade" id="prescription" role="tabpanel">
                             <div class="mb-4">
-                                <label class="form-label fw-bold text-primary fs-5">Diagnosis (ICD-10) <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold text-dark">Diagnosis (ICD-10) <span class="text-danger">*</span></label>
                                 <textarea class="form-control border-primary" name="diagnosis" rows="2" placeholder="Kết luận bệnh lý...">${mr.diagnosis}</textarea>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label fw-bold text-success">Treatment plan</label>
+                                <label class="form-label fw-bold text-dark">Treatment plan</label>
                                 <textarea class="form-control" name="treatmentPlan" rows="2" placeholder="Tư vấn dinh dưỡng, sinh hoạt...">${mr.treatmentPlan}</textarea>
                             </div>
 
                             <div class="card border-success border-opacity-25 shadow-sm">
                                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center border-bottom-0">
-                                    <h6 class="mb-0 fw-bold text-success"><i class="fa-solid fa-pills me-2"></i>Prescription</h6>
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-pills me-2"></i>Prescription</h6>
                                     <div>
                                         <c:if test="${mr != null && mr.medicalRecordId > 0}">
                                             <a href="${basePath}/prescription/print?medicalRecordId=${mr.medicalRecordId}" 
@@ -519,33 +526,88 @@
 
 
 <div class="modal fade" id="medicineInfoModal" tabindex="-1" aria-hidden="true">
+
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-info text-white border-0 py-3 rounded-top-4">
-                <h5 class="modal-title fw-bold">
-                    <i class="fa-solid fa-pills me-2"></i><span id="infoMedName">Tên thuốc</span>
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-pills text-dark me-2"></i>
+                    <span id="infoMedName">Medicine</span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+
             </div>
-            <div class="modal-body p-4 bg-light">
+
+
+            <div class="modal-body">
+
                 <div class="mb-3">
-                    <h6 class="fw-bold text-primary border-bottom pb-1"><i class="fa-solid fa-flask me-2"></i>Thành phần</h6>
-                    <p id="infoMedIngredients" class="text-muted small mb-0">Không có dữ liệu</p>
+
+                    <h6 class="fw-bold text-dark border-bottom pb-1">
+                        <i class="fa-solid fa-flask me-2"></i>
+                        Ingredients
+                    </h6>
+
+                    <p id="infoMedIngredients"
+                       class="text-muted small mb-0">
+                        No data
+                    </p>
+
                 </div>
+
+
                 <div class="mb-3">
-                    <h6 class="fw-bold text-success border-bottom pb-1"><i class="fa-solid fa-book-medical me-2"></i>Công dụng / Cách dùng</h6>
-                    <p id="infoMedUsage" class="text-muted small mb-0">Không có dữ liệu</p>
+
+                    <h6 class="fw-bold text-dark border-bottom pb-1">
+                        <i class="fa-solid fa-book-medical me-2"></i>
+                        Usage
+                    </h6>
+
+                    <p id="infoMedUsage"
+                       class="text-muted small mb-0">
+                        No data
+                    </p>
+
                 </div>
+
+
                 <div class="mb-0">
-                    <h6 class="fw-bold text-danger border-bottom pb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>Chống chỉ định</h6>
-                    <p id="infoMedContra" class="text-muted small mb-0">Không có dữ liệu</p>
+
+                    <h6 class="fw-bold text-dark border-bottom pb-1">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        Contraindication
+                    </h6>
+
+                    <p id="infoMedContra"
+                       class="text-muted small mb-0">
+                        No data
+                    </p>
+
                 </div>
+
             </div>
-            <div class="modal-footer border-top-0 bg-light rounded-bottom-4">
-                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">Đóng</button>
+
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-outline-secondary px-4"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
 
