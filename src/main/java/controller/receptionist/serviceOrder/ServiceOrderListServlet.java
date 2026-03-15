@@ -17,7 +17,6 @@ import java.time.*;
 import java.util.*;
 import model.*;
 
-
 @WebServlet(name = "ServiceOrderListServlet", urlPatterns = {"/receptionist/service-order/list", "/doctor/service-order/list", "/admin/service-order/list"})
 public class ServiceOrderListServlet extends HttpServlet {
 
@@ -77,6 +76,13 @@ public class ServiceOrderListServlet extends HttpServlet {
                     totalCash += order.getPriceAtTime();
                 } else if ("BANKING".equals(order.getPaymentMethod())) {
                     totalBanking += order.getPriceAtTime();
+                }
+            } else if ("REFUNDED".equals(order.getStatus())) {
+                totalRevenue -= order.getPriceAtTime();
+                if ("CASH".equals(order.getPaymentMethod())) {
+                    totalCash -= order.getPriceAtTime();
+                } else if ("BANKING".equals(order.getPaymentMethod())) {
+                    totalBanking -= order.getPriceAtTime();
                 }
             }
         }
