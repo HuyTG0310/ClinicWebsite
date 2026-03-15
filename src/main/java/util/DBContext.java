@@ -43,7 +43,7 @@ public class DBContext {
 
     public static Connection getConnection() throws Exception {
 
-        String url = "jdbc:sqlserver://localhost:1433;databaseName=DB_03_02";
+        String url = "jdbc:sqlserver://localhost:1433;databaseName=DB_07_03";
         String user = "sa";
         String password = "123";
 

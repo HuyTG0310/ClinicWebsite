@@ -111,8 +111,7 @@
                 </div>
             </c:if>
 
-           <form action="${pageContext.request.contextPath}/forget-password" method="post">
-
+            <form action="send-otp" method="post">
                 <div class="mb-4">
                     <label class="form-label">Email Address</label>
                     <div class="input-group">

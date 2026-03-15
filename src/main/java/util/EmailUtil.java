@@ -2,50 +2,42 @@ package util;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
-
 import java.util.Properties;
 
 public class EmailUtil {
 
-    public static void sendOTP(String toEmail, String otp){
+    private static final String FROM_EMAIL = "nguyentailoi.ce191482@gmail.com";
+    private static final String PASSWORD = "tvyaqxhkwfdhvdxg";
 
-        final String fromEmail = "yourgmail@gmail.com";
-        final String password = "app_password";
+    public static void sendOTP(String toEmail, String otp) throws Exception {
 
         Properties props = new Properties();
 
-        props.put("mail.smtp.host","smtp.gmail.com");
-        props.put("mail.smtp.port","587");
-        props.put("mail.smtp.auth","true");
-        props.put("mail.smtp.starttls.enable","true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
 
         Session session = Session.getInstance(props,
-                new Authenticator(){
-                    protected PasswordAuthentication getPasswordAuthentication(){
-                        return new PasswordAuthentication(fromEmail,password);
-                    }
-                });
+                new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(FROM_EMAIL, PASSWORD);
+            }
+        });
 
-        try{
+        Message message = new MimeMessage(session);
 
-            Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(FROM_EMAIL));
 
-            message.setFrom(new InternetAddress(fromEmail));
+        message.setRecipients(
+                Message.RecipientType.TO,
+                InternetAddress.parse(toEmail)
+        );
 
-            message.setRecipients(
-                    Message.RecipientType.TO,
-                    InternetAddress.parse(toEmail)
-            );
+        message.setSubject("Clinic System Password Reset");
 
-            message.setSubject("Clinic System OTP");
+        message.setText("Your OTP code is: " + otp);
 
-            message.setText("Your OTP code is: " + otp);
-
-            Transport.send(message);
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
+        Transport.send(message);
     }
 }

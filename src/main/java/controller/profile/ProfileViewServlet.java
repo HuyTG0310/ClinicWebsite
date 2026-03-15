@@ -21,7 +21,7 @@ public class ProfileViewServlet extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         UserDAO dao = new UserDAO();
-        User userr = dao.getUserById(user.getUserId());
+        User userr = dao.getUserWithRoleById(user.getUserId());
 
         request.setAttribute("user", userr);
         request.setAttribute("pageTitle", "Doctor Dashboard");

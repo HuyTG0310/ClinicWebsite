@@ -11,39 +11,39 @@ import util.DBContext;
 public class UserDAO extends DBContext {
 
     // Lấy thông tin user theo ID (View Profile Detail)
-    public User getUserById(int userId) {
-        String sql = "SELECT u.UserId, u.Username, u.PasswordHash ,u.FullName, u.Phone, u.Email,\n"
-                + "               u.IsActive, r.RoleId, r.RoleName\n"
-                + "        FROM [User] u\n"
-                + "        JOIN Role r ON u.RoleId = r.RoleId\n"
-                + "        WHERE u.UserId = ?";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, userId);
-
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                User u = new User();
-                u.setUserId(rs.getInt("UserId"));
-                u.setUsername(rs.getString("Username"));
-                u.setPasswordHash(rs.getString("PasswordHash"));
-                u.setFullName(rs.getString("FullName"));
-                u.setPhone(rs.getString("Phone"));
-                u.setEmail(rs.getString("Email"));
-                u.setIsActive(rs.getBoolean("IsActive"));
-                u.setRoleId(rs.getInt("RoleId"));
-                u.setRoleName(rs.getString("RoleName"));
-                return u;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
+//     public User getUserById(int userId) {
+//        String sql = "SELECT u.UserId, u.Username, u.PasswordHash ,u.FullName, u.Phone, u.Email,\n"
+//                + "               u.IsActive, r.RoleId, r.RoleName\n"
+//                + "        FROM [User] u\n"
+//                + "        JOIN Role r ON u.RoleId = r.RoleId\n"
+//                + "        WHERE u.UserId = ?";
+//
+//        try {
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//            ps.setInt(1, userId);
+//
+//            ResultSet rs = ps.executeQuery();
+//
+//            if (rs.next()) {
+//                User u = new User();
+//                u.setUserId(rs.getInt("UserId"));
+//                u.setUsername(rs.getString("Username"));
+//                u.setPasswordHash(rs.getString("PasswordHash"));
+//                u.setFullName(rs.getString("FullName"));
+//                u.setPhone(rs.getString("Phone"));
+//                u.setEmail(rs.getString("Email"));
+//                u.setIsActive(rs.getBoolean("IsActive"));
+//                u.setRoleId(rs.getInt("RoleId"));
+//                u.setRoleName(rs.getString("RoleName"));
+//                return u;
+//            }
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
 
     // Update profile (FullName, Phone, Email)
     public boolean updateProfile(int userId, String fullName, String phone, String email) {
@@ -423,41 +423,117 @@ public class UserDAO extends DBContext {
 
         return false;
     }
+//
+//    public User getUserByEmail(String email) {
+//
+//        String sql = "SELECT * FROM [User] WHERE Email = ?";
+//
+//        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+//
+//            System.out.println("QUERY EMAIL = " + email);
+//
+//            ps.setString(1, email);
+//
+//            ResultSet rs = ps.executeQuery();
+//
+//            if (rs.next()) {
+//
+//                System.out.println("USER FOUND IN DB");
+//
+//                User user = new User();
+//                user.setUserId(rs.getInt("UserId"));
+//                user.setUsername(rs.getString("Username"));
+//                user.setEmail(rs.getString("Email"));
+//                user.setPasswordHash(rs.getString("PasswordHash"));
+//
+//                return user;
+//            } else {
+//
+//                System.out.println("NO USER FOUND");
+//
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
+    public User getUserWithRoleByEmail(String email) {
+        String sql = "SELECT * FROM [User] WHERE email = ?";
 
-    public User getUserByEmail(String email) {
-
-        String sql = "SELECT * FROM [User] WHERE Email = ?";
-
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            System.out.println("QUERY EMAIL = " + email);
-
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, email);
 
             ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-
-                System.out.println("USER FOUND IN DB");
-
-                User user = new User();
-                user.setUserId(rs.getInt("UserId"));
-                user.setUsername(rs.getString("Username"));
-                user.setEmail(rs.getString("Email"));
-                user.setPasswordHash(rs.getString("PasswordHash"));
-
-                return user;
-            } else {
-
-                System.out.println("NO USER FOUND");
-
+            while (rs.next()) {
+                return new User(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6),
+                        rs.getInt(7),
+                        rs.getBoolean(8));
             }
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return null;
+    }
+
+    public User getUserWithRoleById(int userId) {
+        String sql = "Select * from [User] where UserId = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                return new User(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6),
+                        rs.getInt(7),
+                        rs.getBoolean(8)
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    public void updatePassword(String email, String password) {
+        String sql = "UPDATE [dbo].[user]\n"
+                + "      SET [password] = ?\n"
+                + "      WHERE [email] = ?";
+        try {
+            PreparedStatement st = conn.prepareStatement(sql);
+            st.setString(1, password);
+            st.setString(2, email);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
+    public void updatePassword(int userId, String password) {
+        String sql = "UPDATE [User] SET passwordHash = ? WHERE userId = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, password);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     public static void main(String[] args) {

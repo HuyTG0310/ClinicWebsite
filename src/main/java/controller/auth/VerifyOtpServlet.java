@@ -7,24 +7,26 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/verify-otp")
-public class VerifyOTP extends HttpServlet {
+public class VerifyOtpServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String userOtp = request.getParameter("otp");
+        String inputOtp = request.getParameter("otp");
 
         HttpSession session = request.getSession();
+
         String otp = (String) session.getAttribute("otp");
 
-        if(otp != null && otp.equals(userOtp)){
+        if (inputOtp.equals(otp)) {
 
             response.sendRedirect("resetPassword.jsp");
 
-        }else{
+        } else {
 
-            request.setAttribute("error","Invalid OTP");
-            request.getRequestDispatcher("verifyOTP.jsp").forward(request,response);
+            request.setAttribute("error", "OTP incorrect!");
+            request.getRequestDispatcher("verifyOtp.jsp")
+                   .forward(request, response);
 
         }
     }

@@ -28,7 +28,7 @@ public class ProfileUpdateServlet extends HttpServlet {
                 request.setAttribute("error", "Email must contain '@' and end with .com");
 
                 UserDAO dao = new UserDAO();
-                User user = dao.getUserById(userId);
+                User user = dao.getUserWithRoleById(userId);
                 request.setAttribute("user", user);
                 request.setAttribute("openModal", true);
                 
