@@ -25,7 +25,7 @@ public class VerifyOtpServlet extends HttpServlet {
         } else {
 
             request.setAttribute("error", "OTP incorrect!");
-            request.getRequestDispatcher("verifyOtp.jsp")
+            request.getRequestDispatcher("verifyOTP.jsp")
                    .forward(request, response);
 
         }

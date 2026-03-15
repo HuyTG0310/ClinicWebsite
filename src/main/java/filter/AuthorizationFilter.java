@@ -83,7 +83,7 @@ public class AuthorizationFilter implements Filter {
                 || path.startsWith("/verify-otp")
                 || path.startsWith("/reset-password")
                 || path.startsWith("/forgotPassword.jsp")
-                || path.startsWith("/verifyOtp.jsp")
+                || path.startsWith("/verifyOTP.jsp")
                 || path.startsWith("/resetPassword.jsp")
                 || path.startsWith("/assets")
                 || path.startsWith("/css")
