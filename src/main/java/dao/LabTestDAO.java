@@ -1684,6 +1684,6 @@ public class LabTestDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        System.out.println(new LabTestDAO().getInChargeLabTechinicianId(19));
+        System.out.println(new LabTestDAO().getInChargeLabTechinicianId(24));
     }
 }
