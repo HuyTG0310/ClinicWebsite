@@ -11,7 +11,7 @@
     </div>
 
     <a href="${pageContext.request.contextPath}/admin/user/add" class="btn btn-primary">
-        <i class="fa-solid fa-user-plus me-2"></i>Add New Staff
+        <i class="fas fa-plus-circle me-2"></i>Add New Staff
     </a>
 </div>
 
@@ -61,7 +61,7 @@
                     <div class="col-md-2 d-flex align-items-end gap-2">
 
                         <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-filter me-2"></i>Search
+                            <i class="fas fa-search me-2"></i>Search
                         </button>
 
                     <c:if test="${not empty param.keyword or not empty param.roleId or not empty param.status}">

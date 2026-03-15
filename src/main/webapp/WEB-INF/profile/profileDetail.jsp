@@ -1,417 +1,249 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
+<div class="container-fluid mb-5">
 
-<style>
-    /* Center content */
-    .page-wrapper {
-        padding: 40px 0;
-    }
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-    /* =========================
-       PROFILE CONTAINER
-    ========================= */
-    .profile-container {
-        width: 900px;
-        max-width: 95%;
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 32px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e3e8ef;
-    }
+        <div>
+            <h2 class="mb-1">
+                <i class="fa-solid fa-user text-primary me-2"></i>
+                Profile Detail
+            </h2>
 
-    /* =========================
-       TITLE
-    ========================= */
-    h2 {
-        text-align: center;
-        font-size: 26px;
-        font-weight: 700;
-        color: #0d6efd;
-        margin-bottom: 28px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-    }
-
-    /* =========================
-       PROFILE CARD
-    ========================= */
-    .profile-card {
-        background: #f8f9fc;
-        border-radius: 14px;
-        padding: 22px 26px;
-        border: 1px solid #dee2e6;
-    }
-
-    .profile-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #dee2e6;
-        font-size: 15px;
-    }
-
-    .profile-row:last-child {
-        border-bottom: none;
-    }
-
-    .profile-row b {
-        color: #495057;
-        font-weight: 600;
-    }
-
-    .profile-value {
-        font-weight: 600;
-        color: #212529;
-    }
-
-    /* =========================
-       DIVIDER
-    ========================= */
-    hr {
-        margin: 26px 0;
-        border: none;
-        height: 1px;
-        background: #dee2e6;
-    }
-
-    /* =========================
-       ACTION BUTTONS
-    ========================= */
-    .actions {
-        display: flex;
-        justify-content: center;
-        gap: 16px;
-        flex-wrap: wrap;
-    }
-
-    .profile-btn {
-        padding: 12px 20px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        transition: all 0.25s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border: none;
-        cursor: pointer;
-    }
-
-    /* Primary – Update */
-    .profile-btn.btn-update {
-        background-color: #0d6efd;
-        color: #ffffff;
-    }
-
-    .profile-btn.btn-update:hover {
-        background-color: #0b5ed7;
-        transform: translateY(-2px);
-    }
-
-    /* Danger – Change Password */
-    .profile-btn.btn-password {
-        background-color: #dc3545;
-        color: #ffffff;
-    }
-
-    .profile-btn.btn-password:hover {
-        background-color: #bb2d3b;
-        transform: translateY(-2px);
-    }
-
-    .icon {
-        font-size: 16px;
-    }
-
-    /* =========================
-       FOOTER NOTE
-    ========================= */
-    .footer-note {
-        text-align: center;
-        margin-top: 22px;
-        color: #6c757d;
-        font-size: 14px;
-    }
-
-    /* =========================
-       MODAL OVERLAY
-    ========================= */
-    .modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    /* =========================
-       MODAL CONTENT
-    ========================= */
-    .modal-content {
-        background: #ffffff;
-        width: 420px;
-        max-width: 92%;
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-    }
-
-    .modal-content h3 {
-        text-align: center;
-        margin-bottom: 18px;
-        font-size: 20px;
-        font-weight: 700;
-        color: #0d6efd;
-    }
-
-    /* =========================
-       FORM
-    ========================= */
-    .input-group {
-        margin-bottom: 16px;
-    }
-
-    .input-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: #495057;
-    }
-
-    .input-group input {
-        width: 100%;
-        padding: 11px 12px;
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-        font-size: 14px;
-    }
-
-    .input-group input:focus {
-        outline: none;
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-    }
-
-    .input-group input[readonly] {
-        background: #e9ecef;
-        cursor: not-allowed;
-    }
-
-    /* =========================
-       MODAL ACTIONS
-    ========================= */
-    .modal-actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 18px;
-    }
-
-    .modal-actions button {
-        flex: 1;
-        padding: 11px;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .modal-actions button[type="submit"] {
-        background-color: #0d6efd;
-        color: #ffffff;
-    }
-
-    .modal-actions .cancel {
-        background-color: #adb5bd;
-        color: #212529;
-    }
-
-    .modal-actions button:hover {
-        opacity: 0.9;
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-    @media (max-width: 600px) {
-        h2 {
-            font-size: 22px;
-        }
-
-        .profile-row {
-            flex-direction: column;
-            gap: 4px;
-        }
-    }
-
-    .profile-container {
-        width: 900px;
-        max-width: 95%;
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 32px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e3e8ef;
-
-        animation: profileFadeUp 0.7s ease-out; /* ⭐ thêm */
-    }
-
-
-    @keyframes profileFadeUp {
-        from {
-            opacity: 0;
-            transform: translateY(24px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-
-</style>
-
-
-<div class="page-wrapper">
-    <div class="profile-container">
-        <h2>PROFILE DETAIL</h2>
-
-        <div class="profile-card">
-            <div class="profile-row">
-                <b>User ID:</b>
-                <span class="profile-value">${user.userId}</span>
-            </div>
-
-            <div class="profile-row">
-                <b>Username:</b>
-                <span class="profile-value">${user.username}</span>
-            </div>
-
-            <div class="profile-row">
-                <b>Full Name:</b>
-                <span class="profile-value">${user.fullName}</span>
-            </div>
-
-            <div class="profile-row">
-                <b>Phone:</b>
-                <span class="profile-value">${user.phone}</span>
-            </div>
-
-            <div class="profile-row">
-                <b>Email:</b>
-                <span class="profile-value">${user.email}</span>
-            </div>
-
-            <div class="profile-row">
-                <b>Role:</b>
-                <span class="profile-value">${user.roleName}</span>
-            </div>
+            <p class="text-muted mb-0">
+                View and manage your account information
+            </p>
         </div>
 
-        <hr>
 
-        <div class="actions">
-            <button class="profile-btn btn-update" onclick="openUpdateModal()">
-                <span class="icon">📝</span> Update Profile Detail
-            </button>
-
-            <a class="profile-btn btn-password"
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary"
                href="${pageContext.request.contextPath}/profile/change-password?userId=${user.userId}">
-                <span class="icon">🔒</span> Change Password
+
+                <i class="fa-solid fa-lock me-2"></i>
+                Change Password
+
             </a>
-        </div>
 
-        <div class="footer-note">
-            ✨ Your account information is protected & displayed securely.
+            <button class="btn btn-warning"
+                    data-bs-toggle="modal"
+                    data-bs-target="#updateModal">
+
+                <i class="fa-solid fa-pen-to-square me-2"></i>
+                Edit
+
+            </button>
         </div>
     </div>
+
+
+    <!-- PROFILE INFORMATION -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-id-card text-primary me-2"></i>
+                Account Information
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="text-muted small">User ID</label>
+                    <div class="fw-semibold">${user.userId}</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted small">Username</label>
+                    <div class="fw-semibold">${user.username}</div>
+                </div>
+
+            </div>
+
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="text-muted small">Full Name</label>
+                    <div class="fw-semibold">${user.fullName}</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted small">Role</label>
+                    <div>
+                        <span class="badge bg-light text-dark border">
+                            ${user.roleName}
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <label class="text-muted small">Phone</label>
+                    <div class="fw-semibold">${user.phone}</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted small">Email</label>
+                    <div class="fw-semibold">${user.email}</div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
 </div>
-<div id="updateModal" class="modal">
-    <div class="modal-content">
-
-        <h3>Update Profile</h3>
-
-        <form action="${pageContext.request.contextPath}/profile/update" method="post">
 
 
-            <input type="hidden" name="userId" value="${user.userId}" />
 
-            <div class="input-group">
-                <label>Username</label>
-                <input type="text" value="${user.username}" readonly />
+<!-- MODAL OVERLAY -->
+
+
+
+<!-- UPDATE MODAL --><div class="modal fade" id="updateModal" tabindex="-1">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-user-pen me-2"></i>
+                    Update Profile
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+
             </div>
 
-            <div class="input-group">
-                <label>Full Name</label>
-                <input
-                    type="text"
-                    name="fullName"
-                    value="${user.fullName}"
-                    required
-                    pattern="^([A-ZÀ-Ỹ][a-zà-ỹ]+)(\s[A-ZÀ-Ỹ][a-zà-ỹ]+)*$"
-                    title="Each word must start with a capital letter and contain only letters"
-                    />
-            </div>
 
-            <div class="input-group">
-                <label>Phone</label>
-                <input
-                    type="text"
-                    name="phone"
-                    value="${user.phone}"
-                    required
-                    pattern="^0\d{9}$"
-                    title="Phone number must contain exactly 10 digits and start with 0"
-                    />
-            </div>
+            <form action="${pageContext.request.contextPath}/profile/update" method="post">
 
-            <div class="input-group">
-                <label>Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    value="${user.email}"
-                    required
-                    pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$"
-                    title="Email must contain '@' and end with .com"
-                    oninput="this.value=this.value.trim()"
-                    />
-            </div>
+                <div class="modal-body">
 
-            <div class="modal-actions">
-                <button type="submit" id="saveBtn">💾 Save</button>
-                <button type="button" class="cancel" onclick="closeUpdateModal()">✖ Cancel</button>
-            </div>
-        </form>
+                    <input type="hidden" name="userId" value="${user.userId}" />
+
+                    <div class="row g-3">
+
+                        <!-- Username -->
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Username
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   value="${user.username}"
+                                   readonly>
+
+                        </div>
+
+
+                        <!-- Full Name -->
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                name="fullName"
+                                class="form-control"
+                                value="${user.fullName}"
+                                required
+                                pattern="^([A-ZÀ-Ỹ][a-zà-ỹ]+)(\s[A-ZÀ-Ỹ][a-zà-ỹ]+)*$"
+                                title="Each word must start with a capital letter and contain only letters">
+
+                        </div>
+
+
+                        <!-- Phone -->
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Phone
+                            </label>
+
+                            <input
+                                type="text"
+                                name="phone"
+                                class="form-control"
+                                value="${user.phone}"
+                                required
+                                pattern="^0\d{9}$"
+                                title="Phone number must contain exactly 10 digits and start with 0">
+
+                        </div>
+
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                class="form-control"
+                                value="${user.email}"
+                                required
+                                pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$"
+                                title="Email must contain '@' and end with .com"
+                                oninput="this.value=this.value.trim()">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary px-4"
+                            id="saveBtn">
+
+                        <i class="fa-solid fa-save me-1"></i>
+                        Save
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
     </div>
-</div>      
 
-<script>
-    function openUpdateModal() {
-        document.getElementById("updateModal").style.display = "flex";
-    }
-
-    function closeUpdateModal() {
-        document.getElementById("updateModal").style.display = "none";
-    }
+</div>
 
 
-    window.onclick = function (event) {
-        const modal = document.getElementById("updateModal");
-    };
-</script>    
 
-<script>
-    const form = document.querySelector("#updateModal form");
-    const saveBtn = document.getElementById("saveBtn");
-
-    saveBtn.addEventListener("click", function (event) {
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            form.reportValidity();
-        }
-
-    });
-</script>

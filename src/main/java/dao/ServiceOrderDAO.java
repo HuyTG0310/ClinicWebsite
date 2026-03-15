@@ -144,31 +144,46 @@ public class ServiceOrderDAO extends DBContext {
     public java.util.List<java.util.Map<String, Object>> getServiceDetailsByMrId(int medicalRecordId, int patientId, String status, String formattedTime) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
 
+        // Lấy thêm so.Status AS CurrentStatus để biết món nào bị hủy
         StringBuilder sql = new StringBuilder("SELECT s.ServiceName, so.PriceAtTime, "
-                + "so.PaymentMethod, so.PaidAt, u.FullName AS CashierName "
+                + "so.PaymentMethod, so.PaidAt, u.FullName AS CashierName, so.Status AS CurrentStatus "
                 + "FROM ServiceOrder so "
                 + "JOIN Service s ON so.ServiceId = s.ServiceId "
-                + "LEFT JOIN [User] u ON so.CashierId = u.UserId " // Join để lấy tên người thu tiền
-                + "WHERE so.Status = ?");
+                + "LEFT JOIN [User] u ON so.CashierId = u.UserId "
+                + "WHERE 1=1 ");
 
         if (medicalRecordId > 0) {
             sql.append(" AND so.MedicalRecordId = ? ");
         } else {
-            // Nếu chưa có Bệnh án -> Tìm hóa đơn của Bệnh nhân này nhưng chưa gắn Bệnh án
             sql.append(" AND so.MedicalRecordId IS NULL AND so.PatientId = ? ");
         }
 
-        // So sánh chính xác thời điểm thu tiền
-        if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
+        // ====================================================================
+        // 🔥 PHÂN NHÁNH NGHIỆP VỤ KẾ TOÁN (ĐỒNG BỘ 100% VỚI DANH SÁCH)
+        // ====================================================================
+        if ("UNPAID".equals(status)) {
+            // 1. CHỜ THU TIỀN
+            sql.append(" AND so.Status = 'UNPAID' AND so.PaidAt IS NULL ");
+
+        } else if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
+            // 2. BIÊN LAI GỐC (Lấy cả món sống và món chết để giữ nguyên tổng tiền 160k)
+            sql.append(" AND (so.Status = 'PAID' OR so.Status = 'CANCELLED') ");
             sql.append(" AND CONVERT(VARCHAR(19), so.PaidAt, 120) = ? ");
-        } else {
-            sql.append(" AND so.PaidAt IS NULL ");
+
+        } else if ("REFUNDED".equals(status)) {
+            // 3. CHI TIẾT HOÀN TIỀN (Đã đóng tiền nhưng bị Lab/Bác sĩ hủy)
+            sql.append(" AND so.Status = 'CANCELLED' AND so.PaidAt IS NOT NULL ");
+            if (formattedTime != null && !formattedTime.isEmpty()) {
+                sql.append(" AND CONVERT(VARCHAR(19), so.PaidAt, 120) = ? ");
+            }
+
+        } else if ("CANCELLED".equals(status)) {
+            // 4. CHI TIẾT HỦY TRẮNG (Bị hủy khi chưa đóng 1 đồng nào)
+            sql.append(" AND so.Status = 'CANCELLED' AND so.PaidAt IS NULL ");
         }
 
         try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
-            int paramIndex = 1; // Quản lý số thứ tự của dấu ?
-
-            st.setString(paramIndex++, status); // Gắn trạng thái vào đây
+            int paramIndex = 1;
 
             if (medicalRecordId > 0) {
                 st.setInt(paramIndex++, medicalRecordId);
@@ -176,7 +191,8 @@ public class ServiceOrderDAO extends DBContext {
                 st.setInt(paramIndex++, patientId);
             }
 
-            if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
+            // Chỉ nạp biến thời gian nếu là nhóm có thu tiền (PAID hoặc REFUNDED)
+            if (("PAID".equals(status) || "REFUNDED".equals(status)) && formattedTime != null && !formattedTime.isEmpty()) {
                 st.setString(paramIndex++, formattedTime);
             }
 
@@ -185,11 +201,12 @@ public class ServiceOrderDAO extends DBContext {
                     java.util.Map<String, Object> item = new java.util.HashMap<>();
                     item.put("serviceName", rs.getString("ServiceName"));
                     item.put("price", rs.getDouble("PriceAtTime"));
-
-                    // 🔥 HỨNG THÊM DỮ LIỆU ĐỂ IN BIÊN LAI
                     item.put("paymentMethod", rs.getString("PaymentMethod"));
                     item.put("paidAt", rs.getTimestamp("PaidAt"));
                     item.put("cashierName", rs.getString("CashierName") != null ? rs.getString("CashierName") : "Hệ thống");
+
+                    // Bỏ thêm trạng thái hiện tại vào túi xách để mang ra UI
+                    item.put("currentStatus", rs.getString("CurrentStatus"));
 
                     list.add(item);
                 }

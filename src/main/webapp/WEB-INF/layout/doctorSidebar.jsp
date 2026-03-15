@@ -49,7 +49,7 @@
             <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/certification/my">
                 <i class="fa-solid fa-certificate me-2"></i>
-                My Certifications
+                Manage certification
             </a>
         </li>
 
@@ -120,7 +120,7 @@
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
                 <i class="fa-solid fa-right-from-bracket me-2"></i>
-                Đăng xuất
+                Logout
             </a>
         </li>
 
