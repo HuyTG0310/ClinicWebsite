@@ -44,7 +44,7 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
         }
 
 
-        User doctor = userDAO.getUserWithRoleById(doctorId);
+        User doctor = userDAO.getUserById(doctorId);
         if (doctor == null || !"Doctor".equals(doctor.getRoleName())) {
             response.sendRedirect(request.getContextPath() + "/admin/user/detail?id=" + doctorId);
             return;

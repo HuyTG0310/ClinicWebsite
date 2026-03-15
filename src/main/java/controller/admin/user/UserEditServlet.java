@@ -51,7 +51,7 @@ public class UserEditServlet extends HttpServlet {
             return;
         }
 
-        User oldUser = userDAO.getUserWithRoleById(userId);
+        User oldUser = userDAO.getUserById(userId);
         if (oldUser == null) {
             response.sendRedirect(request.getContextPath() + "/admin/user/list");
             return;
