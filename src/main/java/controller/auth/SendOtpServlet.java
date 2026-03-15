@@ -44,6 +44,6 @@ public class SendOtpServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        response.sendRedirect("verifyOtp.jsp");
+        response.sendRedirect("verifyOTP.jsp");
     }
 }
