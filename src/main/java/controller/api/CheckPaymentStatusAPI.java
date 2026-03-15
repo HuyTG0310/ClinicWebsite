@@ -12,10 +12,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author huytr
- */
+
 @WebServlet(name = "CheckPaymentStatusAPI", urlPatterns = {"/api/check-payment"})
 public class CheckPaymentStatusAPI extends HttpServlet {
 

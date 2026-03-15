@@ -11,39 +11,39 @@ import util.DBContext;
 public class UserDAO extends DBContext {
 
     // Lấy thông tin user theo ID (View Profile Detail)
-//     public User getUserById(int userId) {
-//        String sql = "SELECT u.UserId, u.Username, u.PasswordHash ,u.FullName, u.Phone, u.Email,\n"
-//                + "               u.IsActive, r.RoleId, r.RoleName\n"
-//                + "        FROM [User] u\n"
-//                + "        JOIN Role r ON u.RoleId = r.RoleId\n"
-//                + "        WHERE u.UserId = ?";
-//
-//        try {
-//            PreparedStatement ps = conn.prepareStatement(sql);
-//            ps.setInt(1, userId);
-//
-//            ResultSet rs = ps.executeQuery();
-//
-//            if (rs.next()) {
-//                User u = new User();
-//                u.setUserId(rs.getInt("UserId"));
-//                u.setUsername(rs.getString("Username"));
-//                u.setPasswordHash(rs.getString("PasswordHash"));
-//                u.setFullName(rs.getString("FullName"));
-//                u.setPhone(rs.getString("Phone"));
-//                u.setEmail(rs.getString("Email"));
-//                u.setIsActive(rs.getBoolean("IsActive"));
-//                u.setRoleId(rs.getInt("RoleId"));
-//                u.setRoleName(rs.getString("RoleName"));
-//                return u;
-//            }
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
-//    }
+     public User getUserById(int userId) {
+        String sql = "SELECT u.UserId, u.Username, u.PasswordHash ,u.FullName, u.Phone, u.Email,\n"
+                + "               u.IsActive, r.RoleId, r.RoleName\n"
+                + "        FROM [User] u\n"
+                + "        JOIN Role r ON u.RoleId = r.RoleId\n"
+                + "        WHERE u.UserId = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User u = new User();
+                u.setUserId(rs.getInt("UserId"));
+                u.setUsername(rs.getString("Username"));
+                u.setPasswordHash(rs.getString("PasswordHash"));
+                u.setFullName(rs.getString("FullName"));
+                u.setPhone(rs.getString("Phone"));
+                u.setEmail(rs.getString("Email"));
+                u.setIsActive(rs.getBoolean("IsActive"));
+                u.setRoleId(rs.getInt("RoleId"));
+                u.setRoleName(rs.getString("RoleName"));
+                return u;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     // Update profile (FullName, Phone, Email)
     public boolean updateProfile(int userId, String fullName, String phone, String email) {
@@ -537,7 +537,7 @@ public class UserDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        System.out.println(new UserDAO().login("duongnc", "123").toString());
+        System.out.println(new UserDAO().getUserById(1).getFullName());
     }
 
 }

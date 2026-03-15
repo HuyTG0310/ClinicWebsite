@@ -15,14 +15,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
-
 @WebServlet(name = "PrintReceiptServlet", urlPatterns = {"/receptionist/receipt/print", "/doctor/receipt/print", "/admin/receipt/print"})
 public class PrintReceiptServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         try {
             String mrIdRaw = request.getParameter("mrId");
             String soIdRaw = request.getParameter("soId");
@@ -45,7 +44,6 @@ public class PrintReceiptServlet extends HttpServlet {
             dao.ServiceOrderDAO soDao = new dao.ServiceOrderDAO();
             dao.PatientDAO patientDao = new dao.PatientDAO();
 
-           
             if (mrId > 0) {
                 List<Map<String, Object>> details = soDao.getServiceDetailsByMrId(mrId, patientId, "PAID", formattedTime);
 
@@ -70,7 +68,6 @@ public class PrintReceiptServlet extends HttpServlet {
 
                 request.getRequestDispatcher("/WEB-INF/receptionist/serviceorder/printLabReceipt.jsp").forward(request, response);
 
-                
             } else if (soId > 0) {
                 model.ServiceOrder order = soDao.getServiceOrderById(soId);
 
@@ -80,7 +77,8 @@ public class PrintReceiptServlet extends HttpServlet {
 
                     if (app != null) {
                         request.setAttribute("app", app); // Đóng gói cục app
-
+                        String amountInWords = util.MoneyConvertUtil.convertToVietnameseWords((long) app.getPrice());
+                        request.setAttribute("amountInWords", amountInWords);
                         request.getRequestDispatcher("/WEB-INF/receptionist/serviceorder/printExamReceipt.jsp").forward(request, response);
                     } else {
                         response.getWriter().print("Không tìm thấy thông tin Lịch Khám!");
@@ -94,6 +92,8 @@ public class PrintReceiptServlet extends HttpServlet {
 
                 if (app != null) {
                     request.setAttribute("app", app);
+                    String amountInWords = util.MoneyConvertUtil.convertToVietnameseWords((long) app.getPrice());
+                    request.setAttribute("amountInWords", amountInWords);
                     request.getRequestDispatcher("/WEB-INF/receptionist/serviceorder/printExamReceipt.jsp").forward(request, response);
                 } else {
                     response.getWriter().print("Không tìm thấy thông tin Lịch Khám!");

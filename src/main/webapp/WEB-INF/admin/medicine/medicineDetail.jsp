@@ -24,6 +24,10 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="${basePath}/medicine/list"
+               class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to list
+            </a>
 
             <c:if test="${hasMedicineEdit}">
                 <button class="btn btn-warning"
@@ -32,12 +36,6 @@
                     <i class="fa-solid fa-pen-to-square me-2"></i>Edit
                 </button>
             </c:if>
-
-            <a href="${basePath}/medicine/list"
-               class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>Back to list
-            </a>
-
         </div>
 
     </div>
@@ -210,16 +208,10 @@
 
                                 <select name="unit" class="form-select" required>
                                     <option value="">-- Select Unit --</option>
-                                    <option value="Tablet" ${medicine.unit == 'Tablet' ? 'selected' : ''}>Tablet</option>
-                                    <option value="Blister" ${medicine.unit == 'Blister' ? 'selected' : ''}>Blister</option>
-                                    <option value="Box" ${medicine.unit == 'Box' ? 'selected' : ''}>Box</option>
-                                    <option value="Bottle" ${medicine.unit == 'Bottle' ? 'selected' : ''}>Bottle</option>
-                                    <option value="Vial" ${medicine.unit == 'Vial' ? 'selected' : ''}>Vial</option>
-                                    <option value="Tube" ${medicine.unit == 'Tube' ? 'selected' : ''}>Tube</option>
-                                    <option value="Sachet" ${medicine.unit == 'Sachet' ? 'selected' : ''}>Sachet</option>
-                                    <option value="Effervescent tablet" ${medicine.unit == 'Effervescent tablet' ? 'selected' : ''}>Effervescent Tablet</option>
-                                    <option value="capsule" ${medicine.unit == 'capsule' ? 'selected' : ''}>Capsule</option>
-                                    <option value="bag" ${medicine.unit == 'bag' ? 'selected' : ''}>Bag</option>
+                                    <option value="Viên" ${medicine.unit == 'Viên' ? 'selected' : ''}>Viên</option>
+                                    <option value="Ống" ${medicine.unit == 'Ống' ? 'selected' : ''}>Ống</option>
+                                    <option value="Lọ" ${medicine.unit == 'Lọ' ? 'selected' : ''}>Lọ</option>
+                                    <option value="Gói" ${medicine.unit == 'Gói' ? 'selected' : ''}>Gói</option>
                                 </select>
                             </div>
 
@@ -303,33 +295,3 @@
 
 
 
-    <style>
-
-        .card{
-            border-radius:12px;
-            border:none;
-        }
-
-        .card-header{
-            border-bottom:1px solid rgba(0,0,0,0.08);
-            border-radius:12px 12px 0 0 !important;
-        }
-
-        .badge{
-            padding:0.45em 0.9em;
-            font-weight:500;
-            border-radius:6px;
-        }
-
-        .btn{
-            border-radius:8px;
-            font-weight:500;
-            transition:all 0.25s ease;
-        }
-
-        .btn:hover{
-            transform:translateY(-2px);
-            box-shadow:0 4px 12px rgba(0,0,0,0.15);
-        }
-
-    </style>

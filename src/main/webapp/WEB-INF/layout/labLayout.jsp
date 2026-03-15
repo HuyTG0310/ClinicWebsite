@@ -1,11 +1,5 @@
-<%-- 
-    Document   : receptionistLayout
-    Created on : Feb 3, 2026, 9:42:57 PM
-    Author     : huytr
---%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -36,6 +30,8 @@
 
             </div>
         </div>
+                
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
 </html>

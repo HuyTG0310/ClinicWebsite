@@ -54,8 +54,8 @@ public class AppointmentDetailServlet extends HttpServlet {
             Appointment app = dao.getAppointmentDetailById(appointmentId);
 
             if (app == null) {
-                request.getSession().setAttribute("error", "Không tìm thấy thông tin phiếu khám!");
-                response.sendRedirect("list");
+                request.getSession().setAttribute("error", "Appointment not found!");
+                response.sendRedirect(basePath + "/appointment/list");
                 return;
             }
 

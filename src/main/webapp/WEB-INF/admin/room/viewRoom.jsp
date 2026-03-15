@@ -18,19 +18,17 @@
         </div>
 
         <div class="d-flex gap-2">
-
+            <a href="${basePath}/room/list"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+               
             <c:if test="${hasRoomEdit}">
                 <button class="btn btn-warning"
                         onclick="openEditModal(${room.roomId})">
                     <i class="fas fa-edit me-2"></i>Edit
                 </button>
             </c:if>
-
-            <a href="${basePath}/room/list"
-               class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to list
-            </a>
-
         </div>
 
     </div>
@@ -181,141 +179,130 @@
 
 
     <!-- ===== EDIT MODAL ===== -->
-
     <div class="modal fade" id="editModal" tabindex="-1">
-
-        <div class="modal-dialog">
-
-            <form class="modal-content"
-                  method="post"
-                  action="${basePath}/room/edit">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
 
                 <div class="modal-header">
-
                     <h5 class="modal-title">
-                        <i class="fas fa-edit text-primary me-2"></i>
+                        <i class="fa-solid fa-pen-to-square me-2"></i>
                         Edit Room
                     </h5>
 
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"></button>
-
                 </div>
 
+                <form method="post"
+                      action="${basePath}/room/edit">
 
-                <div class="modal-body">
+                    <div class="modal-body">
 
-                    <input type="hidden"
-                           id="editRoomId"
-                           name="roomId">
+                        <input type="hidden"
+                               id="editRoomId"
+                               name="roomId">
+
+                        <div class="row g-3">
+
+                            <!-- Room Name -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Room Name
+                                </label>
+
+                                <input id="editRoomName"
+                                       name="roomName"
+                                       class="form-control"
+                                       required>
+                            </div>
 
 
-                    <div class="mb-3">
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Status
+                                </label>
 
-                        <label class="form-label fw-semibold">
-                            Room Name
-                        </label>
+                                <select id="editIsActive"
+                                        name="isActive"
+                                        class="form-select">
 
-                        <input id="editRoomName"
-                               name="roomName"
-                               class="form-control"
-                               required>
+                                    <option value="true">
+                                        Active
+                                    </option>
+
+                                    <option value="false">
+                                        Inactive
+                                    </option>
+
+                                </select>
+                            </div>
+
+
+                            <!-- Specialty -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Specialty
+                                </label>
+
+                                <select id="editSpecialty"
+                                        name="specialtyId"
+                                        class="form-select"
+                                        onchange="onEditSpecialtyChange(this)">
+
+                                    <c:forEach var="s" items="${specialties}">
+                                        <option value="${s.specialtyId}">
+                                            ${s.name}
+                                        </option>
+                                    </c:forEach>
+
+                                </select>
+                            </div>
+
+
+                            <!-- Doctor -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Doctor
+                                </label>
+
+                                <select id="editDoctor"
+                                        name="currentDoctorId"
+                                        class="form-select">
+
+                                    <option value="">
+                                        -- Select Doctor --
+                                    </option>
+
+                                </select>
+                            </div>
+
+                        </div>
 
                     </div>
 
 
-                    <div class="mb-3">
+                    <div class="modal-footer">
 
-                        <label class="form-label fw-semibold">
-                            Specialty
-                        </label>
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
 
-                        <select id="editSpecialty"
-                                name="specialtyId"
-                                class="form-select"
-                                onchange="onEditSpecialtyChange(this)">
-
-                            <c:forEach var="s" items="${specialties}">
-
-                                <option value="${s.specialtyId}">
-                                    ${s.name}
-                                </option>
-
-                            </c:forEach>
-
-                        </select>
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+                            <i class="fa-solid fa-save me-1"></i>
+                            Save
+                        </button>
 
                     </div>
 
+                </form>
 
-                    <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Doctor
-                        </label>
-
-                        <select id="editDoctor"
-                                name="currentDoctorId"
-                                class="form-select">
-
-                            <option value="">
-                                -- Select Doctor --
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Status
-                        </label>
-
-                        <select id="editIsActive"
-                                name="isActive"
-                                class="form-select">
-
-                            <option value="true">
-                                🟢 Active
-                            </option>
-
-                            <option value="false">
-                                🔴 Inactive
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <div class="modal-footer">
-
-                    <button class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
-                        <i class="fas fa-times me-2"></i>
-                        Cancel
-
-                    </button>
-
-                    <button class="btn btn-primary">
-
-                        <i class="fas fa-save me-2"></i>
-                        Save
-
-                    </button>
-
-                </div>
-
-            </form>
-
+            </div>
         </div>
-
     </div>
 
 
@@ -329,42 +316,6 @@
         });
     </script>
 </c:if>
-
-
-<style>
-
-    .card{
-        border-radius:12px;
-        border:none;
-    }
-
-    .card-header{
-        border-bottom:1px solid rgba(0,0,0,0.08);
-        border-radius:12px 12px 0 0 !important;
-    }
-
-    .badge{
-        padding:0.45em 0.9em;
-        font-weight:500;
-        border-radius:6px;
-    }
-
-    .btn{
-        border-radius:8px;
-        font-weight:500;
-        transition:all 0.25s ease;
-    }
-
-    .btn:hover{
-        transform:translateY(-2px);
-        box-shadow:0 4px 12px rgba(0,0,0,0.15);
-    }
-
-</style>
-
-
-
-
 
 
 
@@ -439,11 +390,11 @@
             // ✅ SPECIALTY ACTIVE → ROOM CÓ 2 OPTION
             const activeOpt = document.createElement('option');
             activeOpt.value = 'true';
-            activeOpt.textContent = '🟢 Active';
+            activeOpt.textContent = 'Active';
 
             const inactiveOpt = document.createElement('option');
             inactiveOpt.value = 'false';
-            inactiveOpt.textContent = '🔴 Inactive';
+            inactiveOpt.textContent = 'Inactive';
 
             statusSelect.appendChild(activeOpt);
             statusSelect.appendChild(inactiveOpt);
