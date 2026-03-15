@@ -1,4 +1,3 @@
-
 package util;
 
 import jakarta.mail.*;
@@ -7,10 +6,11 @@ import java.util.Properties;
 
 public class EmailUtil {
 
-    private static final String FROM_EMAIL = "clinic.website.demo@gmail.com";
-    private static final String PASSWORD = "lhjz ftpl fwxs siiu";
+    private static final String FROM_EMAIL = "nguyentailoi.ce191482";
+    private static final String PASSWORD = "tvyaqxhkwfdhvdxg";
 
     private static Session getSession() {
+
         Properties props = new Properties();
 
         props.put("mail.smtp.host", "smtp.gmail.com");
@@ -18,36 +18,32 @@ public class EmailUtil {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
 
-        return Session.getInstance(props,
-                new Authenticator() {
+        return Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(FROM_EMAIL, PASSWORD);
             }
         });
     }
 
-    // Send OTP for password reset
+    // gửi OTP reset password
     public static void sendOTP(String toEmail, String otp) throws Exception {
 
         Session session = getSession();
 
         Message message = new MimeMessage(session);
-
         message.setFrom(new InternetAddress(FROM_EMAIL));
-
         message.setRecipients(
                 Message.RecipientType.TO,
                 InternetAddress.parse(toEmail)
         );
 
         message.setSubject("Clinic System Password Reset");
-
         message.setText("Your OTP code is: " + otp);
 
         Transport.send(message);
     }
 
-    // Send account info for staff
+    // gửi account staff
     public static void sendAccount(String toEmail, String username) {
 
         try {
@@ -55,7 +51,6 @@ public class EmailUtil {
             Session session = getSession();
 
             Message message = new MimeMessage(session);
-
             message.setFrom(new InternetAddress(FROM_EMAIL));
 
             message.setRecipients(
