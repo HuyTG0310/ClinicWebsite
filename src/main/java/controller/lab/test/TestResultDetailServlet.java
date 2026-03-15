@@ -11,13 +11,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.TestResult;
+import model.TestResultDetail;
 
 /**
  *
  * @author huytr
  */
 @WebServlet(name = "LabResultDetailServlet", urlPatterns = {"/lab/lab-test/detail", "/admin/lab-test/detail"})
-public class LabResultDetailServlet extends HttpServlet {
+public class TestResultDetailServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -39,12 +41,18 @@ public class LabResultDetailServlet extends HttpServlet {
         }
 
         request.setAttribute("basePath", basePath);
-        
+
         try {
             int mrId = Integer.parseInt(request.getParameter("mrId"));
             dao.LabTestDAO labDao = new dao.LabTestDAO();
 
-            java.util.List<java.util.Map<String, Object>> tests = labDao.getTestsForProcessing(mrId);
+            java.util.List<TestResultDetail> tests = labDao.getTestsForProcessing(mrId);
+            if (tests.isEmpty()) {
+                request.getSession().setAttribute("error", "Test result detail not found!");
+                response.sendRedirect(basePath + "/lab-queue/list");
+                return;
+            }
+            
             request.setAttribute("tests", tests);
             request.setAttribute("mrId", mrId);
 

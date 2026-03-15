@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package controller.lab.queue;
+package controller.lab.test;
 
 import dao.*;
 import java.io.IOException;
@@ -13,13 +13,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
+import model.TestResult;
 
 /**
  *
  * @author huytr
  */
 @WebServlet(name = "LabQueueServlet", urlPatterns = {"/lab/lab-queue/list", "/admin/lab-queue/list"})
-public class LabQueueServlet extends HttpServlet {
+public class TestResultListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -51,8 +52,14 @@ public class LabQueueServlet extends HttpServlet {
         }
 
         LabTestDAO dao = new LabTestDAO();
+        java.util.List<model.TestResult> queue;
 
-        List<Map<String, Object>> queue = dao.getLabQueue(search, status);
+        // Phân luồng logic gọi hàm DAO
+        if (search != null && !search.trim().isEmpty()) {
+            queue = dao.searchTestResults(search, status);
+        } else {
+            queue = dao.getAllTestResults(status);
+        }
 
         request.setAttribute("queue", queue);
 

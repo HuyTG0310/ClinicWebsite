@@ -12,13 +12,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.TestResult;
 
 /**
  *
  * @author huytr
  */
 @WebServlet(name = "LabTestSaveServlet", urlPatterns = {"/lab/lab-test/save", "/admin/lab-test/save"})
-public class LabTestSaveServlet extends HttpServlet {
+public class TestResultCreateServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,7 +44,7 @@ public class LabTestSaveServlet extends HttpServlet {
         }
 
         request.setAttribute("basePath", basePath);
-        
+
         try {
             int medicalRecordId = Integer.parseInt(request.getParameter("medicalRecordId"));
 
@@ -53,8 +54,16 @@ public class LabTestSaveServlet extends HttpServlet {
             model.User currentUser = (model.User) request.getSession().getAttribute("user");
             int technicianId = currentUser.getUserId();
 
+            TestResult testResult = new TestResult();
+            testResult.setMedicalRecordId(medicalRecordId);
+            testResult.setOrderTestIds(orderTestIds);
+            testResult.setParamIds(paramIds);
+            testResult.setTechnicianId(technicianId);
+            testResult.setParameterMap(request.getParameterMap());
+
             LabTestDAO dao = new LabTestDAO();
-            boolean success = dao.saveLabResults(medicalRecordId, orderTestIds, paramIds, request.getParameterMap(), technicianId);
+//            boolean success = dao.saveLabResults(medicalRecordId, orderTestIds, paramIds, request.getParameterMap(), technicianId);
+            boolean success = dao.saveLabResults(testResult);
 
             if (success) {
                 request.getSession().setAttribute("success", "Saved result successfully!");

@@ -109,96 +109,107 @@
                 </thead>
 
                 <tbody>
+                    <c:choose>
 
-                    <c:forEach items="${queue}" var="row">
+                        <c:when test="${empty queue}">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <div>List is empty</div>
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${queue}" var="row">
 
-                        <tr class="${row.isFullyCompleted ? 'bg-light' : ''}">
+                                <tr class="${row.isFullyCompleted ? 'bg-light' : ''}">
 
-                            <td class="px-4 text-center">
-                                <strong>#${row.medicalRecordId}</strong>
-                            </td>
+                                    <td class="px-4 text-center">
+                                        <strong>#${row.medicalRecordId}</strong>
+                                    </td>
 
-                            <td>
-                                <strong class="text-primary">${row.patientName}</strong>
-                                <div class="small text-muted">
-                                    Patient code: ${row.patientId}
-                                </div>
-                            </td>
+                                    <td>
+                                        <strong class="text-primary">${row.patientName}</strong>
+                                        <div class="small text-muted">
+                                            Patient code: ${row.patientId}
+                                        </div>
+                                    </td>
 
-                            <td class="text-center">
+                                    <td class="text-center">
 
-                                <span class="badge ${row.gender == 'Male' ? 'bg-primary' : 'bg-danger'}">
-                                    ${row.gender}
-                                </span>
-
-                                <span class="ms-1 fw-bold">${row.age}T</span>
-
-                            </td>
-
-                            <td class="small fw-bold text-muted">
-                                <i class="fa-solid fa-user-doctor me-1"></i>
-                                ${row.doctorName}
-                            </td>
-
-                            <td class="text-center">
-
-                                <c:choose>
-
-                                    <c:when test="${row.isFullyCompleted}">
-                                        <span class="badge bg-success">
-                                            <i class="fa-solid fa-check me-1"></i>
-                                            Completed (${row.progress})
+                                        <span class="badge ${row.gender == 'Male' ? 'bg-primary' : 'bg-danger'}">
+                                            ${row.gender}
                                         </span>
-                                    </c:when>
 
-                                    <c:when test="${row.completedTests == 0}">
-                                        <span class="badge bg-warning text-dark">
-                                            Waiting (${row.progress})
-                                        </span>
-                                    </c:when>
+                                        <span class="ms-1 fw-bold">${row.age}T</span>
 
-                                    <c:otherwise>
-                                        <span class="badge bg-primary">
-                                            Processing (${row.progress})
-                                        </span>
-                                    </c:otherwise>
+                                    </td>
 
-                                </c:choose>
+                                    <td class="small fw-bold text-muted">
+                                        <i class="fa-solid fa-user-doctor me-1"></i>
+                                        ${row.doctorName}
+                                    </td>
 
-                            </td>
+                                    <td class="text-center">
 
-                            <td class="text-center">
+                                        <c:choose>
 
-                                <c:choose>
+                                            <c:when test="${row.isFullyCompleted}">
+                                                <span class="badge bg-success">
+                                                    <i class="fa-solid fa-check me-1"></i>
+                                                    Completed (${row.progress})
+                                                </span>
+                                            </c:when>
 
-                                    <c:when test="${row.isFullyCompleted}">
+                                            <c:when test="${row.completedTests == 0}">
+                                                <span class="badge bg-warning text-dark">
+                                                    Waiting (${row.progress})
+                                                </span>
+                                            </c:when>
 
-                                        <a href="${basePath}/lab-test/detail?mrId=${row.medicalRecordId}" 
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="View Details">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
+                                            <c:otherwise>
+                                                <span class="badge bg-primary">
+                                                    Processing (${row.progress})
+                                                </span>
+                                            </c:otherwise>
 
-                                    </c:when>
+                                        </c:choose>
 
-                                    <c:otherwise>
+                                    </td>
 
-                                        <a href="${basePath}/lab-test/edit?mrId=${row.medicalRecordId}"
-                                           class="btn btn-sm btn-success">
-                                            <i class="fa-solid fa-microscope me-1"></i>
-                                            Process
-                                        </a>
+                                    <td class="text-center">
 
-                                    </c:otherwise>
+                                        <c:choose>
 
-                                </c:choose>
+                                            <c:when test="${row.isFullyCompleted}">
 
-                            </td>
+                                                <a href="${basePath}/lab-test/detail?mrId=${row.medicalRecordId}" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="View Details">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
 
-                        </tr>
+                                            </c:when>
 
-                    </c:forEach>
+                                            <c:otherwise>
 
+                                                <a href="${basePath}/lab-test/edit?mrId=${row.medicalRecordId}"
+                                                   class="btn btn-sm btn-success">
+                                                    <i class="fa-solid fa-microscope me-1"></i>
+                                                    Process
+                                                </a>
+
+                                            </c:otherwise>
+
+                                        </c:choose>
+
+                                    </td>
+
+                                </tr>
+
+                            </c:forEach>
+
+                        </c:otherwise>
+                    </c:choose>
                 </tbody>
 
             </table>
