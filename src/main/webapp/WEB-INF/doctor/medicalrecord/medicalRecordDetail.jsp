@@ -23,7 +23,7 @@
             </a>
 
             <c:if test="${not empty consolidatedResults}">
-                <a href="${basePath}/test/print?mrId=${mr.medicalRecordId}"
+                <a href="${basePath}/lab-test/print?mrId=${mr.medicalRecordId}"
                    target="_blank"
                    class="btn btn-info text-white">
                     <i class="fas fa-flask me-2"></i>Print Test Results

@@ -8,6 +8,7 @@ import java.sql.*;
 import model.LabTest;
 import util.DBContext;
 import java.util.*;
+import model.*;
 
 /**
  *
@@ -1081,90 +1082,118 @@ public class LabTestDAO extends DBContext {
         return info;
     }
 
-    public java.util.List<java.util.Map<String, Object>> getLabQueue(String searchKeyword, String status) {
-        java.util.List<java.util.Map<String, Object>> queue = new java.util.ArrayList<>();
+    // SQL GỐC CHO DANH SÁCH TEST
+    private final String BASE_SQL_QUEUE
+            = "SELECT "
+            + "mr.MedicalRecordId, "
+            + "p.PatientId, "
+            + "p.FullName AS PatientName, "
+            + "p.Gender, "
+            + "(YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, "
+            + "u.FullName AS DoctorName, "
+            + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) AS TotalValidTests, "
+            + "SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) AS CompletedTests "
+            + "FROM MedicalRecord mr "
+            + "JOIN Patient p ON mr.PatientId = p.PatientId "
+            + "JOIN [User] u ON mr.ResponsibleDoctorId = u.UserId "
+            + "JOIN LabTestBatch b ON mr.MedicalRecordId = b.MedicalRecordId "
+            + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
+            + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
+            + "WHERE so.Status = 'PAID' AND b.Status != 'CANCELLED' ";
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT "
-                + "mr.MedicalRecordId, "
-                + "p.PatientId, "
-                + "p.FullName AS PatientName, "
-                + "p.Gender, "
-                + "(YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, "
-                + "u.FullName AS DoctorName, "
-                // 🔥 SỬA ĐỔI 1: Chỉ đếm Tổng Test HỢP LỆ (Bỏ qua các test bị Lab từ chối)
-                + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) AS TotalValidTests, "
-                // Đếm Test đã hoàn thành
-                + "SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) AS CompletedTests "
-                + "FROM MedicalRecord mr "
-                + "JOIN Patient p ON mr.PatientId = p.PatientId "
-                + "JOIN [User] u ON mr.ResponsibleDoctorId = u.UserId "
-                + "JOIN LabTestBatch b ON mr.MedicalRecordId = b.MedicalRecordId "
-                + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
-                + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
-                // 🔥 SỬA ĐỔI 2: Chặn đứng các Lô (Batch) đã bị Bác sĩ hủy
-                + "WHERE so.Status = 'PAID' AND b.Status != 'CANCELLED' "
-        );
+    private final String GROUP_BY_QUEUE = "GROUP BY mr.MedicalRecordId, p.PatientId, p.FullName, p.Gender, p.DateOfBirth, u.FullName ";
 
-        // 1. Lọc theo Tên bệnh nhân hoặc Mã BA
-        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            sql.append("AND (p.FullName LIKE ? OR CAST(mr.MedicalRecordId AS VARCHAR) = ?) ");
-        }
+    // HÀM LẤY TẤT CẢ DANH SÁCH TEST
+    public java.util.List<model.TestResult> getAllTestResults(String status) {
+        java.util.List<model.TestResult> queue = new java.util.ArrayList<>();
+        StringBuilder sql = new StringBuilder(BASE_SQL_QUEUE);
 
-        sql.append("GROUP BY mr.MedicalRecordId, p.PatientId, p.FullName, p.Gender, p.DateOfBirth, u.FullName ");
+        sql.append(GROUP_BY_QUEUE);
 
-        // 2. Lọc theo Trạng thái (Phép thuật nằm ở câu HAVING)
         if ("COMPLETED".equals(status)) {
-            // 🔥 SỬA ĐỔI 3: Ca XONG là ca có (Số Hoàn Thành = Số Hợp Lệ)
             sql.append("HAVING SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) = "
                     + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) ");
         } else if ("PENDING".equals(status)) {
-            // 🔥 SỬA ĐỔI 4: Ca CHỜ là ca có (Số Hoàn Thành < Số Hợp Lệ)
             sql.append("HAVING SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) < "
                     + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) ");
         }
 
-        sql.append("ORDER BY mr.MedicalRecordId DESC"); // Xếp mới nhất lên đầu
+        sql.append("ORDER BY mr.MedicalRecordId DESC");
+
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString()); java.sql.ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                queue.add(mapResultSetToTestResult(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return queue;
+    }
+
+    // HÀM TÌM KIẾM DANH SÁCH TEST
+    public java.util.List<model.TestResult> searchTestResults(String searchKeyword, String status) {
+        java.util.List<model.TestResult> queue = new java.util.ArrayList<>();
+        StringBuilder sql = new StringBuilder(BASE_SQL_QUEUE);
+
+        boolean hasKeyword = searchKeyword != null && !searchKeyword.trim().isEmpty();
+
+        if (hasKeyword) {
+            sql.append("AND (p.FullName LIKE ? OR CAST(mr.MedicalRecordId AS VARCHAR) = ?) ");
+        }
+
+        sql.append(GROUP_BY_QUEUE);
+
+        if ("COMPLETED".equals(status)) {
+            sql.append("HAVING SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) = "
+                    + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) ");
+        } else if ("PENDING".equals(status)) {
+            sql.append("HAVING SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) < "
+                    + "SUM(CASE WHEN lot.Status != 'REJECTED' THEN 1 ELSE 0 END) ");
+        }
+
+        sql.append("ORDER BY mr.MedicalRecordId DESC");
 
         try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
 
-            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            if (hasKeyword) {
                 st.setString(1, "%" + searchKeyword.trim() + "%");
                 st.setString(2, searchKeyword.trim());
             }
 
             try (java.sql.ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    java.util.Map<String, Object> row = new java.util.HashMap<>();
-                    row.put("medicalRecordId", rs.getInt("MedicalRecordId"));
-                    row.put("patientId", rs.getInt("PatientId"));
-                    row.put("patientName", rs.getString("PatientName"));
-                    row.put("gender", rs.getString("Gender"));
-                    row.put("age", rs.getInt("Age"));
-                    row.put("doctorName", rs.getString("DoctorName"));
-
-                    // 🔥 SỬA ĐỔI 5: Lấy số liệu mới để tính toán Tiến độ
-                    int totalValid = rs.getInt("TotalValidTests");
-                    int completed = rs.getInt("CompletedTests");
-
-                    row.put("totalTests", totalValid);
-                    row.put("completedTests", completed);
-
-                    // Hiển thị 2/2 thay vì 2/3 nếu có 1 mẫu bị reject
-                    row.put("progress", completed + "/" + totalValid);
-
-                    // Cờ xác nhận: Đã xong 100% nếu số Completed = Số Valid 
-                    // (Nếu Lab từ chối cả 3/3 dịch vụ, totalValid = 0, completed = 0 -> Vẫn tính là xong và đá sang tab COMPLETED)
-                    boolean isFullyCompleted = (totalValid == completed);
-                    row.put("isFullyCompleted", isFullyCompleted);
-
-                    queue.add(row);
+                    queue.add(mapResultSetToTestResult(rs));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return queue;
+    }
+
+    // =========================================================================
+    // 🔥 HÀM TIỆN ÍCH CHUẨN HÓA DỮ LIỆU
+    // =========================================================================
+    private model.TestResult mapResultSetToTestResult(java.sql.ResultSet rs) throws Exception {
+        model.TestResult row = new model.TestResult();
+        row.setMedicalRecordId(rs.getInt("MedicalRecordId"));
+        row.setPatientId(rs.getInt("PatientId"));
+        row.setPatientName(rs.getString("PatientName"));
+        row.setGender(rs.getString("Gender"));
+        row.setAge(rs.getInt("Age"));
+        row.setDoctorName(rs.getString("DoctorName"));
+
+        int totalValid = rs.getInt("TotalValidTests");
+        int completed = rs.getInt("CompletedTests");
+        row.setTotalTests(totalValid);
+        row.setCompletedTests(completed);
+        row.setProgress(completed + "/" + totalValid);
+
+        boolean isFullyCompleted = (totalValid == completed);
+        row.setIsFullyCompleted(isFullyCompleted);
+
+        return row;
     }
 
     //cập nhật trạng thái của 1 chỉ định xét nghiệm (LabOrderTest)
@@ -1291,9 +1320,96 @@ public class LabTestDAO extends DBContext {
         return false;
     }
 
-    //lấy danh sách chi tiết các chỉ số xét nghiệm để kỹ thuật viên nhập kết quả
-    public java.util.List<java.util.Map<String, Object>> getTestsForProcessing(int medicalRecordId) {
-        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+//    public java.util.List<java.util.Map<String, Object>> getTestsForProcessing(int medicalRecordId) {
+//        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+//
+//        // Join với LabReferenceRange dựa trên Tuổi và Giới tính bệnh nhân
+//        String sql = "SELECT "
+//                + "c.CategoryName, "
+//                + "b.BatchId, "
+//                + "lot.LabOrderTestId, "
+//                + "lot.Status AS TestStatus, "
+//                + "lot.RejectReason, "
+//                + "t.TestName, "
+//                + "p.ParameterId, "
+//                + "p.ParameterName, "
+//                + "COALESCE(r.Unit, p.Unit) AS Unit, "
+//                // Ưu tiên lấy RefMin/Max từ bảng LabResult nếu đã nhập. Nếu chưa nhập thì lấy từ quy tắc phù hợp (rr)
+//                + "COALESCE(r.RefMin, rr.RefMin) AS RefMin, "
+//                + "COALESCE(r.RefMax, rr.RefMax) AS RefMax, "
+//                + "r.ResultId, "
+//                + "r.ResultValue, "
+//                + "r.Flag "
+//                + "FROM LabTestBatch b "
+//                + "JOIN Patient pat ON b.PatientId = pat.PatientId " // Cần bảng Patient để lấy Tuổi, Giới tính
+//                + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
+//                + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
+//                + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
+//                + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
+//                + "JOIN LabTestParameter p ON t.LabTestId = p.LabTestId "
+//                // 💎 LEFT JOIN Quyết định: Tìm Range phù hợp với bệnh nhân này
+//                + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId "
+//                + "     AND rr.IsActive = 1 "
+//                + "     AND ("
+//                + "         rr.Gender = 'ALL' "
+//                + "         OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
+//                + "         OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
+//                + "     ) "
+//                + "     AND DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays "
+//                + "LEFT JOIN LabResult r ON lot.LabOrderTestId = r.LabOrderTestId AND p.ParameterId = r.ParameterId "
+//                + "WHERE b.MedicalRecordId = ? "
+//                + "AND so.Status = 'PAID' "
+//                + "AND b.Status != 'CANCELLED' "
+//                + "AND lot.Status != 'CANCELLED' "
+//                + "AND (t.IsActive = 1 OR r.ResultValue IS NOT NULL) "
+//                + "AND ( (p.IsActive = 1 AND lot.Status != 'COMPLETED') OR r.ResultId IS NOT NULL ) "
+//                + "ORDER BY c.SortOrder ASC, t.SortOrder ASC, p.SortOrder ASC";
+//
+//        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
+//
+//            st.setInt(1, medicalRecordId);
+//            try (java.sql.ResultSet rs = st.executeQuery()) {
+//                while (rs.next()) {
+//                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+//                    map.put("batchId", rs.getInt("BatchId"));
+//                    map.put("categoryName", rs.getString("CategoryName"));
+//                    map.put("labOrderTestId", rs.getInt("LabOrderTestId"));
+//                    map.put("status", rs.getString("TestStatus"));
+//                    map.put("rejectReason", rs.getString("RejectReason"));
+//                    map.put("testName", rs.getString("TestName"));
+//                    map.put("parameterId", rs.getInt("ParameterId"));
+//                    map.put("parameterName", rs.getString("ParameterName"));
+//                    map.put("unit", rs.getString("Unit"));
+//
+//                    // Nối dải tham chiếu bình thường (VD: 4.0 - 5.5)
+//                    Object refMin = rs.getObject("RefMin");
+//                    Object refMax = rs.getObject("RefMax");
+//                    String normalRange = (refMin != null ? refMin.toString() : "") + " - " + (refMax != null ? refMax.toString() : "");
+//                    map.put("normalRange", normalRange.equals(" - ") ? "___" : normalRange);
+//
+//                    map.put("isNumeric", (refMin != null || refMax != null));
+//                    map.put("refMin", refMin);
+//                    map.put("refMax", refMax);
+//
+//                    // Lấy kết quả (nếu đã nhập)
+//                    map.put("resultId", rs.getObject("ResultId"));
+//                    map.put("resultValue", rs.getString("ResultValue"));
+//
+//                    // Cờ bất thường (Flag)
+//                    String flag = rs.getString("Flag");
+//                    map.put("isAbnormal", (flag != null && !flag.trim().isEmpty()));
+//                    map.put("flag", flag);
+//
+//                    list.add(map);
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return list;
+//    }
+    public java.util.List<TestResultDetail> getTestsForProcessing(int medicalRecordId) {
+        java.util.List<TestResultDetail> list = new java.util.ArrayList<>();
 
         // Join với LabReferenceRange dựa trên Tuổi và Giới tính bệnh nhân
         String sql = "SELECT "
@@ -1342,37 +1458,38 @@ public class LabTestDAO extends DBContext {
             st.setInt(1, medicalRecordId);
             try (java.sql.ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    java.util.Map<String, Object> map = new java.util.HashMap<>();
-                    map.put("batchId", rs.getInt("BatchId"));
-                    map.put("categoryName", rs.getString("CategoryName"));
-                    map.put("labOrderTestId", rs.getInt("LabOrderTestId"));
-                    map.put("status", rs.getString("TestStatus"));
-                    map.put("rejectReason", rs.getString("RejectReason"));
-                    map.put("testName", rs.getString("TestName"));
-                    map.put("parameterId", rs.getInt("ParameterId"));
-                    map.put("parameterName", rs.getString("ParameterName"));
-                    map.put("unit", rs.getString("Unit"));
+//                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    TestResultDetail result = new TestResultDetail();
+                    result.setBatchId(rs.getInt("BatchId"));
+                    result.setCategoryName(rs.getString("CategoryName"));
+                    result.setLabOrderTestId(rs.getInt("LabOrderTestId"));
+                    result.setStatus(rs.getString("TestStatus"));
+                    result.setRejectReason(rs.getString("RejectReason"));
+                    result.setTestName(rs.getString("TestName"));
+                    result.setParameterId(rs.getInt("ParameterId"));
+                    result.setParameterName(rs.getString("ParameterName"));
+                    result.setUnit(rs.getString("Unit"));
 
                     // Nối dải tham chiếu bình thường (VD: 4.0 - 5.5)
                     Object refMin = rs.getObject("RefMin");
                     Object refMax = rs.getObject("RefMax");
                     String normalRange = (refMin != null ? refMin.toString() : "") + " - " + (refMax != null ? refMax.toString() : "");
-                    map.put("normalRange", normalRange.equals(" - ") ? "___" : normalRange);
+                    result.setNormalRange(normalRange.equals(" - ") ? "___" : normalRange);
+                    result.setIsNumeric((refMin != null || refMax != null));
 
-                    map.put("isNumeric", (refMin != null || refMax != null));
-                    map.put("refMin", refMin);
-                    map.put("refMax", refMax);
+                    result.setRefMin(refMin);
+                    result.setRefMax(refMax);
 
                     // Lấy kết quả (nếu đã nhập)
-                    map.put("resultId", rs.getObject("ResultId"));
-                    map.put("resultValue", rs.getString("ResultValue"));
+                    result.setResultId(rs.getObject("ResultId"));
+                    result.setResultValue(rs.getString("ResultValue"));
 
                     // Cờ bất thường (Flag)
                     String flag = rs.getString("Flag");
-                    map.put("isAbnormal", (flag != null && !flag.trim().isEmpty()));
-                    map.put("flag", flag);
+                    result.setIsAbnormal((flag != null && !flag.trim().isEmpty()));
+                    result.setFlag(flag);
 
-                    list.add(map);
+                    list.add(result);
                 }
             }
         } catch (Exception e) {
@@ -1382,7 +1499,7 @@ public class LabTestDAO extends DBContext {
     }
 
     //hàm lưu kết quả xét nghiệm
-    public boolean saveLabResults(int medicalRecordId, String[] orderTestIds, String[] paramIds, java.util.Map<String, String[]> parameterMap, int technicianId) {
+    public boolean saveLabResults(TestResult testResult) {
         java.sql.Connection conn = null;
 
         // 🔥 SỬA LẠI CÂU LỆNH LẤY SNAPSHOT: Truyền MedicalRecordId để truy vết ra Bệnh nhân, từ đó tìm đúng Range
@@ -1429,13 +1546,15 @@ public class LabTestDAO extends DBContext {
             boolean hasInsert = false;
             boolean hasUpdate = false;
             boolean hasStatusUpdate = false;
-
+            
+            String[] orderTestIds = testResult.getOrderTestIds();
+            String[] paramIds = testResult.getParamIds();
             if (orderTestIds != null && paramIds != null) {
                 for (int i = 0; i < orderTestIds.length; i++) {
                     String orderTestId = orderTestIds[i];
                     String paramId = paramIds[i];
 
-                    String[] resultValues = parameterMap.get("result_" + orderTestId + "_" + paramId);
+                    String[] resultValues = testResult.getParameterMap().get("result_" + orderTestId + "_" + paramId);
                     String resultValue = (resultValues != null && resultValues.length > 0) ? resultValues[0] : "";
 
                     if (resultValue != null && !resultValue.trim().isEmpty()) {
@@ -1444,7 +1563,7 @@ public class LabTestDAO extends DBContext {
                         java.math.BigDecimal refMax = null;
                         String unit = null;
 
-                        stGetSnapshot.setInt(1, medicalRecordId);
+                        stGetSnapshot.setInt(1, testResult.getMedicalRecordId());
                         stGetSnapshot.setInt(2, Integer.parseInt(paramId));
 
                         try (java.sql.ResultSet rsSnap = stGetSnapshot.executeQuery()) {
@@ -1468,7 +1587,7 @@ public class LabTestDAO extends DBContext {
                         }
 
                         if (finalFlag == null) {
-                            String[] flags = parameterMap.get("flag_" + orderTestId + "_" + paramId);
+                            String[] flags = testResult.getParameterMap().get("flag_" + orderTestId + "_" + paramId);
                             if (flags != null && flags.length > 0 && flags[0] != null) {
                                 String uiFlag = flags[0].trim().toLowerCase();
                                 if (uiFlag.equals("on") || uiFlag.equals("true") || uiFlag.equals("y") || uiFlag.equals("1")) {
@@ -1509,8 +1628,8 @@ public class LabTestDAO extends DBContext {
 
                         stUpdateOrder.setInt(1, Integer.parseInt(orderTestId));
                         stUpdateOrder.addBatch();
-                        
-                        stUpdateBatch.setInt(1, technicianId);
+
+                        stUpdateBatch.setInt(1, testResult.getTechnicianId());
                         stUpdateBatch.setInt(2, Integer.parseInt(orderTestId));
                         stUpdateBatch.setInt(3, Integer.parseInt(orderTestId));
                         stUpdateBatch.addBatch();
@@ -1563,7 +1682,6 @@ public class LabTestDAO extends DBContext {
         }
         return -1;
     }
-
 
     public static void main(String[] args) {
         System.out.println(new LabTestDAO().getInChargeLabTechinicianId(19));

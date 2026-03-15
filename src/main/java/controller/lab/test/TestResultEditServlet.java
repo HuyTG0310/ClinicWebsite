@@ -13,13 +13,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
+import model.TestResult;
+import model.TestResultDetail;
 
 /**
  *
  * @author huytr
  */
 @WebServlet(name = "LabTestEditServlet", urlPatterns = {"/lab/lab-test/edit", "/admin/lab-test/edit"})
-public class LabTestEditServlet extends HttpServlet {
+public class TestResultEditServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -53,7 +55,7 @@ public class LabTestEditServlet extends HttpServlet {
                 return;
             }
 
-            java.util.List<java.util.Map<String, Object>> tests = labDao.getTestsForProcessing(mrId);
+            java.util.List<TestResultDetail> tests = labDao.getTestsForProcessing(mrId);
             request.setAttribute("tests", tests);
             request.setAttribute("mrId", mrId);
 
