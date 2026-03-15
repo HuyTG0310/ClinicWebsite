@@ -15,6 +15,7 @@
 <c:set var="activeTab" value="${param.activeTab}" />
 <c:set var="isProfessionalActive" value="${activeTab == 'professional'}" />
 <c:set var="isBasicActive" value="${empty activeTab || activeTab != 'professional'}" />
+
 <div class="container-fluid">
 
     <!-- HEADER -->

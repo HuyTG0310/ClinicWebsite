@@ -147,6 +147,25 @@
             </div>
         </a>
     </div>
+    <div class="col-xl-3 col-md-4 col-sm-6">
+        <a href="${pageContext.request.contextPath}/admin/certification/list"
+           class="dashboard-card text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="dashboard-icon bg-primary">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+                    <h6 class="mt-3 mb-1">Certification Approval</h6>
+                    <p class="text-muted small mb-0">
+                        Duyệt chứng chỉ
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>     
+</div>
+
+</div>     
 
 
 

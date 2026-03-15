@@ -45,6 +45,13 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/certification/my">
+                <i class="fa-solid fa-certificate me-2"></i>
+                My Certifications
+            </a>
+        </li>
 
         <!-- Test Requests -->
         <c:if test="${hasMedicineView}">

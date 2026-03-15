@@ -77,7 +77,18 @@ public class AuthorizationFilter implements Filter {
         System.out.println("DEBUG FILTER PATH: " + path);
 
         // --- 1. Bỏ qua Login, Forget password & Assets ---
-        if (path.startsWith("/login") || path.startsWith("/assets") || path.startsWith("/css") || path.startsWith("/js") || path.startsWith("/forget-password")) {
+        if (path.startsWith("/login")
+                || path.startsWith("/forget-password")
+                || path.startsWith("/send-otp")
+                || path.startsWith("/verify-otp")
+                || path.startsWith("/reset-password")
+                || path.startsWith("/forgotPassword.jsp")
+                || path.startsWith("/verifyOtp.jsp")
+                || path.startsWith("/resetPassword.jsp")
+                || path.startsWith("/assets")
+                || path.startsWith("/css")
+                || path.startsWith("/js")) {
+
             chain.doFilter(request, response);
             return;
         }
@@ -143,7 +154,6 @@ public class AuthorizationFilter implements Filter {
         req.setAttribute("hasAppointmentCreate", privileges.contains("APPOINTMENT_CREATE"));
         req.setAttribute("hasAppointmentEdit", privileges.contains("APPOINTMENT_EDIT"));
         req.setAttribute("hasAppointmentView", privileges.contains("APPOINTMENT_VIEW"));
-
 
         if (path.startsWith("/profile")) {
             chain.doFilter(request, response);

@@ -31,6 +31,15 @@
         </li>
 
         <li class="nav-item">
+            <a class="nav-link ${activePage == 'certificationApproval' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/certification/list">
+                <i class="fa-solid fa-certificate me-2"></i>
+                Certification Approval
+            </a>
+        </li>
+
+
+        <li class="nav-item">
             <a class="nav-link ${activePage == 'manageStaff' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/user/list">
                 <i class="fa-solid fa-users me-2"></i>
