@@ -6,17 +6,10 @@
 
     <div>
         <h2 class="mb-1">
-            <i class="fa-solid fa-users-medical text-primary me-2"></i>
+            <i class="fa-regular fa-calendar-check text-primary me-2"></i>
             Manage Queue
         </h2>
         <p class="text-muted mb-0">Monitor and receive patients at your clinic</p>
-    </div>
-
-    <div class="bg-white px-4 py-2 rounded-3 shadow-sm border border-primary border-opacity-25">
-        <i class="fa-regular fa-calendar-check text-primary me-2"></i>
-        <strong class="text-dark">
-            <fmt:formatDate value="${now}" pattern="EEEE, dd/MM/yyyy"/>
-        </strong>
     </div>
 
 </div>

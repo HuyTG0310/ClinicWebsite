@@ -44,7 +44,7 @@
 
                 <div class="col-md-3 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="fas fa-filter me-2"></i>Search
+                        <i class="fas fa-search me-2"></i>Search
                     </button>
 
                     <c:if test="${not empty keyword}">
