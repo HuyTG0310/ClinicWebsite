@@ -230,6 +230,7 @@
                                 <tr>
                                     <th>Parameter</th>
                                     <th class="text-center">Result</th>
+                                    <th class="text-center">Unit</th>
                                     <th class="text-center">Reference</th>
                                     <th class="text-center">Time</th>
                                 </tr>
@@ -245,7 +246,7 @@
                                     <!-- CATEGORY -->
                                     <c:if test="${r.categoryName != currCat}">
                                         <tr class="table-secondary">
-                                            <td colspan="4" class="fw-bold">
+                                            <td colspan="5" class="fw-bold">
                                                 <i class="fas fa-layer-group me-2"></i>${r.categoryName}
                                             </td>
                                         </tr>
@@ -257,7 +258,7 @@
                                     <c:if test="${r.testName != currTest}">
                                         <c:if test="${r.isPanel}">
                                             <tr class="bg-light">
-                                                <td colspan="4" class="fw-semibold fst-italic">
+                                                <td colspan="5" class="fw-semibold fst-italic">
                                                     <i class="fas fa-vial me-2 text-secondary"></i>
                                                     ${r.testName}
                                                 </td>
@@ -299,9 +300,12 @@
                                                 </c:otherwise>
 
                                             </c:choose>
-
+                                            
                                         </td>
-
+                                        <td class="text-center text-muted">
+                                            ${r.unit}
+                                        </td>
+                                        
                                         <td class="text-center text-muted">
                                             ${r.normalRange}
                                         </td>
