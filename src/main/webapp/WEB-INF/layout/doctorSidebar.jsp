@@ -108,7 +108,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/profile/view">
+               href="${pageContext.request.contextPath}/doctor/profile/view">
                 <i class="fa-solid fa-id-card me-2"></i>
                 Profile
             </a>

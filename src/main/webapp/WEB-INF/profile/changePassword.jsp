@@ -38,7 +38,7 @@
 
                 <div class="card-body">
 
-                    <form action="${pageContext.request.contextPath}/profile/change-password" method="post">
+                    <form action="${basePath}/profile/change-password" method="post">
 
                         <div class="mb-3">
 
@@ -134,7 +134,7 @@
             <div class="text-center mt-3">
 
                 <a class="btn btn-outline-secondary"
-                   href="${pageContext.request.contextPath}/profile/view">
+                   href="${basePath}/profile/view">
 
                     <i class="fa-solid fa-arrow-left me-2"></i>
                     Back to Profile

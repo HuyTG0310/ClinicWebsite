@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.User;
 
-@WebServlet(name = "ChangePasswordServlet", urlPatterns = {"/profile/change-password"})
+@WebServlet(name = "ChangePasswordServlet", urlPatterns = {"/lab/profile/change-password", "/doctor/profile/change-password", "/receptionist/profile/change-password"})
 public class ChangePasswordServlet extends HttpServlet {
 
     private String hashPassword(String password) {
@@ -23,13 +23,30 @@ public class ChangePasswordServlet extends HttpServlet {
             HttpServletResponse response,
             String contentPage
     ) throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
 
+        String layout;
+        String basePath;
+        if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        request.setAttribute("basePath", basePath);
         request.setAttribute("pageTitle", "Doctor Dashboard");
         request.setAttribute("activePage", "profile");
         request.setAttribute("contentPage", contentPage);
 
-        request.getRequestDispatcher("/WEB-INF/layout/doctorLayout.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     /* =========================

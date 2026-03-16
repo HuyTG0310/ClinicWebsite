@@ -19,7 +19,7 @@
 
         <div class="d-flex gap-2">
             <a class="btn btn-primary"
-               href="${pageContext.request.contextPath}/profile/change-password?userId=${user.userId}">
+               href="${basePath}/profile/change-password?userId=${user.userId}">
 
                 <i class="fa-solid fa-lock me-2"></i>
                 Change Password
@@ -131,7 +131,7 @@
             </div>
 
 
-            <form action="${pageContext.request.contextPath}/profile/update" method="post">
+            <form action="${basePath}/profile/update" method="post">
 
                 <div class="modal-body">
 
