@@ -62,6 +62,8 @@ public class Login extends HttpServlet {
                 response.sendRedirect(ctx + "/doctor/dashboard");
             } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
                 response.sendRedirect(ctx + "/receptionist/dashboard");
+            } else if ("LAB TECHNICIAN".equalsIgnoreCase(role)) {
+                response.sendRedirect(ctx + "/lab/dashboard");
             } else {
                 // Các role khác nếu có
                 response.sendRedirect(ctx + "/index.jsp");
@@ -81,6 +83,8 @@ public class Login extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/doctor/dashboard");
         } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/receptionist/dashboard");
+        } else if ("LAB TECHNICIAN".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/lab/dashboard");
         } else {
             response.sendRedirect(request.getContextPath() + "/home"); // Hoặc trang mặc định
         }

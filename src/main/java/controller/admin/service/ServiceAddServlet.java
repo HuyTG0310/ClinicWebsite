@@ -117,7 +117,7 @@ public class ServiceAddServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Lỗi: " + e.getMessage());
+            request.getSession().setAttribute("error", "Error: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/service/add");
         }
     }

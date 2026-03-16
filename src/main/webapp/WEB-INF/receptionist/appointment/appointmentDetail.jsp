@@ -16,6 +16,16 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="${basePath}/appointment/list"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
+
+            <a href="${basePath}/receipt/print?appId=${app.appointmentId}"
+               target="_blank"
+               class="btn btn-primary">
+                <i class="fas fa-print me-2"></i>Print
+            </a>
 
             <c:if test="${hasAppointmentEdit}">
                 <c:if test="${app.status == 'WAITING'}">
@@ -35,18 +45,6 @@
 
                 </c:if>
             </c:if>
-
-            <a href="${basePath}/receipt/print?appId=${app.appointmentId}"
-               target="_blank"
-               class="btn btn-primary">
-                <i class="fas fa-print me-2"></i>Print
-            </a>
-
-            <a href="${basePath}/appointment/list"
-               class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to list
-            </a>
-
         </div>
 
     </div>

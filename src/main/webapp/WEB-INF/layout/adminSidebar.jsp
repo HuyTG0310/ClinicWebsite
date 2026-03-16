@@ -31,6 +31,15 @@
         </li>
 
         <li class="nav-item">
+            <a class="nav-link ${activePage == 'certificationApproval' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/certification/list">
+                <i class="fa-solid fa-certificate me-2"></i>
+                Manage certification
+            </a>
+        </li>
+
+
+        <li class="nav-item">
             <a class="nav-link ${activePage == 'manageStaff' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/user/list">
                 <i class="fa-solid fa-users me-2"></i>
@@ -102,8 +111,6 @@
             </li>
         </c:if>
 
-
-
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/service-order/list">
@@ -111,6 +118,42 @@
                 Manage service order
             </a>
         </li>
+
+        
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/queue/list">
+                <i class="fa-solid fa-calendar-check me-2"></i>
+                Manage queue
+            </a>
+        </li>
+
+
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'manageMedicalRecord' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/medical-record/list">
+                <i class="fa-solid fa-file-medical me-2"></i>
+                Manage medical record
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'managePrescription' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/prescription/list">
+                <i class="fa-solid fa-prescription me-2"></i>
+                Manage prescription
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'manageTest' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/admin/lab-queue/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage test
+            </a>
+        </li>
+
+
 
         <!-- Logout -->
         <li class="nav-item mt-3">

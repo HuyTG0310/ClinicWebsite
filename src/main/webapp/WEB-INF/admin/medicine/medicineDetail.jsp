@@ -24,6 +24,10 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="${basePath}/medicine/list"
+               class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to list
+            </a>
 
             <c:if test="${hasMedicineEdit}">
                 <button class="btn btn-warning"
@@ -32,12 +36,6 @@
                     <i class="fa-solid fa-pen-to-square me-2"></i>Edit
                 </button>
             </c:if>
-
-            <a href="${basePath}/medicine/list"
-               class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>Back to list
-            </a>
-
         </div>
 
     </div>

@@ -15,6 +15,7 @@
 <c:set var="activeTab" value="${param.activeTab}" />
 <c:set var="isProfessionalActive" value="${activeTab == 'professional'}" />
 <c:set var="isBasicActive" value="${empty activeTab || activeTab != 'professional'}" />
+
 <div class="container-fluid">
 
     <!-- HEADER -->
@@ -31,6 +32,11 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="${pageContext.request.contextPath}/admin/user/list"
+               class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>
+                Back to list
+            </a>
 
             <button class="btn btn-warning"
                     data-bs-toggle="modal"
@@ -38,13 +44,6 @@
                 <i class="fa-solid fa-pen-to-square me-2"></i>
                 Edit
             </button>
-
-            <a href="${pageContext.request.contextPath}/admin/user/list"
-               class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Back to list
-            </a>
-
         </div>
 
     </div>

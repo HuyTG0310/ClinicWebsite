@@ -58,7 +58,7 @@ public class SePayWebhookServlet extends HttpServlet {
         // Ép tất cả thành chữ hoa và XÓA SẠCH khoảng trắng
         String normalizedContent = content.toUpperCase().replace(" ", "");
         dao.ServiceOrderDAO dao = new dao.ServiceOrderDAO();
-        int botCashierId = 4; // ID Lễ tân tự động (1)
+        int botCashierId = 1; // ID Lễ tân tự động (1)
 
         try {
             //THANH TOÁN BỆNH ÁN (XÉT NGHIỆM)

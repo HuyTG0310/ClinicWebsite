@@ -1,20 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package util;
-import java.util.Properties;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
-/**
- *
- * @author ADMIN
- */
-public class EmailUtil {
-    public static void sendAccount(String toEmail, String username) {
+import java.util.Properties;
 
-        final String fromEmail = "clinic.website.demo@gmail.com";
-        final String appPassword = "lhjz ftpl fwxs siiu";
+public class EmailUtil {
+
+    private static final String FROM_EMAIL = "nguyentailoi.ce191482";
+    private static final String PASSWORD = "tvyaqxhkwfdhvdxg";
+
+    private static Session getSession() {
+
         Properties props = new Properties();
 
         props.put("mail.smtp.host", "smtp.gmail.com");
@@ -22,18 +18,40 @@ public class EmailUtil {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
 
-        Session session = Session.getInstance(props,
-                new Authenticator() {
+        return Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, appPassword);
+                return new PasswordAuthentication(FROM_EMAIL, PASSWORD);
             }
         });
+    }
+
+    // gửi OTP reset password
+    public static void sendOTP(String toEmail, String otp) throws Exception {
+
+        Session session = getSession();
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(FROM_EMAIL));
+        message.setRecipients(
+                Message.RecipientType.TO,
+                InternetAddress.parse(toEmail)
+        );
+
+        message.setSubject("Clinic System Password Reset");
+        message.setText("Your OTP code is: " + otp);
+
+        Transport.send(message);
+    }
+
+    // gửi account staff
+    public static void sendAccount(String toEmail, String username) {
 
         try {
 
-            Message message = new MimeMessage(session);
+            Session session = getSession();
 
-            message.setFrom(new InternetAddress(fromEmail));
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(FROM_EMAIL));
 
             message.setRecipients(
                     Message.RecipientType.TO,

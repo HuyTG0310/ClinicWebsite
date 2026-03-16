@@ -27,7 +27,7 @@
         <i class="fa-solid fa-circle-exclamation me-2"></i>${sessionScope.error}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <% session.removeAttribute("error"); %>
+    <% session.removeAttribute("error");%>
 </c:if>
 
 
@@ -108,48 +108,53 @@
 
                         <option value="UNPAID"
                                 <c:if test="${param.status == 'UNPAID'}">selected</c:if>>
-                            UNPAID
-                        </option>
+                                    UNPAID
+                                </option>
 
-                        <option value="PAID"
+                                <option value="PAID"
                                 <c:if test="${param.status == 'PAID'}">selected</c:if>>
-                            PAID
-                        </option>
+                                    PAID
+                                </option>
 
-                        <option value="CANCELLED"
+                                <option value="REFUNDED"
+                                <c:if test="${param.status == 'REFUNDED'}">selected</c:if>>
+                                    REFUNDED
+                                </option>
+
+                                <option value="CANCELLED"
                                 <c:if test="${param.status == 'CANCELLED'}">selected</c:if>>
-                            CANCELLED
-                        </option>
-                    </select>
-                </div>
+                                    CANCELLED
+                                </option>
+                        </select>
+                    </div>
 
 
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small text-muted">Payment method</label>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">Payment method</label>
 
-                    <select class="form-select" name="paymentMethod">
+                        <select class="form-select" name="paymentMethod">
 
-                        <option value="">-- All methods --</option>
+                            <option value="">-- All methods --</option>
 
-                        <option value="CASH"
-                                <c:if test="${param.paymentMethod == 'CASH'}">selected</c:if>>
-                            Cash
-                        </option>
+                            <option value="CASH"
+                            <c:if test="${param.paymentMethod == 'CASH'}">selected</c:if>>
+                                Cash
+                            </option>
 
-                        <option value="BANKING"
-                                <c:if test="${param.paymentMethod == 'BANKING'}">selected</c:if>>
-                            Banking
-                        </option>
+                            <option value="BANKING"
+                            <c:if test="${param.paymentMethod == 'BANKING'}">selected</c:if>>
+                                Banking
+                            </option>
 
-                    </select>
-                </div>
+                        </select>
+                    </div>
 
 
-                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <div class="col-md-3 d-flex align-items-end gap-2">
 
-                    <button class="btn btn-primary flex-grow-1" type="submit">
-                        <i class="fas fa-filter me-2"></i>Search
-                    </button>
+                        <button class="btn btn-primary flex-grow-1" type="submit">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
 
                     <c:if test="${not empty param.paymentMethod or not empty param.date or not empty param.status}">
                         <a href="${basePath}/service-order/list"
@@ -315,6 +320,12 @@
                                     </span>
                                 </c:if>
 
+                                <c:if test="${o.status == 'REFUNDED'}">
+                                    <span class="badge bg-danger">
+                                        <i class="fa-solid fa-clock me-1"></i>REFUNDED
+                                    </span>
+                                </c:if>
+
                                 <c:if test="${o.status == 'CANCELLED'}">
                                     <span class="badge bg-secondary">
                                         <i class="fa-solid fa-ban me-1"></i>CANCELLED
@@ -330,25 +341,12 @@
                                 <c:set var="paidTime" value="${o.paidAt != null ? o.paidAt.time : ''}" />
 
                                 <c:choose>
-
                                     <c:when test="${o.medicalRecordId > 0}">
-                                        <a href="${basePath}/service-order/detail?mrId=${o.medicalRecordId}&patientId=${o.patientId}&status=${o.status}<c:if test='${o.status == "PAID"}'>&time=${o.paidAt.time}</c:if>"
-                                           class="btn btn-sm btn-outline-primary">
-
-                                            <i class="fas fa-eye me-1"></i>View
-
-                                        </a>
+                                        <a href="${basePath}/service-order/detail?mrId=${o.medicalRecordId}&patientId=${o.patientId}&status=${o.status}<c:if test="${o.status == 'PAID' || o.status == 'REFUNDED'}">&time=${o.paidAt.time}</c:if>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
                                     </c:when>
-
                                     <c:otherwise>
-                                        <a href="${basePath}/service-order/detail?soId=${o.serviceOrderId}&patientId=${o.patientId}&status=${o.status}<c:if test='${o.status == "PAID"}'>&time=${o.paidAt.time}</c:if>"
-                                           class="btn btn-sm btn-outline-primary">
-
-                                            <i class="fas fa-eye me-1"></i>View
-
-                                        </a>
+                                        <a href="${basePath}/service-order/detail?soId=${o.serviceOrderId}&patientId=${o.patientId}&status=${o.status}<c:if test="${o.status == 'PAID' || o.status == 'REFUNDED'}">&time=${o.paidAt.time}</c:if>" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
                                     </c:otherwise>
-
                                 </c:choose>
 
                             </td>

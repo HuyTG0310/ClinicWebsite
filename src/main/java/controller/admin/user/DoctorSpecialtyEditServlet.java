@@ -15,12 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
 
-
-/**
- *
- * @author huytr
- */
-
 @WebServlet(name = "DoctorSpecialtyEditServlet", urlPatterns = {"/admin/doctor-specialty/edit"})
 public class DoctorSpecialtyEditServlet extends HttpServlet {
 

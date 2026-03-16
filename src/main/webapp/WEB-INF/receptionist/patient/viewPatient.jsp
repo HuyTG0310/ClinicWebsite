@@ -18,6 +18,9 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to list
+            </a>
 
             <c:if test="${hasPatientDelete}">
                 <button class="btn btn-danger"
@@ -42,9 +45,7 @@
                 </button>
             </c:if>
 
-            <a href="${basePath}/patient/list" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to list
-            </a>
+
 
         </div>
 

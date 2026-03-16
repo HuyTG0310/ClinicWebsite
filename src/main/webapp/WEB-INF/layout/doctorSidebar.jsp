@@ -22,29 +22,36 @@
 
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+            <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/doctor/queue/list">
                 <i class="fa-solid fa-calendar-check me-2"></i>
                 Manage queue
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+            <a class="nav-link ${activePage == 'manageMedicalRecord' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/doctor/medical-record/list">
                 <i class="fa-solid fa-file-medical me-2"></i>
                 Manage medical record
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
+            <a class="nav-link ${activePage == 'managePrescription' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/doctor/prescription/list">
                 <i class="fa-solid fa-prescription me-2"></i>
                 Manage prescription
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/certification/my">
+                <i class="fa-solid fa-certificate me-2"></i>
+                Manage certification
+            </a>
+        </li>
 
         <!-- Test Requests -->
         <c:if test="${hasMedicineView}">
@@ -101,7 +108,7 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/profile/view">
+               href="${pageContext.request.contextPath}/doctor/profile/view">
                 <i class="fa-solid fa-id-card me-2"></i>
                 Profile
             </a>
@@ -113,7 +120,7 @@
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
                 <i class="fa-solid fa-right-from-bracket me-2"></i>
-                Đăng xuất
+                Logout
             </a>
         </li>
 

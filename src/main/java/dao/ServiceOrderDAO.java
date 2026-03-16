@@ -7,86 +7,132 @@ import util.DBContext;
 
 public class ServiceOrderDAO extends DBContext {
 
-    public List<ServiceOrder> getServiceOrders(String dateStr, String paymentMethod, String status) {
-        List<ServiceOrder> list = new ArrayList<>();
+    public List<model.ServiceOrder> getServiceOrders(String dateStr, String paymentMethod, String status) {
+        List<model.ServiceOrder> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT "
-                + "so.MedicalRecordId, "
-                + "MAX(so.ServiceOrderId) AS ServiceOrderId, "
-                + "so.PatientId, "
-                + "p.FullName AS PatientName, "
-                + "so.Status, "
-                + "so.PaymentMethod, "
-                + "so.PaidAt, "
-                + "MAX(so.OrderTime) AS OrderTime, "
-                + "MAX(u.FullName) AS CashierName, "
-                + "COUNT(so.ServiceOrderId) AS TotalServices, "
-                + "SUM(so.PriceAtTime) AS TotalAmount "
-                + "FROM ServiceOrder so "
-                + "JOIN Patient p ON so.PatientId = p.PatientId "
-                + "LEFT JOIN [User] u ON so.CashierId = u.UserId "
-                + "WHERE 1=1 "
-        );
+        StringBuilder sql = new StringBuilder();
 
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append("AND so.Status = ? ");
-        }
+        // Dùng kỹ thuật CTE (WITH) để tạo 3 khối dữ liệu (Sổ cái kế toán)
+        sql.append("WITH BaseData AS ( ");
 
+        // =========================================================================
+        // KHỐI 1: CÁC HÓA ĐƠN CHƯA THU TIỀN (UNPAID hoặc Hủy trước khi thu)
+        // =========================================================================
+        sql.append("  SELECT so.MedicalRecordId, MAX(so.ServiceOrderId) AS ServiceOrderId, so.PatientId, p.FullName AS PatientName, ");
+        sql.append("         so.Status AS DBStatus, so.PaymentMethod, so.PaidAt, MAX(so.OrderTime) AS OrderTime, ");
+        sql.append("         MAX(u.FullName) AS CashierName, COUNT(so.ServiceOrderId) AS TotalServices, SUM(so.PriceAtTime) AS TotalAmount ");
+        sql.append("  FROM ServiceOrder so ");
+        sql.append("  JOIN Patient p ON so.PatientId = p.PatientId LEFT JOIN [User] u ON so.CashierId = u.UserId ");
+        sql.append("  WHERE so.PaidAt IS NULL ");
         if (dateStr != null && !dateStr.trim().isEmpty()) {
-            sql.append("AND (CAST(so.PaidAt AS DATE) = ? OR CAST(so.OrderTime AS DATE) = ?) ");
+            sql.append(" AND CAST(so.OrderTime AS DATE) = ? ");
         }
-
         if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
-            sql.append("AND so.PaymentMethod = ? ");
+            sql.append(" AND so.PaymentMethod = ? ");
+        }
+        sql.append("  GROUP BY so.MedicalRecordId, so.PatientId, p.FullName, so.Status, so.PaymentMethod, so.PaidAt, CASE WHEN so.MedicalRecordId IS NULL THEN so.ServiceOrderId ELSE 0 END ");
+
+        sql.append("  UNION ALL ");
+
+        // =========================================================================
+        // KHỐI 2: BIÊN LAI GỐC ĐÃ THU TIỀN (Gộp tất cả PAID và CANCELLED để ra 160k)
+        // =========================================================================
+        sql.append("  SELECT so.MedicalRecordId, MAX(so.ServiceOrderId) AS ServiceOrderId, so.PatientId, p.FullName AS PatientName, ");
+        sql.append("         'PAID' AS DBStatus, so.PaymentMethod, so.PaidAt, MAX(so.OrderTime) AS OrderTime, ");
+        sql.append("         MAX(u.FullName) AS CashierName, COUNT(so.ServiceOrderId) AS TotalServices, SUM(so.PriceAtTime) AS TotalAmount ");
+        sql.append("  FROM ServiceOrder so ");
+        sql.append("  JOIN Patient p ON so.PatientId = p.PatientId LEFT JOIN [User] u ON so.CashierId = u.UserId ");
+        sql.append("  WHERE so.PaidAt IS NOT NULL ");
+        if (dateStr != null && !dateStr.trim().isEmpty()) {
+            sql.append(" AND CAST(so.PaidAt AS DATE) = ? ");
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND so.PaymentMethod = ? ");
+        }
+        sql.append("  GROUP BY so.MedicalRecordId, so.PatientId, p.FullName, so.PaymentMethod, so.PaidAt, CASE WHEN so.MedicalRecordId IS NULL THEN so.ServiceOrderId ELSE 0 END ");
+
+        sql.append("  UNION ALL ");
+
+        // =========================================================================
+        // KHỐI 3: PHIẾU HOÀN TIỀN (Chỉ bóc tách phần 60k bị CANCELLED ra thành 1 dòng)
+        // =========================================================================
+        sql.append("  SELECT so.MedicalRecordId, MAX(so.ServiceOrderId) AS ServiceOrderId, so.PatientId, p.FullName AS PatientName, ");
+        sql.append("         'REFUNDED' AS DBStatus, so.PaymentMethod, so.PaidAt, MAX(so.OrderTime) AS OrderTime, ");
+        sql.append("         MAX(u.FullName) AS CashierName, COUNT(so.ServiceOrderId) AS TotalServices, SUM(so.PriceAtTime) AS TotalAmount ");
+        sql.append("  FROM ServiceOrder so ");
+        sql.append("  JOIN Patient p ON so.PatientId = p.PatientId LEFT JOIN [User] u ON so.CashierId = u.UserId ");
+        sql.append("  WHERE so.PaidAt IS NOT NULL AND so.Status = 'CANCELLED' ");
+        if (dateStr != null && !dateStr.trim().isEmpty()) {
+            sql.append(" AND CAST(so.PaidAt AS DATE) = ? ");
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND so.PaymentMethod = ? ");
+        }
+        sql.append("  GROUP BY so.MedicalRecordId, so.PatientId, p.FullName, so.PaymentMethod, so.PaidAt, CASE WHEN so.MedicalRecordId IS NULL THEN so.ServiceOrderId ELSE 0 END ");
+
+        sql.append(") ");
+
+        // =========================================================================
+        // TỔNG HỢP VÀ LỌC THEO STATUS Ở BÊN NGOÀI CÙNG
+        // =========================================================================
+        sql.append("SELECT * FROM BaseData WHERE 1=1 ");
+
+        if (status != null && !status.trim().isEmpty() && !status.equals("ALL")) {
+            sql.append("AND DBStatus = ? ");
         }
 
-        sql.append("GROUP BY so.MedicalRecordId, so.PatientId, p.FullName, so.Status, so.PaymentMethod, so.PaidAt, ");
-        sql.append("CASE WHEN so.MedicalRecordId IS NULL THEN so.ServiceOrderId ELSE 0 END ");
+        sql.append("ORDER BY OrderTime DESC, DBStatus DESC"); // Xếp PAID trước CANCELLED nếu trùng giờ
 
-        sql.append("ORDER BY MAX(so.OrderTime) DESC");
-
-        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql.toString())) {
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
 
             int index = 1;
 
-            if (status != null && !status.trim().isEmpty()) {
+            // Truyền parameter cho 3 khối UNION (Lặp 3 lần cực kỳ gọn gàng)
+            for (int i = 0; i < 3; i++) {
+                if (dateStr != null && !dateStr.trim().isEmpty()) {
+                    st.setString(index++, dateStr);
+                }
+                if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+                    st.setString(index++, paymentMethod);
+                }
+            }
+
+            // Truyền parameter cho bộ lọc Status ngoài cùng
+            if (status != null && !status.trim().isEmpty() && !status.equals("ALL")) {
                 st.setString(index++, status);
             }
-            if (dateStr != null && !dateStr.trim().isEmpty()) {
-                st.setString(index++, dateStr);
-                st.setString(index++, dateStr);
-            }
-            if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
-                st.setString(index++, paymentMethod);
-            }
 
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                ServiceOrder order = new ServiceOrder();
+            try (java.sql.ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    model.ServiceOrder order = new model.ServiceOrder();
 
-                int mrId = rs.getInt("MedicalRecordId");
-                int soId = rs.getInt("ServiceOrderId");
-                order.setMedicalRecordId(mrId);
-                order.setServiceOrderId(soId);
+                    int mrId = rs.getInt("MedicalRecordId");
+                    int soId = rs.getInt("ServiceOrderId");
 
-                if (mrId > 0) {
+                    order.setMedicalRecordId(mrId); // Nếu null thì tự động lấy số 0
+                    order.setServiceOrderId(soId);
 
-                    int count = rs.getInt("TotalServices");
-                    order.setServiceName("Gói Cận Lâm Sàng (" + count + " chỉ định)");
-                } else {
-                    // Nếu là phí khám ban đầu
-                    order.setServiceName(new ServiceDAO().getById(1).getServiceName());
+                    if (mrId > 0) {
+                        int count = rs.getInt("TotalServices");
+                        order.setServiceName("Gói Cận Lâm Sàng (" + count + " chỉ định)");
+                    } else {
+                        order.setServiceName(new ServiceDAO().getById(1).getServiceName());
+                    }
+
+                    String dbStatus = rs.getString("DBStatus");
+                    String finalStatus = (status != null && !status.trim().isEmpty() && !status.equals("ALL"))
+                            ? status : dbStatus;
+
+                    order.setPriceAtTime(rs.getDouble("TotalAmount"));
+                    order.setStatus(finalStatus != null ? finalStatus.trim() : "");
+                    order.setPaidAt(rs.getTimestamp("PaidAt"));
+                    order.setPaymentMethod(rs.getString("PaymentMethod"));
+                    order.setPatientName(rs.getString("PatientName"));
+                    order.setCashierName(rs.getString("CashierName"));
+                    order.setPatientId(rs.getInt("PatientId"));
+
+                    list.add(order);
                 }
-
-                order.setPriceAtTime(rs.getDouble("TotalAmount"));
-                order.setStatus(rs.getString("Status"));
-                order.setPaidAt(rs.getTimestamp("PaidAt"));
-                order.setPaymentMethod(rs.getString("PaymentMethod"));
-                order.setPatientName(rs.getString("PatientName"));
-                order.setCashierName(rs.getString("CashierName"));
-                order.setPatientId(rs.getInt("PatientId"));
-                list.add(order);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,31 +144,46 @@ public class ServiceOrderDAO extends DBContext {
     public java.util.List<java.util.Map<String, Object>> getServiceDetailsByMrId(int medicalRecordId, int patientId, String status, String formattedTime) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
 
+        // Lấy thêm so.Status AS CurrentStatus để biết món nào bị hủy
         StringBuilder sql = new StringBuilder("SELECT s.ServiceName, so.PriceAtTime, "
-                + "so.PaymentMethod, so.PaidAt, u.FullName AS CashierName "
+                + "so.PaymentMethod, so.PaidAt, u.FullName AS CashierName, so.Status AS CurrentStatus "
                 + "FROM ServiceOrder so "
                 + "JOIN Service s ON so.ServiceId = s.ServiceId "
-                + "LEFT JOIN [User] u ON so.CashierId = u.UserId " // Join để lấy tên người thu tiền
-                + "WHERE so.Status = ?");
+                + "LEFT JOIN [User] u ON so.CashierId = u.UserId "
+                + "WHERE 1=1 ");
 
         if (medicalRecordId > 0) {
             sql.append(" AND so.MedicalRecordId = ? ");
         } else {
-            // Nếu chưa có Bệnh án -> Tìm hóa đơn của Bệnh nhân này nhưng chưa gắn Bệnh án
             sql.append(" AND so.MedicalRecordId IS NULL AND so.PatientId = ? ");
         }
 
-        // So sánh chính xác thời điểm thu tiền
-        if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
+        // ====================================================================
+        // 🔥 PHÂN NHÁNH NGHIỆP VỤ KẾ TOÁN (ĐỒNG BỘ 100% VỚI DANH SÁCH)
+        // ====================================================================
+        if ("UNPAID".equals(status)) {
+            // 1. CHỜ THU TIỀN
+            sql.append(" AND so.Status = 'UNPAID' AND so.PaidAt IS NULL ");
+
+        } else if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
+            // 2. BIÊN LAI GỐC (Lấy cả món sống và món chết để giữ nguyên tổng tiền 160k)
+            sql.append(" AND (so.Status = 'PAID' OR so.Status = 'CANCELLED') ");
             sql.append(" AND CONVERT(VARCHAR(19), so.PaidAt, 120) = ? ");
-        } else {
-            sql.append(" AND so.PaidAt IS NULL ");
+
+        } else if ("REFUNDED".equals(status)) {
+            // 3. CHI TIẾT HOÀN TIỀN (Đã đóng tiền nhưng bị Lab/Bác sĩ hủy)
+            sql.append(" AND so.Status = 'CANCELLED' AND so.PaidAt IS NOT NULL ");
+            if (formattedTime != null && !formattedTime.isEmpty()) {
+                sql.append(" AND CONVERT(VARCHAR(19), so.PaidAt, 120) = ? ");
+            }
+
+        } else if ("CANCELLED".equals(status)) {
+            // 4. CHI TIẾT HỦY TRẮNG (Bị hủy khi chưa đóng 1 đồng nào)
+            sql.append(" AND so.Status = 'CANCELLED' AND so.PaidAt IS NULL ");
         }
 
         try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql.toString())) {
-            int paramIndex = 1; // Quản lý số thứ tự của dấu ?
-
-            st.setString(paramIndex++, status); // Gắn trạng thái vào đây
+            int paramIndex = 1;
 
             if (medicalRecordId > 0) {
                 st.setInt(paramIndex++, medicalRecordId);
@@ -130,7 +191,8 @@ public class ServiceOrderDAO extends DBContext {
                 st.setInt(paramIndex++, patientId);
             }
 
-            if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
+            // Chỉ nạp biến thời gian nếu là nhóm có thu tiền (PAID hoặc REFUNDED)
+            if (("PAID".equals(status) || "REFUNDED".equals(status)) && formattedTime != null && !formattedTime.isEmpty()) {
                 st.setString(paramIndex++, formattedTime);
             }
 
@@ -139,11 +201,12 @@ public class ServiceOrderDAO extends DBContext {
                     java.util.Map<String, Object> item = new java.util.HashMap<>();
                     item.put("serviceName", rs.getString("ServiceName"));
                     item.put("price", rs.getDouble("PriceAtTime"));
-
-                    // 🔥 HỨNG THÊM DỮ LIỆU ĐỂ IN BIÊN LAI
                     item.put("paymentMethod", rs.getString("PaymentMethod"));
                     item.put("paidAt", rs.getTimestamp("PaidAt"));
                     item.put("cashierName", rs.getString("CashierName") != null ? rs.getString("CashierName") : "Hệ thống");
+
+                    // Bỏ thêm trạng thái hiện tại vào túi xách để mang ra UI
+                    item.put("currentStatus", rs.getString("CurrentStatus"));
 
                     list.add(item);
                 }

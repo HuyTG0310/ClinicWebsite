@@ -4,7 +4,7 @@
 
     <h5 class="text-center mb-4 sidebar-title">
         <i class="fa-solid fa-vials me-1"></i>
-        Receptionist
+        Lab Technician
     </h5>
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
@@ -20,10 +20,10 @@
 
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
-                <i class="fa-solid fa-clock-rotate-left me-2"></i>
-                Manage test result
+            <a class="nav-link ${activePage == 'manageTest' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/lab/lab-queue/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage test
             </a>
         </li>
 
@@ -31,7 +31,7 @@
         <!-- Test History -->
         <li class="nav-item">
             <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/history">
+               href="${pageContext.request.contextPath}/lab/profile/view">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Profile
             </a>
@@ -43,7 +43,7 @@
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
                 <i class="fa-solid fa-right-from-bracket me-2"></i>
-                Đăng xuất
+                Logout
             </a>
         </li>
 
