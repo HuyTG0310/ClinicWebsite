@@ -177,7 +177,7 @@ public class PrescriptionDAO extends DBContext {
     public java.util.List<java.util.Map<String, Object>> getPrescribedMedicines(int medicalRecordId) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
         String sql = "SELECT pr.PrescriptionId, pr.MedicineId, m.MedicineName, m.Unit, "
-                + "pr.Quantity, pr.Dosage, pr.Note, m.Usage "
+                + "pr.Quantity, pr.Dosage, pr.Note, m.[Usage], m.Ingredients, m.Contraindication "
                 + "FROM Prescription pr "
                 + "JOIN Medicine m ON pr.MedicineId = m.MedicineId "
                 + "WHERE pr.MedicalRecordId = ?";
@@ -195,6 +195,8 @@ public class PrescriptionDAO extends DBContext {
                     map.put("dosage", rs.getString("Dosage"));
                     map.put("note", rs.getString("Note"));
                     map.put("usage", rs.getString("Usage")); // Cách dùng mặc định của thuốc
+                    map.put("ingredients", rs.getString("Ingredients"));
+                    map.put("contraindication", rs.getString("Contraindication"));
                     list.add(map);
                 }
             }
@@ -203,6 +205,7 @@ public class PrescriptionDAO extends DBContext {
         }
         return list;
     }
+    
 
     public boolean savePrescription(int medicalRecordId, String[] medicineIds, String[] quantities, String[] dosages, String[] notes) {
         java.sql.Connection conn = null;

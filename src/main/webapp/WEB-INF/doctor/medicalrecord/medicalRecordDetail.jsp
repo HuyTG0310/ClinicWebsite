@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 <div class="container-fluid">
 
     <!-- HEADER -->
@@ -230,6 +232,7 @@
                                 <tr>
                                     <th>Parameter</th>
                                     <th class="text-center">Result</th>
+                                    <th class="text-center">Unit</th>
                                     <th class="text-center">Reference</th>
                                     <th class="text-center">Time</th>
                                 </tr>
@@ -245,7 +248,7 @@
                                     <!-- CATEGORY -->
                                     <c:if test="${r.categoryName != currCat}">
                                         <tr class="table-secondary">
-                                            <td colspan="4" class="fw-bold">
+                                            <td colspan="5" class="fw-bold">
                                                 <i class="fas fa-layer-group me-2"></i>${r.categoryName}
                                             </td>
                                         </tr>
@@ -257,7 +260,7 @@
                                     <c:if test="${r.testName != currTest}">
                                         <c:if test="${r.isPanel}">
                                             <tr class="bg-light">
-                                                <td colspan="4" class="fw-semibold fst-italic">
+                                                <td colspan="5" class="fw-semibold fst-italic">
                                                     <i class="fas fa-vial me-2 text-secondary"></i>
                                                     ${r.testName}
                                                 </td>
@@ -300,6 +303,9 @@
 
                                             </c:choose>
 
+                                        </td>
+                                        <td class="text-center text-muted">
+                                            ${r.unit}
                                         </td>
 
                                         <td class="text-center text-muted">
@@ -391,11 +397,11 @@
 
                             <thead class="table-light">
                                 <tr>
-                                    <th>#</th>
-                                    <th>Medicine</th>
-                                    <th class="text-center">Unit</th>
-                                    <th class="text-center">Qty</th>
-                                    <th>Dosage</th>
+                                    <th width="5%" class="text-center">#</th>
+                                    <th width="35%">Medicine</th>
+                                    <th width="15%" class="text-center">Unit</th>
+                                    <th width="15%" class="text-center">Qty</th>
+                                    <th width="30%">Dosage</th>
                                 </tr>
                             </thead>
 
@@ -405,19 +411,32 @@
 
                                     <tr>
 
-                                        <td class="text-muted">
+                                        <td class="text-center text-muted">
                                             ${loop.index + 1}
                                         </td>
 
                                         <td class="fw-semibold">
-                                            ${p.medicineName}
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>${p.medicineName}</span>
+
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-link text-info p-0 ms-2"
+                                                        data-name="${fn:escapeXml(p.medicineName)}"
+                                                        data-ingredients="${fn:escapeXml(p.ingredients)}"
+                                                        data-usage="${fn:escapeXml(p.usage)}"
+                                                        data-contra="${fn:escapeXml(p.contraindication)}"
+                                                        onclick="showMedInfo(this)" 
+                                                        title="View Medicine Info">
+                                                    <i class="fa-solid fa-circle-info fs-5"></i>
+                                                </button>
+                                            </div>
                                         </td>
 
                                         <td class="text-center">
                                             ${p.unit}
                                         </td>
 
-                                        <td class="text-center fw-bold text-primary">
+                                        <td class="text-center fw-bold text-primary fs-6">
                                             ${p.quantity}
                                         </td>
 
@@ -426,7 +445,7 @@
 
                                             <c:if test="${not empty p.note}">
                                                 <div class="small text-muted mt-1">
-                                                    ${p.note}
+                                                    <i class="fa-solid fa-caret-right me-1 opacity-50"></i>${p.note}
                                                 </div>
                                             </c:if>
 
@@ -447,7 +466,7 @@
                 <c:otherwise>
 
                     <div class="p-5 text-center text-muted">
-                        <i class="fas fa-file-prescription fa-2x mb-2"></i>
+                        <i class="fas fa-file-prescription fa-3x mb-3 opacity-25 d-block"></i>
                         <div>No prescriptions recorded</div>
                     </div>
 
@@ -513,3 +532,66 @@
     </div>
 
 </div>
+
+
+<div class="modal fade" id="medicineInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-pills text-dark me-2"></i>
+                    <span id="infoMedName" class="fw-bold text-dark">Medicine</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark border-bottom pb-1">
+                        <i class="fa-solid fa-flask me-2 text-dark"></i>Ingredients
+                    </h6>
+                    <p id="infoMedIngredients" class="text-muted small mb-0">No data</p>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark border-bottom pb-1">
+                        <i class="fa-solid fa-book-medical me-2 text-dark"></i>Usage
+                    </h6>
+                    <p id="infoMedUsage" class="text-muted small mb-0">No data</p>
+                </div>
+
+                <div class="mb-0">
+                    <h6 class="fw-bold text-dark border-bottom pb-1">
+                        <i class="fa-solid fa-triangle-exclamation me-2 text-dark"></i>Contraindication
+                    </h6>
+                    <p id="infoMedContra" class="text-muted small mb-0">No data</p>
+                </div>
+            </div>
+
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function showMedInfo(btnElement) {
+        // 1. Lấy dữ liệu từ các thuộc tính data-* của nút bấm
+        let name = btnElement.getAttribute('data-name') || 'Không xác định';
+        let ingredients = btnElement.getAttribute('data-ingredients') || 'Đang cập nhật...';
+        let usage = btnElement.getAttribute('data-usage') || 'Đang cập nhật...';
+        let contra = btnElement.getAttribute('data-contra') || 'Đang cập nhật...';
+
+        // 2. Đổ dữ liệu vào Modal
+        document.getElementById('infoMedName').textContent = name;
+        document.getElementById('infoMedIngredients').textContent = ingredients;
+        document.getElementById('infoMedUsage').textContent = usage;
+        document.getElementById('infoMedContra').textContent = contra;
+
+        // 3. Hiển thị Modal lên
+        let infoModal = new bootstrap.Modal(document.getElementById('medicineInfoModal'));
+        infoModal.show();
+    }
+</script>

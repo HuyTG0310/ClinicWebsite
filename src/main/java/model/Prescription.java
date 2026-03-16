@@ -16,6 +16,9 @@ public class Prescription {
     // Thuộc tính mở rộng để hiển thị tên thuốc ra màn hình Detail sau này
     private String medicineName;
     private String unit;
+    private String usage;
+    private String ingredients;
+    private String contraindication;
 
     public Prescription() {
     }
@@ -93,6 +96,30 @@ public class Prescription {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    public String getUsage() {
+        return usage;
+    }
+
+    public void setUsage(String usage) {
+        this.usage = usage;
+    }
+
+    public String getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(String ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public String getContraindication() {
+        return contraindication;
+    }
+
+    public void setContraindication(String contraindication) {
+        this.contraindication = contraindication;
     }
 
 }
