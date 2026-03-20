@@ -3,9 +3,10 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
+
     <head>
         <meta charset="UTF-8">
-        <title>My Certifications</title>
+        <title>My Certifications - Lab</title>
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -30,15 +31,6 @@
                 border-radius:6px;
                 border:1px solid #ddd;
             }
-            /* Tooltip custom style */
-            .tooltip-inner {
-                max-width: 250px;
-                background-color: #dc3545; /* Màu đỏ cho tiệp với badge Rejected */
-                color: white;
-                font-size: 13px;
-                border-radius: 8px;
-                padding: 10px;
-            }
         </style>
     </head>
 
@@ -52,18 +44,11 @@
                         My Certifications
                     </h3>
 
-                    <a href="${pageContext.request.contextPath}/doctor/certification/add"
+                    <a href="${pageContext.request.contextPath}/lab/certification/add"
                        class="btn btn-primary">
                         <i class="fa-solid fa-plus"></i> Add Certification
                     </a>
                 </div>
-
-                <c:if test="${not empty success}">
-                    <div class="alert alert-success alert-dismissible fade show">
-                        ${success}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </c:if>
 
                 <table class="table table-striped align-middle">
                     <thead class="table-light">
@@ -74,9 +59,10 @@
                             <th>Expiry Date</th>
                             <th>Status</th>
                             <th>File</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         <c:forEach items="${list}" var="c">
                             <tr>
@@ -93,16 +79,11 @@
                                             <span class="badge bg-warning text-dark">Pending</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge bg-danger" 
-                                                  style="cursor: help;"
-                                                  data-bs-toggle="tooltip" 
-                                                  data-bs-placement="top" 
-                                                  title="Lý do từ chối: ${not empty c.rejectionNote ? c.rejectionNote : 'Vui lòng liên hệ Admin'}">
-                                                Rejected <i class="fa-solid fa-circle-info ms-1"></i>
-                                            </span>
+                                            <span class="badge bg-danger">Rejected</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
+
                                 <td>
                                     <c:if test="${not empty c.filePath}">
                                         <c:set var="fileUrl" value="${pageContext.request.contextPath}/certification/file?name=${c.filePath}" />
@@ -120,6 +101,7 @@
                                         </c:choose>
                                     </c:if>
                                 </td>
+
                                 <td>
                                     <c:choose>
                                         <c:when test="${c.status == 'PENDING'}">
@@ -138,6 +120,7 @@
                                 </td>
                             </tr>
                         </c:forEach>
+
                         <c:if test="${empty list}">
                             <tr><td colspan="7" class="text-center text-muted">No certifications uploaded yet.</td></tr>
                         </c:if>
@@ -149,8 +132,8 @@
         <div class="modal fade" id="editModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="editCertForm" method="post" enctype="multipart/form-data" 
-                          action="${pageContext.request.contextPath}/doctor/certification/edit">
+                    <form id="editCertForm" method="post" enctype="multipart/form-data"
+                          action="${pageContext.request.contextPath}/lab/certification/edit">
 
                         <div class="modal-header">
                             <h5 class="modal-title">Edit Certification</h5>
@@ -183,7 +166,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Change File (Keep empty to remain old file)</label>
+                                <label class="form-label">Change File (Optional)</label>
                                 <input type="file" name="certificateFile" class="form-control">
                             </div>
                         </div>
@@ -196,91 +179,89 @@
                 </div>
             </div>
         </div>
+
         <div class="modal fade" id="deleteModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog">
                 <div class="modal-content">
-                    <form method="post" action="${pageContext.request.contextPath}/admin/certification/delete">
-                        <div class="modal-header bg-dark text-white">
-                            <h5 class="modal-title">Xác nhận xóa</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <form method="post" action="${pageContext.request.contextPath}/lab/certification/delete">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-
-                        <div class="modal-body text-center py-4">
+                        <div class="modal-body text-center">
                             <input type="hidden" name="id" id="deleteId">
-
-                            <!-- 🔥 THÊM 2 DÒNG NÀY -->
-                            <input type="hidden" name="searchName" value="${param.searchName}">
-                            <input type="hidden" name="searchPhone" value="${param.searchPhone}">
-
-                            <h4 class="text-danger">Bạn có chắc chắn?</h4>
-                            <p class="fw-bold">Thao tác này không thể hoàn tác!</p>
+                            <p>Are you sure you want to delete this certification?</p>
                         </div>
-
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Quay lại</button>
-                            <button type="submit" class="btn btn-danger">Đồng ý xóa</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-danger">Delete</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
         <script>
-                                // 🔥 KHỞI TẠO TOOLTIP ĐỂ HIỆN LÝ DO REJECT
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                                    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                                        return new bootstrap.Tooltip(tooltipTriggerEl)
-                                    });
-                                });
+            function openEditModal(id, name, number, issue, expiry) {
+                document.getElementById("editId").value = id;
+                document.getElementById("editName").value = name;
+                document.getElementById("editNumber").value = number;
+                document.getElementById("editIssue").value = issue;
+                document.getElementById("editExpiry").value = expiry;
+                
+                // Reset vùng thông báo lỗi
+                const errorDiv = document.getElementById("ajaxError");
+                errorDiv.classList.add("d-none");
+                errorDiv.innerText = "";
 
-                                function openEditModal(id, name, number, issue, expiry) {
-                                    document.getElementById("editId").value = id;
-                                    document.getElementById("editName").value = name;
-                                    document.getElementById("editNumber").value = number;
-                                    document.getElementById("editIssue").value = issue;
-                                    document.getElementById("editExpiry").value = expiry;
-                                    document.getElementById("ajaxError").classList.add("d-none");
-                                    new bootstrap.Modal(document.getElementById('editModal')).show();
-                                }
+                var modal = new bootstrap.Modal(document.getElementById('editModal'));
+                modal.show();
+            }
 
-                                function openDeleteModal(id) {
-                                    document.getElementById("deleteId").value = id;
-                                    new bootstrap.Modal(document.getElementById('deleteModal')).show();
-                                }
+            function openDeleteModal(id) {
+                document.getElementById("deleteId").value = id;
+                var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                modal.show();
+            }
 
-                                function submitEditForm() {
-                                    const form = document.getElementById('editCertForm');
-                                    const formData = new FormData(form);
-                                    const saveBtn = document.getElementById('saveBtn');
-                                    const errorDiv = document.getElementById('ajaxError');
+            function submitEditForm() {
+                const form = document.getElementById('editCertForm');
+                const formData = new FormData(form);
+                const saveBtn = document.getElementById('saveBtn');
+                const errorDiv = document.getElementById('ajaxError');
 
-                                    saveBtn.disabled = true;
-                                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-                                    errorDiv.classList.add("d-none");
+                // Hiệu ứng chờ
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+                errorDiv.classList.add("d-none");
 
-                                    fetch(form.action, {
-                                        method: 'POST',
-                                        body: formData
-                                    })
-                                            .then(async response => {
-                                                const message = await response.text();
-                                                if (response.ok && message === "SUCCESS") {
-                                                    window.location.reload();
-                                                } else {
-                                                    errorDiv.innerText = message || "Có lỗi xảy ra, vui lòng thử lại!";
-                                                    errorDiv.classList.remove("d-none");
-                                                    saveBtn.disabled = false;
-                                                    saveBtn.innerHTML = 'Save Changes';
-                                                }
-                                            })
-                                            .catch(err => {
-                                                alert("Lỗi kết nối hệ thống!");
-                                                saveBtn.disabled = false;
-                                                saveBtn.innerHTML = 'Save Changes';
-                                            });
-                                }
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    const message = await response.text();
+                    
+                    if (response.ok && message === "SUCCESS") {
+                        // Thành công: Tải lại trang
+                        window.location.reload();
+                    } else {
+                        // Thất bại: Hiện thông báo lỗi từ Servlet (Status 400)
+                        errorDiv.innerText = message || "An error occurred. Please try again.";
+                        errorDiv.classList.remove("d-none");
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = 'Save Changes';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("System connection error!");
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = 'Save Changes';
+                });
+            }
         </script>
     </body>
 </html>

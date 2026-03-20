@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-
 public class DBContext {
 
     public Connection conn = null;
@@ -42,8 +41,11 @@ public class DBContext {
     }
 
     public static Connection getConnection() throws Exception {
+        // Thêm encrypt và trustServerCertificate vào đây nè!
+        String url = "jdbc:sqlserver://localhost:1433;"
+                + "databaseName=DB_07_03;"
+                + "encrypt=true;trustServerCertificate=true;";
 
-        String url = "jdbc:sqlserver://localhost:1433;databaseName=DB_07_03";
         String user = "sa";
         String password = "123";
 
@@ -51,8 +53,9 @@ public class DBContext {
 
         return DriverManager.getConnection(url, user, password);
     }
-
+    
     public static void main(String[] args) {
         DBContext db = new DBContext();
     }
+    
 }

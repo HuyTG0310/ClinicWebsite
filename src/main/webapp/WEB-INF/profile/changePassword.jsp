@@ -168,7 +168,7 @@
                         type="password"
                         name="newPassword"
                         required
-                        pattern="^\S{6,}$"
+                        pattern="^\S{3,}$"
                         title="Password must be at least 6 characters long and must not contain spaces"
                         />
                 </div>
