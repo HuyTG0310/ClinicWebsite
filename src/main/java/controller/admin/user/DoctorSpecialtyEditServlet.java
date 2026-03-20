@@ -52,13 +52,13 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
 
 
         if (specialtyIdsRaw == null || specialtyIdsRaw.length == 0) {
-            redirectWithError(response, request, doctorId, "Pháº£i chá»n Ã­t nháº¥t má»™t chuyÃªn khoa.");
+            redirectWithError(response, request, doctorId, "You must select a main specialty.");
             return;
         }
 
 
         if (primaryRaw == null || primaryRaw.isEmpty()) {
-            redirectWithError(response, request, doctorId, "Pháº£i chá»n má»™t chuyÃªn khoa chÃ­nh.");
+            redirectWithError(response, request, doctorId, "You must select at least one specialty.");
             return;
         }
 
@@ -66,7 +66,7 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
         try {
             primaryId = Integer.parseInt(primaryRaw);
         } catch (Exception e) {
-            redirectWithError(response, request, doctorId, "ChuyÃªn khoa chÃ­nh khÃ´ng há»£p lá»‡.");
+            redirectWithError(response, request, doctorId, "The main specialty is invalid");
             return;
         }
 
@@ -79,7 +79,7 @@ public class DoctorSpecialtyEditServlet extends HttpServlet {
         }
 
         if (!primaryValid) {
-            redirectWithError(response, request, doctorId, "ChuyÃªn khoa chÃ­nh pháº£i náº±m trong danh sÃ¡ch Ä‘Ã£ chá»n.");
+            redirectWithError(response, request, doctorId, "The main specialty must be in the selected list.");
             return;
         }
 

@@ -50,14 +50,14 @@ public class UserAddServlet extends HttpServlet {
         int roleId = -1;
 
         if (username == null || username.trim().isEmpty()) {
-            error = "Username không được để trống";
+            error = "Username not null";
         } else if (userDAO.existsByUsername(username.trim())) {
-            error = "Username đã tồn tại";
+            error = "Username is exeist";
         }
 
         if (error == null) {
             if (fullName == null || fullName.trim().isEmpty()) {
-                error = "Họ tên không được để trống";
+                error = "Fullname is not null";
             }
         }
 
@@ -65,10 +65,10 @@ public class UserAddServlet extends HttpServlet {
             try {
                 roleId = Integer.parseInt(roleIdRaw);
                 if (!roleDAO.existsById(roleId)) {
-                    error = "Vai trò không hợp lệ";
+                    error = "Role is valid";
                 }
             } catch (Exception e) {
-                error = "Vai trò không hợp lệ";
+                error = "Role is valid";
             }
         }
 
@@ -77,9 +77,9 @@ public class UserAddServlet extends HttpServlet {
             phone = phone.trim();
 
             if (!phone.matches("\\d{9,11}")) {
-                error = "Số điện thoại không hợp lệ";
+                error = "Phone is valid format";
             } else if (userDAO.existsByPhone(phone)) {
-                error = "Số điện thoại đã tồn tại";
+                error = "Phone is exist";
             }
         }
 
@@ -88,9 +88,9 @@ public class UserAddServlet extends HttpServlet {
             email = email.trim();
 
             if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.com$")) {
-                error = "Email không hợp lệ";
+                error = "Email is valid";
             } else if (userDAO.existsByEmail(email)) {
-                error = "Email đã tồn tại";
+                error = "Email is exist";
             }
         }
 
@@ -128,8 +128,15 @@ public class UserAddServlet extends HttpServlet {
         if (success) {
 
             if (email != null && !email.isEmpty()) {
-                EmailUtil.sendAccount(email, username);
+
+                final String emailFinal = email;
+                final String usernameFinal = username;
+
+                new Thread(() -> {
+                    EmailUtil.sendAccount(emailFinal, usernameFinal);
+                }).start();
             }
+            request.getSession().setAttribute("msg", "Add staff successfully! Email is being sent...");
 
             response.sendRedirect(request.getContextPath() + "/admin/user/list");
 
