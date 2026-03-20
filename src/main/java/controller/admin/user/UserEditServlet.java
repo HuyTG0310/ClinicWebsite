@@ -59,28 +59,28 @@ public class UserEditServlet extends HttpServlet {
 
         // 1️⃣ Username
         if (username == null || username.trim().isEmpty()) {
-            error = "Username không được để trống";
+            error = "Username not null";
         } else if (userDAO.existsByUsernameExceptId(username.trim(), userId)) {
-            error = "Username đã tồn tại";
+            error = "Username is existed";
         }
 
         // 2️⃣ Full name
         if (error == null && (fullName == null || fullName.trim().isEmpty())) {
-            error = "Họ tên không được để trống";
+            error = "Fullname not null";
         }
 
         // 3️⃣ Role
         if (error == null && !roleDAO.existsById(roleId)) {
-            error = "Vai trò không hợp lệ";
+            error = "Role is valid";
         }
 
         // 4️⃣ Phone
         if (error == null && phone != null && !phone.trim().isEmpty()) {
             phone = phone.trim();
             if (!phone.matches("\\d{9,11}")) {
-                error = "Số điện thoại không hợp lệ";
+                error = "Phone is valid";
             } else if (userDAO.existsByPhoneExceptId(phone, userId)) {
-                error = "Số điện thoại đã tồn tại";
+                error = "Phone is existed";
             }
         }
 
@@ -88,9 +88,9 @@ public class UserEditServlet extends HttpServlet {
         if (error == null && email != null && !email.trim().isEmpty()) {
             email = email.trim();
             if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-                error = "Email không hợp lệ";
+                error = "Email is valid";
             } else if (userDAO.existsByEmailExceptId(email, userId)) {
-                error = "Email đã tồn tại";
+                error = "Email is existed";
             }
         }
 

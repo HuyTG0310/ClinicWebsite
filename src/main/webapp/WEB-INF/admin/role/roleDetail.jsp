@@ -6,7 +6,7 @@
         <div>
             <h2 class="mb-1">
                 <i class="fa-solid fa-user-shield text-primary me-2"></i>
-                Role Detail
+                Role  privilege
             </h2>
             <p class="text-muted mb-0">Manage role information and privileges</p>
         </div>

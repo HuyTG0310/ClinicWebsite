@@ -37,7 +37,7 @@
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Back to list
             </a>
-               
+
             <button class="btn btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#editUserModal">

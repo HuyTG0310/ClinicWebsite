@@ -37,6 +37,16 @@
             </a>
         </li>
 
+<!--
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/certification/my">
+                <i class="fa-solid fa-certificate me-2"></i>
+                Manage certification
+            </a>
+        </li>-->
+
+        <!-- Test Requests -->
         <c:if test="${hasCertView}">
             <li class="nav-item">
                 <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
@@ -91,14 +101,19 @@
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/profile/view">
-                <i class="fa-solid fa-id-card me-2"></i> Profile
+
+               href="${pageContext.request.contextPath}/doctor/profile/view">
+                <i class="fa-solid fa-id-card me-2"></i>
+                Profile
+
             </a>
         </li>
 
         <li class="nav-item mt-3">
-            <a class="nav-link logout" href="${pageContext.request.contextPath}/logout">
-                <i class="fa-solid fa-right-from-bracket me-2"></i> Đăng xuất
+            <a class="nav-link logout"
+               href="${pageContext.request.contextPath}/logout">
+                <i class="fa-solid fa-right-from-bracket me-2"></i>
+                Logout
             </a>
         </li>
     </ul>

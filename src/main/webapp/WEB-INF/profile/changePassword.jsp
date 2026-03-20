@@ -1,27 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<style>
-    /* =================================================
-       CHANGE PASSWORD – SCOPED STYLE (SAFE FOR LAYOUT)
-    ================================================= */
+<div class="container-fluid mb-5">
 
-    .change-password-page {
-        padding: 60px 0;
-        display: flex;
-        justify-content: center;
-    }
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-    .change-password-card {
-        width: 500px;
-        max-width: 95%;
-        background: #ffffff;
-        border-radius: 20px;
-        padding: 35px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        border: 1px solid #e3e8ef;
-        animation: fadeIn 0.6s ease, slideDown 0.6s ease;
-    }
+        <div>
+            <h2 class="mb-1">
+                <i class="fa-solid fa-lock text-primary me-2"></i>
+                Change Password
+            </h2>
 
+<<<<<<< HEAD
     /* TITLE */
     .change-password-card h2 {
         text-align: center;
@@ -208,8 +198,148 @@
 
         <div class="note">
             ⚡ Password must be at least 6 characters and must not contain spaces.
+=======
+            <p class="text-muted mb-0">
+                Update your account password securely
+            </p>
+>>>>>>> e69fd48a9d4e1c25401d242ea75c1869f56faf3b
         </div>
 
+    </div>
+
+
+
+    <!-- CENTERED CARD -->
+    <div class="row justify-content-center">
+
+        <div class="col-md-6 col-lg-5">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-key text-primary me-2"></i>
+                        Security Information
+                    </h5>
+                </div>
+
+
+
+                <div class="card-body">
+
+                    <form action="${basePath}/profile/change-password" method="post">
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+                                Old Password
+                            </label>
+
+                            <input type="password"
+                                   class="form-control"
+                                   name="oldPassword"
+                                   required />
+
+                        </div>
+
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+                                New Password
+                            </label>
+
+                            <input type="password"
+                                   class="form-control"
+                                   name="newPassword"
+                                   required
+                                   pattern="^\S{6,}$"
+                                   title="Password must be at least 6 characters long and must not contain spaces" />
+
+                        </div>
+
+
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Confirm New Password
+                            </label>
+
+                            <input type="password"
+                                   class="form-control"
+                                   name="confirmPassword"
+                                   required />
+
+                        </div>
+
+
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            <i class="fa-solid fa-lock me-2"></i>
+                            Change Password
+
+                        </button>
+
+
+
+                        <% if (request.getAttribute("error") != null) {%>
+
+                        <div class="alert alert-danger mt-3 mb-0">
+
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                            <%= request.getAttribute("error")%>
+
+                        </div>
+
+                        <% } %>
+
+
+
+                        <% if (request.getAttribute("msg") != null) {%>
+
+                        <div class="alert alert-success mt-3 mb-0">
+
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <%= request.getAttribute("msg")%>
+
+                        </div>
+
+                        <% }%>
+
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BACK BUTTON -->
+            <div class="text-center mt-3">
+
+                <a class="btn btn-outline-secondary"
+                   href="${basePath}/profile/view">
+
+                    <i class="fa-solid fa-arrow-left me-2"></i>
+                    Back to Profile
+
+                </a>
+
+            </div>
+
+
+
+            <p class="text-muted text-center small mt-2">
+                Password must be at least 6 characters and must not contain spaces.
+            </p>
+
+
+        </div>
     </div>
 
 </div>

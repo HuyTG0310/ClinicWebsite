@@ -87,7 +87,7 @@
                     <div class="col-md-12">
 
                         <label class="form-label fw-semibold">
-                            Description
+                            Description <span class="text-danger">*</span>
                         </label>
 
                         <textarea class="form-control"

@@ -80,24 +80,36 @@ public class LabCheckinServlet extends HttpServlet {
         }
 
         request.setAttribute("basePath", basePath);
-        
+
         try {
             int mrId = Integer.parseInt(request.getParameter("mrId"));
             String action = request.getParameter("action");
             dao.LabTestDAO dao = new dao.LabTestDAO();
 
             if ("ACCEPT_ALL".equals(action)) {
+                model.User currentUser = (model.User) request.getSession().getAttribute("user");
+                int technicianId = currentUser.getUserId(); // Lấy ID cho Accept
+
                 String[] testIds = request.getParameterValues("labOrderTestIds");
                 if (testIds != null) {
                     for (String idStr : testIds) {
-                        dao.updateLabTestStatus(Integer.parseInt(idStr), "ACCEPTED", null);
+                        // Truyền thêm technicianId
+                        dao.updateLabTestStatus(Integer.parseInt(idStr), "ACCEPTED", null, technicianId);
                     }
                 }
                 request.getSession().setAttribute("success", "Samples received! Please enter results.");
+                
             } else if ("REJECT_SINGLE".equals(action)) {
+                // 🔥 Đã Mở Comment
+                model.User currentUser = (model.User) request.getSession().getAttribute("user");
+                int technicianId = currentUser.getUserId(); // Lấy ID cho Reject
+                
                 int rejectTestId = Integer.parseInt(request.getParameter("rejectTestId"));
                 String rejectReason = request.getParameter("rejectReason");
-                dao.updateLabTestStatus(rejectTestId, "REJECTED", rejectReason);
+                
+                // Truyền thêm technicianId
+                dao.updateLabTestStatus(rejectTestId, "REJECTED", rejectReason, technicianId);
+                
                 request.getSession().setAttribute("success", "Rejected service successfully.");
             }
 

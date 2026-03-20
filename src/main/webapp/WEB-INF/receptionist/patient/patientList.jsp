@@ -55,7 +55,7 @@
                 <div class="col-md-3 d-flex align-items-end gap-2">
 
                     <button class="btn btn-primary flex-grow-1" type="submit">
-                        <i class="fas fa-filter me-2"></i>Search
+                        <i class="fas fa-search me-2"></i>Search
                     </button>
 
                     <c:if test="${searchKeyword != null}">

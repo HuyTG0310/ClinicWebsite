@@ -2,60 +2,18 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<c:if test="${param.msg eq 'addSuccess'}">
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="fa-solid fa-circle-check me-2"></i> New role added successfully!
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-</c:if>
+
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-user-tag text-primary me-2"></i>
-            Manage Role
+            Manage Role privilege
         </h2>
         <p class="text-muted mb-0">Manage and monitor all system roles and permissions</p>
     </div>
-
-    <a href="${pageContext.request.contextPath}/admin/role/create" class="btn btn-primary">
-        <i class="fas fa-plus-circle me-2"></i>Add New Role
-    </a>
 </div>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <form action="${pageContext.request.contextPath}/admin/role/list" method="GET">
-            <div class="row g-3">
-
-                <div class="col-md-9">
-                    <label class="form-label fw-bold small text-muted">Keyword</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" name="search" class="form-control"
-                               placeholder="Role name..." value="${searchValue}">
-                    </div>
-                </div>
-
-                <div class="col-md-3 d-flex align-items-end gap-2">
-                    <button class="btn btn-primary flex-grow-1" type="submit">
-                        <i class="fas fa-filter me-2"></i>Search
-                    </button>
-
-                    <c:if test="${not empty searchValue}">
-                        <a href="${pageContext.request.contextPath}/admin/role/list"
-                           class="btn btn-outline-secondary px-3" title="Clear Filters">
-                            <i class="fas fa-redo-alt"></i>
-                        </a>
-                    </c:if>
-                </div>
-
-            </div>
-        </form>
-    </div>
-</div>
 
 <div class="card shadow-sm">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">

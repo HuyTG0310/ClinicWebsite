@@ -39,7 +39,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
             || description == null || description.trim().isEmpty()) {
 
         request.setAttribute("error",
-                "Name và Description không được để trống hoặc chỉ chứa khoảng trắng.");
+                "Name and Description not null or only contain space.");
 
         request.setAttribute("pageTitle", "Specialty Detail");
         request.setAttribute("activePage", "manageSpecialty");
@@ -52,7 +52,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
 
     // ===== DUPLICATE CHECK =====
     if (dao.existsByName(name.trim())) {
-        request.setAttribute("error", "Specialty name đã tồn tại.");
+        request.setAttribute("error", "Specialty name is existed.");
         request.setAttribute("pageTitle", "Specialty Detail");
         request.setAttribute("activePage", "manageSpecialty");
         request.setAttribute("contentPage", "/WEB-INF/admin/specialty/addSpecialty.jsp");

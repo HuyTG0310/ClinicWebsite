@@ -19,7 +19,7 @@ public class DBContext {
             String dbURL = "jdbc:sqlserver://localhost:1433;"
                     + "databaseName=DB_07_03;"
                     + "user=sa;"
-                    + "password=123;"
+                    + "password=123456;"
                     + "encrypt=true;trustServerCertificate=true;";
             conn = DriverManager.getConnection(dbURL);
             if (conn != null) {
@@ -47,7 +47,7 @@ public class DBContext {
                 + "encrypt=true;trustServerCertificate=true;";
 
         String user = "sa";
-        String password = "123";
+        String password = "123456";
 
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 

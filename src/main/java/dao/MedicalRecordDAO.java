@@ -370,7 +370,7 @@ public class MedicalRecordDAO extends DBContext {
 
             // 2. Nếu tìm thấy Bệnh án -> Quét luôn Đơn thuốc đính kèm
             if (mr != null) {
-                String sqlPres = "SELECT p.*, m.MedicineName, m.Unit "
+                String sqlPres = "SELECT p.*, m.MedicineName, m.Unit, m.Ingredients, m.Usage, m.Contraindication "
                         + "FROM Prescription p "
                         + "JOIN Medicine m ON p.MedicineId = m.MedicineId "
                         + "WHERE p.MedicalRecordId = ?";
@@ -387,6 +387,9 @@ public class MedicalRecordDAO extends DBContext {
                             p.setNote(rsPres.getString("Note"));
                             p.setMedicineName(rsPres.getString("MedicineName"));
                             p.setUnit(rsPres.getString("Unit"));
+                            p.setIngredients(rsPres.getString("Ingredients"));
+                            p.setUsage(rsPres.getString("Usage"));
+                            p.setContraindication(rsPres.getString("Contraindication"));
                             presList.add(p);
                         }
                         mr.setPrescriptions(presList);
