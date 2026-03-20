@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -110,6 +110,21 @@
                 </a>
             </li>
         </c:if>
+            
+        <%-- Thêm đoạn này vào Sidebar của Doctor, Receptionist và Lab --%>
+<c:if test="${hasCertView}">
+    <li class="nav-item">
+        <%-- Tự động xác định prefix dựa trên role của user --%>
+        <c:set var="rolePath" value="${fn:replace(fn:toLowerCase(sessionScope.user.roleName), ' ', '')}" />
+        <c:set var="prefix" value="${fn:contains(rolePath, 'lab') ? 'lab' : (fn:contains(rolePath, 'receptionist') ? 'receptionist' : 'doctor')}" />
+        
+        <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
+           href="${pageContext.request.contextPath}/${prefix}/certification/my">
+            <i class="fa-solid fa-certificate me-2"></i>
+            My Certifications
+        </a>
+    </li>
+</c:if>
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"

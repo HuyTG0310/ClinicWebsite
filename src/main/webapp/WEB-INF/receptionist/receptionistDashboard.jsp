@@ -15,7 +15,7 @@
         Danh sách bệnh nhân
     </h4>
     <span class="text-muted">
-        Xin chào, <b>Admin</b>
+        Xin chào, <b>Receptionist</b>
     </span>
 </div>
 

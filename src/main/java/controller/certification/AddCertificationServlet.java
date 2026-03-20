@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
 import model.Certification;
 import model.User;
 
@@ -15,13 +14,22 @@ import java.nio.file.Paths;
 import java.sql.Date;
 import java.util.UUID;
 
-@WebServlet("/certification/add")
-@MultipartConfig
+@WebServlet({
+    "/doctor/certification/add",
+    "/receptionist/certification/add",
+    "/lab/certification/add"
+})
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize = 1024 * 1024 * 5,
+        maxRequestSize = 1024 * 1024 * 10
+)
 public class AddCertificationServlet extends HttpServlet {
 
-    // mở trang add certification
-    protected void doGet(HttpServletRequest request,
-            HttpServletResponse response)
+    private static final String UPLOAD_DIR = "D:/ClinicData/uploads/certifications";
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
@@ -32,14 +40,12 @@ public class AddCertificationServlet extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher(
-                "/WEB-INF/doctor/certification/addCertification.jsp")
+        request.getRequestDispatcher("/WEB-INF/certification/addCertification.jsp")
                 .forward(request, response);
     }
 
-    // submit form upload certification
-    protected void doPost(HttpServletRequest request,
-            HttpServletResponse response)
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
@@ -53,77 +59,123 @@ public class AddCertificationServlet extends HttpServlet {
         }
 
         try {
-
-            // lấy dữ liệu form
+            // =========================
+            // 1. VALIDATE INPUT
+            // =========================
             String name = request.getParameter("certificateName");
             String number = request.getParameter("certificateNumber");
-
             String issueDateStr = request.getParameter("issueDate");
             String expiryDateStr = request.getParameter("expiryDate");
 
-            if (name == null || number == null || issueDateStr == null || expiryDateStr == null) {
-                throw new Exception("Invalid form data");
+            if (name == null || name.trim().isEmpty()
+                    || number == null || number.trim().isEmpty()
+                    || issueDateStr == null || expiryDateStr == null) {
+                throw new Exception("Vui lòng nhập đầy đủ thông tin");
             }
-
+            if (!issueDateStr.matches("^\\d{4}-\\d{2}-\\d{2}$")
+                    || !expiryDateStr.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+                throw new Exception("Ngày không hợp lệ (định dạng yyyy-MM-dd)");
+            }
             Date issueDate = Date.valueOf(issueDateStr);
             Date expiryDate = Date.valueOf(expiryDateStr);
+            Date today = new Date(System.currentTimeMillis());
+            if (expiryDate.before(today)) {
+                throw new Exception("Chứng chỉ đã hết hạn");
+            }
 
-            // lấy file upload
+            if (issueDate.after(today)) {
+                throw new Exception("Chứng chỉ chưa được cấp");
+            }
+
+            if (expiryDate.before(issueDate)) {
+                throw new Exception("Ngày hết hạn phải sau ngày cấp");
+            }
+
+            CertificationDAO dao = new CertificationDAO();
+
+            if (dao.isCertificateNumberExist(number)) {
+                throw new Exception("Số chứng chỉ đã tồn tại");
+            }
+
+            // =========================
+            // 2. HANDLE FILE UPLOAD
+            // =========================
             Part filePart = request.getPart("certificateFile");
 
             if (filePart == null || filePart.getSize() == 0) {
-                throw new Exception("File not uploaded");
+                throw new Exception("Vui lòng chọn file chứng chỉ");
             }
 
-            String originalFileName = Paths.get(filePart.getSubmittedFileName())
-                    .getFileName().toString();
+            // Validate content type
+            String contentType = filePart.getContentType();
+            if (!contentType.startsWith("image/")
+                    && !contentType.equals("application/pdf")) {
+                throw new Exception("Chỉ chấp nhận file ảnh hoặc PDF");
+            }
 
-            // tạo filename unique để tránh trùng
-            String uniqueFileName = UUID.randomUUID() + "_" + originalFileName;
-
-            // đường dẫn upload
-            String uploadPath = getServletContext()
-                    .getRealPath("/uploads/certifications");
-
-            File uploadDir = new File(uploadPath);
-
+            // Tạo folder nếu chưa có
+            File uploadDir = new File(UPLOAD_DIR);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
 
-            String filePath = uploadPath + File.separator + uniqueFileName;
+            // Lấy extension
+            String originalFileName = Paths.get(filePart.getSubmittedFileName())
+                    .getFileName().toString();
 
+            String extension = "";
+            int i = originalFileName.lastIndexOf('.');
+            if (i > 0) {
+                extension = originalFileName.substring(i);
+            }
+
+            // Tạo tên file unique
+            String uniqueFileName = UUID.randomUUID().toString() + extension;
+
+            // Lưu file
+            String filePath = UPLOAD_DIR + File.separator + uniqueFileName;
             filePart.write(filePath);
 
-            // lưu path vào DB
-            String dbFilePath = "uploads/certifications/" + uniqueFileName;
-
-            // tạo object certification
+            // =========================
+            // 3. SAVE DATABASE
+            // =========================
             Certification c = new Certification();
-
             c.setUserId(user.getUserId());
-            c.setCertificateName(name);
-            c.setCertificateNumber(number);
+            c.setCertificateName(name.trim());
+            c.setCertificateNumber(number.trim());
             c.setIssueDate(issueDate);
             c.setExpiryDate(expiryDate);
-            c.setFilePath(dbFilePath);
+            c.setFilePath(uniqueFileName); // chỉ lưu tên file
             c.setStatus("PENDING");
-
-            CertificationDAO dao = new CertificationDAO();
 
             dao.insertCertification(c);
 
-            // redirect về danh sách certification
-            response.sendRedirect(request.getContextPath() + "/certification/my");
+            // =========================
+            // 4. REDIRECT THEO ROLE
+            // =========================
+            String role = user.getRoleName() != null ? user.getRoleName().trim() : "";
+
+            String redirectPath = "/profile";
+
+            if ("Doctor".equalsIgnoreCase(role)) {
+                redirectPath = "/doctor/certification/my";
+            } else if ("Receptionist".equalsIgnoreCase(role)) {
+                redirectPath = "/receptionist/certification/my";
+            } else if ("Lab technician".equalsIgnoreCase(role)) {
+                redirectPath = "/lab/certification/my";
+            }
+
+            response.sendRedirect(request.getContextPath() + redirectPath);
 
         } catch (Exception e) {
-
             e.printStackTrace();
 
-            request.setAttribute("error", "Upload certification failed!");
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/doctor/certification/addCertification.jsp")
+            request.setAttribute("error", e.getMessage());
+            request.setAttribute("certificateName", request.getParameter("certificateName"));
+            request.setAttribute("certificateNumber", request.getParameter("certificateNumber"));
+            request.setAttribute("issueDate", request.getParameter("issueDate"));
+            request.setAttribute("expiryDate", request.getParameter("expiryDate"));
+            request.getRequestDispatcher("/WEB-INF/certification/addCertification.jsp")
                     .forward(request, response);
         }
     }
