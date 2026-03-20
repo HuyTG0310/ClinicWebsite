@@ -2,6 +2,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <div class="d-flex justify-content-between align-items-center mb-4">
+    <c:if test="${not empty sessionScope.msg}">
+    <div class="alert alert-success alert-dismissible fade show">
+        ${sessionScope.msg}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <c:remove var="msg" scope="session"/>
+</c:if>
     <div>
         <h2 class="mb-1">
             <i class="fa-solid fa-users text-primary me-2"></i>
