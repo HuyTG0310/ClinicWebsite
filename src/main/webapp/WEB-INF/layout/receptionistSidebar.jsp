@@ -68,7 +68,7 @@
         </c:if>
 
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
+            <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/receptionist/profile/view">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Profile

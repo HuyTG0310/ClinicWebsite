@@ -22,7 +22,7 @@ public class ProfileViewServlet extends HttpServlet {
 
         String layout;
         String basePath;
-        
+
         if (uri.startsWith(ctx + "/lab")) {
             layout = "/WEB-INF/layout/labLayout.jsp";
             basePath = ctx + "/lab";
@@ -36,17 +36,17 @@ public class ProfileViewServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        
+
+        request.setAttribute("basePath", basePath);
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
         // Lấy thông tin mới nhất từ Database
         UserDAO dao = new UserDAO();
-//<<<<<<< HEAD
         User updatedUser = dao.getUserById(user.getUserId());
         request.setAttribute("user", updatedUser);
 
-        // XỬ LÝ DYNAMIC LAYOUT VÀ TITLE THEO ROLE
         String roleName = updatedUser.getRoleName().toLowerCase();
         String layoutPath = "/WEB-INF/layout/doctorLayout.jsp"; // Mặc định
         String pageTitle = "Doctor Profile";
@@ -68,16 +68,5 @@ public class ProfileViewServlet extends HttpServlet {
 
         // Đẩy sang đúng Layout của Role đó
         request.getRequestDispatcher(layoutPath).forward(request, response);
-//=======
-//        User userr = dao.getUserById(user.getUserId());
-//        
-//        request.setAttribute("basePath", basePath);
-//        request.setAttribute("user", userr);
-//        request.setAttribute("pageTitle", "Profile Detail");
-//        request.setAttribute("activePage", "profile");
-//        request.setAttribute("contentPage", "/WEB-INF/profile/profileDetail.jsp");
-//
-//        request.getRequestDispatcher(layout).forward(request, response);
-//>>>>>>> e69fd48a9d4e1c25401d242ea75c1869f56faf3b
     }
 }
