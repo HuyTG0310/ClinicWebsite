@@ -22,13 +22,6 @@
                 <i class="fas fa-arrow-left me-2"></i>Back to list
             </a>
 
-            <c:if test="${hasPatientDelete}">
-                <button class="btn btn-danger"
-                        onclick="confirmDelete(${patient.patientId}, '${patient.fullName}')">
-                    <i class="fas fa-trash me-2"></i>Delete
-                </button>
-            </c:if>
-
             <c:if test="${hasPatientEdit}">
                 <button class="btn btn-warning"
                         onclick="openEditModal(

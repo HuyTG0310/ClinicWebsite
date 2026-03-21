@@ -10,13 +10,6 @@
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'doctorDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/doctor/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i> Dashboard
-            </a>
-        </li>
-
-        <li class="nav-item">
             <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/doctor/queue/list">
                 <i class="fa-solid fa-calendar-check me-2"></i> Manage queue
@@ -98,6 +91,18 @@
                 <i class="fa-solid fa-vials me-2"></i> Manage service order
             </a>
         </li>
+
+
+        <c:if test="${hasServiceView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/doctor/service/list">
+                    <i class="fa-solid fa-briefcase-medical me-2"></i>
+                    Manage service
+                </a>
+            </li>   
+        </c:if>
+
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"

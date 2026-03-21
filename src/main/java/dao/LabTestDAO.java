@@ -4,6 +4,7 @@
  */
 package dao;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import model.LabTest;
 import util.DBContext;
@@ -15,269 +16,894 @@ import model.*;
  * @author huytr
  */
 public class LabTestDAO extends DBContext {
+    public void loadTestsForBatch(LabTestBatch batch) {
 
-    public boolean insertFullLabTest(model.Service service, model.LabTest labTest, java.util.List<model.LabTestParameter> parameters) {
-        String sqlService = "INSERT INTO Service (ServiceName, Category, CurrentPrice, IsActive) VALUES (?, ?, ?, 1)";
-        String sqlLabTest = "INSERT INTO LabTest (ServiceId, TestCode, TestName, CategoryId, IsPanel, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
-        String sqlParam = "INSERT INTO LabTestParameter (LabTestId, ParameterCode, ParameterName, Unit, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, 1)";
-        String sqlRange = "INSERT INTO LabReferenceRange (ParameterId, Gender, AgeMinDays, AgeMaxDays, RefMin, RefMax, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
+        String sql = "SELECT t.LabTestId, t.TestName "
+                + "FROM LabOrderTest lot "
+                + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
+                + "WHERE lot.BatchId = ? "
+                + "AND lot.Status != 'CANCELLED' "
+                + "AND lot.Status != 'REJECTED'";
 
-        java.sql.Connection conn = null;
-        java.sql.PreparedStatement psService = null;
-        java.sql.PreparedStatement psLabTest = null;
-        java.sql.PreparedStatement psParam = null;
-        java.sql.PreparedStatement psRange = null; // Mới
-        java.sql.ResultSet rsService = null;
-        java.sql.ResultSet rsLabTest = null;
-        java.sql.ResultSet rsParam = null; // Mới
+        List<Integer> testIds = new ArrayList<>();
+        List<String> testNames = new ArrayList<>();
+
+        try (Connection conn = new DBContext().conn; PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, batch.getBatchId());
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    testIds.add(rs.getInt("LabTestId"));
+                    testNames.add(rs.getString("TestName"));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        batch.setTestIds(testIds);
+        batch.setTestNames(testNames);
+    }
+
+
+    private static final String SQL_GET_SNAPSHOT
+            = "SELECT TOP 1 rr.RefMin, rr.RefMax, p.Unit "
+            + "FROM LabTestParameter p "
+            + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId AND rr.IsActive = 1 "
+            + "JOIN MedicalRecord mr ON mr.MedicalRecordId = ? "
+            + "JOIN Patient pat ON mr.PatientId = pat.PatientId "
+            + "WHERE p.ParameterId = ? "
+            + "AND ("
+            + "     rr.Gender IS NULL "
+            + "     OR rr.Gender = 'ALL' "
+            + "     OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
+            + "     OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
+            + ") "
+            + "AND (rr.AgeMinDays IS NULL OR DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays) "
+            + "ORDER BY CASE WHEN rr.Gender = 'ALL' THEN 2 ELSE 1 END ASC";
+
+    private static final String SQL_CHECK_RESULT
+            = "SELECT ResultId FROM LabResult WHERE LabOrderTestId = ? AND ParameterId = ?";
+
+    private static final String SQL_INSERT_RESULT
+            = "INSERT INTO LabResult (LabOrderTestId, ParameterId, ResultValue, Flag, RefMin, RefMax, Unit, ResultTime) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
+
+    private static final String SQL_UPDATE_RESULT
+            = "UPDATE LabResult SET ResultValue = ?, Flag = ?, RefMin = ?, RefMax = ?, Unit = ?, ResultTime = GETDATE() "
+            + "WHERE ResultId = ?";
+
+    private static final String SQL_UPDATE_ORDER
+            = "UPDATE LabOrderTest SET Status = 'COMPLETED' WHERE LabOrderTestId = ?";
+
+    private static final String SQL_UPDATE_BATCH
+            = "UPDATE LabTestBatch SET Status = 'COMPLETED', TechnicianId = ? "
+            + "WHERE BatchId IN (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
+            + "AND NOT EXISTS ("
+            + "    SELECT 1 FROM LabOrderTest lot2 "
+            + "    WHERE lot2.BatchId = (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
+            + "    AND lot2.Status != 'COMPLETED' "
+            + "    AND lot2.Status != 'CANCELLED'"
+            + ")";
+
+    public boolean saveLabResults(TestResult testResult) {
+        Connection conn = null;
 
         try {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
-            // 1. INSERT VÀO BẢNG SERVICE
-            psService = conn.prepareStatement(sqlService, java.sql.PreparedStatement.RETURN_GENERATED_KEYS);
-            psService.setString(1, service.getServiceName());
-            psService.setString(2, "Xét nghiệm");
-            psService.setBigDecimal(3, service.getCurrentPrice());
-            psService.executeUpdate();
-
-            rsService = psService.getGeneratedKeys();
-            int serviceId = 0;
-            if (rsService.next()) {
-                serviceId = rsService.getInt(1);
-            }
-
-            // 2. INSERT VÀO BẢNG LABTEST
-            psLabTest = conn.prepareStatement(sqlLabTest, java.sql.PreparedStatement.RETURN_GENERATED_KEYS);
-            psLabTest.setInt(1, serviceId);
-            psLabTest.setString(2, labTest.getTestCode());
-            psLabTest.setString(3, labTest.getTestName());
-            psLabTest.setInt(4, labTest.getCategoryId());
-            psLabTest.setBoolean(5, labTest.isIsPanel());
-            psLabTest.setInt(6, 1);
-            psLabTest.executeUpdate();
-
-            rsLabTest = psLabTest.getGeneratedKeys();
-            int labTestId = 0;
-            if (rsLabTest.next()) {
-                labTestId = rsLabTest.getInt(1);
-            }
-
-            // 3. INSERT VÀO BẢNG LABTEST PARAMETER & REFERENCE RANGES
-            psParam = conn.prepareStatement(sqlParam, java.sql.PreparedStatement.RETURN_GENERATED_KEYS); // Cần sinh ID
-            psRange = conn.prepareStatement(sqlRange);
-
-            int sortOrder = 1;
-            for (model.LabTestParameter p : parameters) {
-                psParam.setInt(1, labTestId);
-                psParam.setString(2, p.getParameterCode());
-                psParam.setString(3, p.getParameterName());
-                psParam.setString(4, p.getUnit());
-                psParam.setInt(5, sortOrder++);
-                psParam.executeUpdate(); // Chạy từng dòng thay vì Batch để lấy ID
-
-                rsParam = psParam.getGeneratedKeys();
-                int paramId = 0;
-                if (rsParam.next()) {
-                    paramId = rsParam.getInt(1);
-                }
-
-                // DUYỆT VÀ INSERT TẤT CẢ RANGES CỦA PARAMETER NÀY
-                if (p.getReferenceRanges() != null && !p.getReferenceRanges().isEmpty()) {
-                    for (model.LabReferenceRange r : p.getReferenceRanges()) {
-                        psRange.setInt(1, paramId);
-                        psRange.setString(2, r.getGender());
-                        psRange.setInt(3, r.getAgeMinDays());
-                        psRange.setInt(4, r.getAgeMaxDays());
-
-                        if (r.getRefMin() != null) {
-                            psRange.setDouble(5, r.getRefMin());
-                        } else {
-                            psRange.setNull(5, java.sql.Types.DECIMAL);
-                        }
-
-                        if (r.getRefMax() != null) {
-                            psRange.setDouble(6, r.getRefMax());
-                        } else {
-                            psRange.setNull(6, java.sql.Types.DECIMAL);
-                        }
-
-                        psRange.addBatch();
-                    }
-                }
-            }
-            psRange.executeBatch();
+            processSaveResults(conn, testResult);
 
             conn.commit();
             return true;
 
         } catch (Exception e) {
+            rollback(conn);
             e.printStackTrace();
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-            }
             return false;
         } finally {
-            try {
-                if (rsService != null) {
-                    rsService.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (rsLabTest != null) {
-                    rsLabTest.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (psService != null) {
-                    psService.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (psLabTest != null) {
-                    psLabTest.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (psParam != null) {
-                    psParam.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (Exception e) {
-            }
+            close(conn);
         }
     }
 
-    public boolean updateFullLabTest(model.Service service, model.LabTest labTest, java.util.List<model.LabTestParameter> parameters) {
-        String sqlUpdateService = "UPDATE Service SET ServiceName = ?, CurrentPrice = ?, IsActive = ? WHERE ServiceId = ?";
-        String sqlUpdateLabTest = "UPDATE LabTest SET TestCode = ?, TestName = ?, CategoryId = ?, IsPanel = ?, IsActive = ? WHERE LabTestId = ?";
+    private void processSaveResults(Connection conn, TestResult testResult) throws Exception {
 
-        java.sql.Connection conn = null;
-        java.sql.PreparedStatement psUpdateService = null;
-        java.sql.PreparedStatement psUpdateLabTest = null;
-        java.sql.PreparedStatement psDeleteParams = null;
-        java.sql.PreparedStatement psUpdateParam = null;
-        java.sql.PreparedStatement psInsertParam = null;
-        java.sql.PreparedStatement psDeleteOldRanges = null;
-        java.sql.PreparedStatement psInsertNewRange = null;
+        PreparedStatement stGetSnapshot = conn.prepareStatement(SQL_GET_SNAPSHOT);
+        PreparedStatement stCheck = conn.prepareStatement(SQL_CHECK_RESULT);
+        PreparedStatement stInsert = conn.prepareStatement(SQL_INSERT_RESULT);
+        PreparedStatement stUpdate = conn.prepareStatement(SQL_UPDATE_RESULT);
+        PreparedStatement stUpdateOrder = conn.prepareStatement(SQL_UPDATE_ORDER);
+        PreparedStatement stUpdateBatch = conn.prepareStatement(SQL_UPDATE_BATCH);
+
+        boolean hasInsert = false;
+        boolean hasUpdate = false;
+        boolean hasStatus = false;
+
+        String[] orderTestIds = testResult.getOrderTestIds();
+        String[] paramIds = testResult.getParamIds();
+
+        for (int i = 0; i < orderTestIds.length; i++) {
+
+            String orderTestId = orderTestIds[i];
+            String paramId = paramIds[i];
+
+            String value = getResultValue(testResult, orderTestId, paramId);
+            if (isEmpty(value)) {
+                continue;
+            }
+
+            Snapshot snap = getSnapshot(stGetSnapshot, testResult, paramId);
+
+            String flag = calculateFlag(value, snap, testResult, orderTestId, paramId);
+
+            Integer resultId = checkExistingResult(stCheck, orderTestId, paramId);
+
+            if (resultId == null) {
+                insertResult(stInsert, orderTestId, paramId, value, flag, snap);
+                hasInsert = true;
+            } else {
+                updateResult(stUpdate, resultId, value, flag, snap);
+                hasUpdate = true;
+            }
+
+            updateStatus(stUpdateOrder, stUpdateBatch, testResult, orderTestId);
+            hasStatus = true;
+        }
+
+        if (hasInsert) {
+            stInsert.executeBatch();
+        }
+        if (hasUpdate) {
+            stUpdate.executeBatch();
+        }
+        if (hasStatus) {
+            stUpdateOrder.executeBatch();
+            stUpdateBatch.executeBatch();
+        }
+    }
+
+    private String getResultValue(TestResult testResult, String orderTestId, String paramId) {
+        String[] values = testResult.getParameterMap()
+                .get("result_" + orderTestId + "_" + paramId);
+
+        return (values != null && values.length > 0) ? values[0].trim() : "";
+    }
+
+    private boolean isEmpty(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    private Snapshot getSnapshot(PreparedStatement st, TestResult testResult, String paramId) throws Exception {
+        st.setInt(1, testResult.getMedicalRecordId());
+        st.setInt(2, Integer.parseInt(paramId));
+
+        try (ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return new Snapshot(
+                        rs.getBigDecimal("RefMin"),
+                        rs.getBigDecimal("RefMax"),
+                        rs.getString("Unit")
+                );
+            }
+        }
+        return new Snapshot(null, null, null);
+    }
+
+    private String calculateFlag(String value, Snapshot s,
+            TestResult testResult, String orderTestId, String paramId) {
+
+        try {
+            double val = Double.parseDouble(value.replace(",", ".").trim());
+
+            if (s.refMin != null && val < s.refMin.doubleValue()) {
+                return "L";
+            }
+            if (s.refMax != null && val > s.refMax.doubleValue()) {
+                return "H";
+            }
+
+        } catch (Exception e) {
+        }
+
+        String[] flags = testResult.getParameterMap()
+                .get("flag_" + orderTestId + "_" + paramId);
+
+        if (flags != null && flags.length > 0) {
+            String f = flags[0].toLowerCase();
+            if (f.equals("on") || f.equals("true") || f.equals("1")) {
+                return "Y";
+            }
+        }
+
+        return null;
+    }
+
+    private Integer checkExistingResult(PreparedStatement st, String orderTestId, String paramId) throws Exception {
+        st.setInt(1, Integer.parseInt(orderTestId));
+        st.setInt(2, Integer.parseInt(paramId));
+
+        try (ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("ResultId");
+            }
+        }
+        return null;
+    }
+
+    private void insertResult(PreparedStatement st, String orderTestId, String paramId,
+            String value, String flag, Snapshot s) throws Exception {
+
+        st.setInt(1, Integer.parseInt(orderTestId));
+        st.setInt(2, Integer.parseInt(paramId));
+        st.setString(3, value);
+        st.setString(4, flag);
+        st.setBigDecimal(5, s.refMin);
+        st.setBigDecimal(6, s.refMax);
+        st.setString(7, s.unit);
+
+        st.addBatch();
+    }
+
+    private void updateResult(PreparedStatement st, int id,
+            String value, String flag, Snapshot s) throws Exception {
+
+        st.setString(1, value);
+        st.setString(2, flag);
+        st.setBigDecimal(3, s.refMin);
+        st.setBigDecimal(4, s.refMax);
+        st.setString(5, s.unit);
+        st.setInt(6, id);
+
+        st.addBatch();
+    }
+
+    private void updateStatus(PreparedStatement stOrder, PreparedStatement stBatch,
+            TestResult testResult, String orderTestId) throws Exception {
+
+        stOrder.setInt(1, Integer.parseInt(orderTestId));
+        stOrder.addBatch();
+
+        stBatch.setInt(1, testResult.getTechnicianId());
+        stBatch.setInt(2, Integer.parseInt(orderTestId));
+        stBatch.setInt(3, Integer.parseInt(orderTestId));
+        stBatch.addBatch();
+    }
+
+    private void rollback(Connection conn) {
+        try {
+            if (conn != null) {
+                conn.rollback();
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    private void close(Connection conn) {
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    class Snapshot {
+
+        BigDecimal refMin;
+        BigDecimal refMax;
+        String unit;
+
+        public Snapshot(BigDecimal min, BigDecimal max, String unit) {
+            this.refMin = min;
+            this.refMax = max;
+            this.unit = unit;
+        }
+    }
+
+    public boolean insertFullLabTest(Service service, LabTest labTest, List<LabTestParameter> parameters) {
+        Connection conn = null;
 
         try {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
-            // 1 & 2. Update Service & LabTest
-            psUpdateService = conn.prepareStatement(sqlUpdateService);
-            psUpdateService.setString(1, service.getServiceName());
-            psUpdateService.setBigDecimal(2, service.getCurrentPrice());
-            psUpdateService.setBoolean(3, service.isIsActive());
-            psUpdateService.setInt(4, service.getServiceId());
-            psUpdateService.executeUpdate();
+            int serviceId = insertService(conn, service);
+            int labTestId = insertLabTest(conn, serviceId, labTest);
 
-            psUpdateLabTest = conn.prepareStatement(sqlUpdateLabTest);
-            psUpdateLabTest.setString(1, labTest.getTestCode());
-            psUpdateLabTest.setString(2, labTest.getTestName());
-            psUpdateLabTest.setInt(3, labTest.getCategoryId());
-            psUpdateLabTest.setBoolean(4, labTest.isIsPanel());
-            psUpdateLabTest.setBoolean(5, labTest.isIsActive());
-            psUpdateLabTest.setInt(6, labTest.getLabTestId());
-            psUpdateLabTest.executeUpdate();
+            insertParametersWithRanges(conn, labTestId, parameters);
 
-            // 3. XỬ LÝ CHỈ SỐ VÀ KHOẢNG THAM CHIẾU
-            StringBuilder keptIds = new StringBuilder("0");
-            for (model.LabTestParameter p : parameters) {
-                if (p.getParameterId() > 0) {
-                    keptIds.append(",").append(p.getParameterId());
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            rollback(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            close(conn);
+        }
+    }
+
+    private int insertService(Connection conn, Service service) throws Exception {
+        String sql = "INSERT INTO Service (ServiceName, Category, CurrentPrice, IsActive) VALUES (?, ?, ?, 1)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, service.getServiceName());
+            ps.setString(2, "Xét nghiệm");
+            ps.setBigDecimal(3, service.getCurrentPrice());
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+        throw new RuntimeException("Insert Service failed");
+    }
+
+    private int insertLabTest(Connection conn, int serviceId, LabTest labTest) throws Exception {
+        String sql = "INSERT INTO LabTest (ServiceId, TestCode, TestName, CategoryId, IsPanel, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
+        
+        
+        int nextSortOrder = getNextSortOrder(conn, labTest.getCategoryId());
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, serviceId);
+            ps.setString(2, labTest.getTestCode());
+            ps.setString(3, labTest.getTestName());
+            ps.setInt(4, labTest.getCategoryId());
+            ps.setBoolean(5, labTest.isIsPanel());
+            ps.setInt(6, nextSortOrder);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+        throw new RuntimeException("Insert LabTest failed");
+    }
+    
+    private int getNextSortOrder(Connection conn, int categoryId) throws Exception {
+        String sql = "SELECT ISNULL(MAX(SortOrder), 0) + 1 AS NextOrder FROM LabTest WHERE CategoryId = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("NextOrder");
                 }
             }
+        }
+        return 1; // Mặc định trả về 1 nếu bảng đang trống
+    }
 
-            // Soft delete các Param bị xóa
-            String sqlSoftDelete = "UPDATE LabTestParameter SET IsActive = 0 WHERE LabTestId = ? AND ParameterId NOT IN (" + keptIds.toString() + ")";
-            try (java.sql.PreparedStatement psSoftDelete = conn.prepareStatement(sqlSoftDelete)) {
-                psSoftDelete.setInt(1, labTest.getLabTestId());
-                psSoftDelete.executeUpdate();
-            }
+    private void insertParametersWithRanges(Connection conn, int labTestId, List<LabTestParameter> params) throws Exception {
 
-            String sqlUpdateP = "UPDATE LabTestParameter SET ParameterCode=?, ParameterName=?, Unit=?, SortOrder=?, IsActive=1 WHERE ParameterId=?";
-            String sqlInsertP = "INSERT INTO LabTestParameter (LabTestId, ParameterCode, ParameterName, Unit, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, 1)";
+        String sqlParam = "INSERT INTO LabTestParameter (LabTestId, ParameterCode, ParameterName, Unit, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, 1)";
+        String sqlRange = "INSERT INTO LabReferenceRange (ParameterId, Gender, AgeMinDays, AgeMaxDays, RefMin, RefMax, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
 
-            //Xóa sạch Range cũ của Param đó và Insert lại toàn bộ Range mới
-            String sqlDelRange = "DELETE FROM LabReferenceRange WHERE ParameterId = ?";
-            String sqlInsRange = "INSERT INTO LabReferenceRange (ParameterId, Gender, AgeMinDays, AgeMaxDays, RefMin, RefMax, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
-
-            psUpdateParam = conn.prepareStatement(sqlUpdateP);
-            psInsertParam = conn.prepareStatement(sqlInsertP, java.sql.PreparedStatement.RETURN_GENERATED_KEYS);
-            psDeleteOldRanges = conn.prepareStatement(sqlDelRange);
-            psInsertNewRange = conn.prepareStatement(sqlInsRange);
+        try (
+                PreparedStatement psParam = conn.prepareStatement(sqlParam, Statement.RETURN_GENERATED_KEYS); PreparedStatement psRange = conn.prepareStatement(sqlRange)) {
 
             int sortOrder = 1;
-            for (model.LabTestParameter p : parameters) {
-                int currentParamId = p.getParameterId();
 
-                if (currentParamId > 0) {
-                    // Cập nhật thông tin Param
-                    psUpdateParam.setString(1, p.getParameterCode());
-                    psUpdateParam.setString(2, p.getParameterName());
-                    psUpdateParam.setString(3, p.getUnit());
-                    psUpdateParam.setInt(4, sortOrder++);
-                    psUpdateParam.setInt(5, currentParamId);
-                    psUpdateParam.executeUpdate();
+            for (LabTestParameter p : params) {
 
-                    // Xóa Range cũ
-                    psDeleteOldRanges.setInt(1, currentParamId);
-                    psDeleteOldRanges.executeUpdate();
-                } else {
-                    // Thêm Param mới
-                    psInsertParam.setInt(1, labTest.getLabTestId());
-                    psInsertParam.setString(2, p.getParameterCode());
-                    psInsertParam.setString(3, p.getParameterName());
-                    psInsertParam.setString(4, p.getUnit());
-                    psInsertParam.setInt(5, sortOrder++);
-                    psInsertParam.executeUpdate();
+                int paramId = insertParameter(psParam, labTestId, p, sortOrder++);
 
-                    java.sql.ResultSet rsNewParam = psInsertParam.getGeneratedKeys();
-                    if (rsNewParam.next()) {
-                        currentParamId = rsNewParam.getInt(1);
-                    }
-                }
+                insertRanges(psRange, paramId, p.getReferenceRanges());
+            }
 
-                // Insert lại Range mới
-                if (p.getReferenceRanges() != null && !p.getReferenceRanges().isEmpty()) {
-                    for (model.LabReferenceRange r : p.getReferenceRanges()) {
-                        psInsertNewRange.setInt(1, currentParamId);
-                        psInsertNewRange.setString(2, r.getGender());
-                        psInsertNewRange.setInt(3, r.getAgeMinDays());
-                        psInsertNewRange.setInt(4, r.getAgeMaxDays());
+            psRange.executeBatch();
+        }
+    }
 
-                        if (r.getRefMin() != null) {
-                            psInsertNewRange.setDouble(5, r.getRefMin());
-                        } else {
-                            psInsertNewRange.setNull(5, java.sql.Types.DECIMAL);
-                        }
+    private int insertParameter(PreparedStatement ps, int labTestId, LabTestParameter p, int sortOrder) throws Exception {
 
-                        if (r.getRefMax() != null) {
-                            psInsertNewRange.setDouble(6, r.getRefMax());
-                        } else {
-                            psInsertNewRange.setNull(6, java.sql.Types.DECIMAL);
-                        }
+        ps.setInt(1, labTestId);
+        ps.setString(2, p.getParameterCode());
+        ps.setString(3, p.getParameterName());
+        ps.setString(4, p.getUnit());
+        ps.setInt(5, sortOrder);
 
-                        psInsertNewRange.addBatch();
-                    }
+        ps.executeUpdate();
+
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+
+        throw new RuntimeException("Insert Parameter failed");
+    }
+
+    private void insertRanges(PreparedStatement ps, int paramId, List<LabReferenceRange> ranges) throws Exception {
+
+        if (ranges == null || ranges.isEmpty()) {
+            return;
+        }
+
+        for (LabReferenceRange r : ranges) {
+
+            ps.setInt(1, paramId);
+            ps.setString(2, r.getGender());
+            ps.setInt(3, r.getAgeMinDays());
+            ps.setInt(4, r.getAgeMaxDays());
+
+            if (r.getRefMin() != null) {
+                ps.setDouble(5, r.getRefMin());
+            } else {
+                ps.setNull(5, Types.DECIMAL);
+            }
+
+            if (r.getRefMax() != null) {
+                ps.setDouble(6, r.getRefMax());
+            } else {
+                ps.setNull(6, Types.DECIMAL);
+            }
+
+            ps.addBatch();
+        }
+    }
+
+    public boolean createLabOrders(int patientId, int medicalRecordId, int doctorId, String[] labTestIds) {
+
+        if (labTestIds == null || labTestIds.length == 0) {
+            return false;
+        }
+
+        Connection conn = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+
+            int batchId = createBatch(conn, patientId, medicalRecordId, doctorId);
+
+            for (String idStr : labTestIds) {
+                int labTestId = Integer.parseInt(idStr);
+
+                processSingleLabOrder(conn, batchId, patientId, medicalRecordId, doctorId, labTestId);
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            rollback(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            close(conn);
+        }
+    }
+
+    private int createBatch(Connection conn, int patientId, int medicalRecordId, int doctorId) throws Exception {
+
+        String sql = "INSERT INTO LabTestBatch (PatientId, MedicalRecordId, CreatedByDoctorId, Status) VALUES (?, ?, ?, 'CREATED')";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, patientId);
+            ps.setInt(2, medicalRecordId);
+            ps.setInt(3, doctorId);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+        throw new RuntimeException("Create batch failed");
+    }
+
+    private void processSingleLabOrder(Connection conn,
+            int batchId,
+            int patientId,
+            int medicalRecordId,
+            int doctorId,
+            int labTestId) throws Exception {
+
+        PriceInfo priceInfo = getPriceInfo(conn, labTestId);
+
+        int orderId = createServiceOrder(conn, patientId, medicalRecordId, doctorId,
+                priceInfo.serviceId, priceInfo.price);
+
+        insertLabOrderTest(conn, orderId, labTestId, batchId);
+    }
+
+    private PriceInfo getPriceInfo(Connection conn, int labTestId) throws Exception {
+
+        String sql = "SELECT t.ServiceId, s.CurrentPrice "
+                + "FROM LabTest t "
+                + "JOIN Service s ON t.ServiceId = s.ServiceId "
+                + "WHERE t.LabTestId = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, labTestId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new PriceInfo(
+                            rs.getInt("ServiceId"),
+                            rs.getDouble("CurrentPrice")
+                    );
                 }
             }
-            psInsertNewRange.executeBatch();
+        }
+
+        throw new RuntimeException("Price not found for LabTestId = " + labTestId);
+    }
+
+    private int createServiceOrder(Connection conn,
+            int patientId,
+            int medicalRecordId,
+            int doctorId,
+            int serviceId,
+            double price) throws Exception {
+
+        String sql = "INSERT INTO ServiceOrder (PatientId, MedicalRecordId, ServiceId, AssignedById, PriceAtTime, Status) "
+                + "VALUES (?, ?, ?, ?, ?, 'UNPAID')";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, patientId);
+            ps.setInt(2, medicalRecordId);
+            ps.setInt(3, serviceId);
+            ps.setInt(4, doctorId);
+            ps.setDouble(5, price);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+        throw new RuntimeException("Create ServiceOrder failed");
+    }
+
+    private void insertLabOrderTest(Connection conn, int orderId, int labTestId, int batchId) throws Exception {
+
+        String sql = "INSERT INTO LabOrderTest (ServiceOrderId, LabTestId, BatchId, Status) "
+                + "VALUES (?, ?, ?, 'ORDERED')";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            ps.setInt(2, labTestId);
+            ps.setInt(3, batchId);
+
+            ps.executeUpdate();
+        }
+    }
+
+    class PriceInfo {
+
+        int serviceId;
+        double price;
+
+        public PriceInfo(int serviceId, double price) {
+            this.serviceId = serviceId;
+            this.price = price;
+        }
+    }
+
+    public boolean updateFullLabTest(Service service, LabTest labTest, List<LabTestParameter> parameters) {
+
+        Connection conn = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+
+            updateService(conn, service);
+            updateLabTest(conn, labTest);
+
+            softDeleteRemovedParams(conn, labTest.getLabTestId(), parameters);
+
+            processParametersUpdate(conn, labTest.getLabTestId(), parameters);
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            rollback(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            close(conn);
+        }
+    }
+
+    private void updateService(Connection conn, Service service) throws Exception {
+
+        String sql = "UPDATE Service SET ServiceName = ?, CurrentPrice = ?, IsActive = ? WHERE ServiceId = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, service.getServiceName());
+            ps.setBigDecimal(2, service.getCurrentPrice());
+            ps.setBoolean(3, service.isIsActive());
+            ps.setInt(4, service.getServiceId());
+
+            ps.executeUpdate();
+        }
+    }
+
+    private void updateLabTest(Connection conn, LabTest labTest) throws Exception {
+
+        String sql = "UPDATE LabTest SET TestCode = ?, TestName = ?, CategoryId = ?, IsPanel = ?, IsActive = ? WHERE LabTestId = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, labTest.getTestCode());
+            ps.setString(2, labTest.getTestName());
+            ps.setInt(3, labTest.getCategoryId());
+            ps.setBoolean(4, labTest.isIsPanel());
+            ps.setBoolean(5, labTest.isIsActive());
+            ps.setInt(6, labTest.getLabTestId());
+
+            ps.executeUpdate();
+        }
+    }
+
+    private void softDeleteRemovedParams(Connection conn, int labTestId, List<LabTestParameter> parameters) throws Exception {
+
+        StringBuilder keptIds = new StringBuilder("0");
+
+        for (LabTestParameter p : parameters) {
+            if (p.getParameterId() > 0) {
+                keptIds.append(",").append(p.getParameterId());
+            }
+        }
+
+        String sql = "UPDATE LabTestParameter SET IsActive = 0 WHERE LabTestId = ? AND ParameterId NOT IN (" + keptIds + ")";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, labTestId);
+            ps.executeUpdate();
+        }
+    }
+
+    private void processParametersUpdate(Connection conn, int labTestId, List<LabTestParameter> parameters) throws Exception {
+
+        String sqlUpdate = "UPDATE LabTestParameter SET ParameterCode=?, ParameterName=?, Unit=?, SortOrder=?, IsActive=1 WHERE ParameterId=?";
+        String sqlInsert = "INSERT INTO LabTestParameter (LabTestId, ParameterCode, ParameterName, Unit, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, 1)";
+        String sqlDeleteRange = "DELETE FROM LabReferenceRange WHERE ParameterId = ?";
+        String sqlInsertRange = "INSERT INTO LabReferenceRange (ParameterId, Gender, AgeMinDays, AgeMaxDays, RefMin, RefMax, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
+
+        try (
+                PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate); PreparedStatement psInsert = conn.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS); PreparedStatement psDeleteRange = conn.prepareStatement(sqlDeleteRange); PreparedStatement psInsertRange = conn.prepareStatement(sqlInsertRange)) {
+
+            int sortOrder = 1;
+
+            for (LabTestParameter p : parameters) {
+
+                int paramId;
+
+                if (p.getParameterId() > 0) {
+                    paramId = updateParameter(psUpdate, p, sortOrder++);
+                    deleteOldRanges(psDeleteRange, paramId);
+                } else {
+                    paramId = insertNewParameter(psInsert, labTestId, p, sortOrder++);
+                }
+
+                insertRanges(psInsertRange, paramId, p.getReferenceRanges());
+            }
+
+            psInsertRange.executeBatch();
+        }
+    }
+
+    private int updateParameter(PreparedStatement ps, LabTestParameter p, int sortOrder) throws Exception {
+
+        ps.setString(1, p.getParameterCode());
+        ps.setString(2, p.getParameterName());
+        ps.setString(3, p.getUnit());
+        ps.setInt(4, sortOrder);
+        ps.setInt(5, p.getParameterId());
+
+        ps.executeUpdate();
+        return p.getParameterId();
+    }
+
+    private int insertNewParameter(PreparedStatement ps, int labTestId, LabTestParameter p, int sortOrder) throws Exception {
+
+        ps.setInt(1, labTestId);
+        ps.setString(2, p.getParameterCode());
+        ps.setString(3, p.getParameterName());
+        ps.setString(4, p.getUnit());
+        ps.setInt(5, sortOrder);
+
+        ps.executeUpdate();
+
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+
+        throw new RuntimeException("Insert new param failed");
+    }
+
+    private void deleteOldRanges(PreparedStatement ps, int paramId) throws Exception {
+        ps.setInt(1, paramId);
+        ps.executeUpdate();
+    }
+
+    public boolean editLabOrders(int batchId, int patientId, int medicalRecordId, int doctorId, String[] newTestIds) {
+
+        if (newTestIds == null || newTestIds.length == 0) {
+            return cancelLabBatch(batchId);
+        }
+
+        Connection conn = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+
+            Map<Integer, Integer> currentMap = getCurrentTests(conn, batchId);
+            List<Integer> currentIds = new ArrayList<>(currentMap.keySet());
+
+            List<Integer> newIds = parseIds(newTestIds);
+
+            List<Integer> toRemove = getTestsToRemove(currentIds, newIds);
+            List<Integer> toAdd = getTestsToAdd(currentIds, newIds);
+
+            if (!toRemove.isEmpty()) {
+                cancelTests(conn, batchId, toRemove, currentMap);
+            }
+
+            if (!toAdd.isEmpty()) {
+                addNewTests(conn, batchId, patientId, medicalRecordId, doctorId, toAdd);
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (Exception e) {
+            rollback(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            close(conn);
+        }
+    }
+
+    private Map<Integer, Integer> getCurrentTests(Connection conn, int batchId) throws Exception {
+
+        Map<Integer, Integer> map = new HashMap<>();
+
+        String sql = "SELECT LabTestId, ServiceOrderId FROM LabOrderTest WHERE BatchId = ? AND Status != 'CANCELLED'";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, batchId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    map.put(rs.getInt("LabTestId"), rs.getInt("ServiceOrderId"));
+                }
+            }
+        }
+
+        return map;
+    }
+
+    private List<Integer> parseIds(String[] ids) {
+        List<Integer> list = new ArrayList<>();
+        for (String id : ids) {
+            list.add(Integer.parseInt(id));
+        }
+        return list;
+    }
+
+    private List<Integer> getTestsToRemove(List<Integer> current, List<Integer> newer) {
+        List<Integer> result = new ArrayList<>(current);
+        result.removeAll(newer);
+        return result;
+    }
+
+    private List<Integer> getTestsToAdd(List<Integer> current, List<Integer> newer) {
+        List<Integer> result = new ArrayList<>(newer);
+        result.removeAll(current);
+        return result;
+    }
+
+    private void cancelTests(Connection conn, int batchId, List<Integer> testIds, Map<Integer, Integer> testToOrderMap) throws Exception {
+
+        String sqlTest = "UPDATE LabOrderTest SET Status = 'CANCELLED' WHERE BatchId = ? AND LabTestId = ?";
+        String sqlOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' WHERE ServiceOrderId = ?";
+
+        try (
+                PreparedStatement psTest = conn.prepareStatement(sqlTest); PreparedStatement psOrder = conn.prepareStatement(sqlOrder)) {
+
+            for (int testId : testIds) {
+
+                psTest.setInt(1, batchId);
+                psTest.setInt(2, testId);
+                psTest.addBatch();
+
+                psOrder.setInt(1, testToOrderMap.get(testId));
+                psOrder.addBatch();
+            }
+
+            psTest.executeBatch();
+            psOrder.executeBatch();
+        }
+    }
+
+    private void addNewTests(Connection conn, int batchId,
+            int patientId, int medicalRecordId, int doctorId,
+            List<Integer> testIds) throws Exception {
+
+        for (int labTestId : testIds) {
+
+            PriceInfo priceInfo = getPriceInfo(conn, labTestId);
+
+            int orderId = createServiceOrder(conn,
+                    patientId, medicalRecordId, doctorId,
+                    priceInfo.serviceId, priceInfo.price);
+
+            insertLabOrderTest(conn, orderId, labTestId, batchId);
+        }
+    }
+
+    public boolean cancelLabBatch(int batchId) {
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement stCheck = null;
+        java.sql.PreparedStatement stCancelOrders = null;
+        java.sql.PreparedStatement stCancelOrderTests = null;
+        java.sql.PreparedStatement stCancelBatch = null;
+
+        try {
+            conn = new DBContext().conn;
+            conn.setAutoCommit(false);
+
+            // 1. KIỂM TRA BẢO MẬT: Đảm bảo không có hóa đơn nào trong Lô này đã được thanh toán
+            String sqlCheck = "SELECT COUNT(*) FROM LabOrderTest lot "
+                    + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
+                    + "WHERE lot.BatchId = ? AND so.Status = 'PAID'";
+            stCheck = conn.prepareStatement(sqlCheck);
+            stCheck.setInt(1, batchId);
+            try (java.sql.ResultSet rs = stCheck.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return false; // Đã đóng tiền rồi -> Không cho Hủy!
+                }
+            }
+
+            // 2. HỦY TẤT CẢ HÓA ĐƠN (ServiceOrder) liên quan đến Lô này
+            // Phép thuật SQL: Dùng IN kết hợp SubQuery để tìm ra đúng hóa đơn của Lô
+            String sqlCancelOrders = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
+                    + "WHERE ServiceOrderId IN (SELECT ServiceOrderId FROM LabOrderTest WHERE BatchId = ?)";
+            stCancelOrders = conn.prepareStatement(sqlCancelOrders);
+            stCancelOrders.setInt(1, batchId);
+            stCancelOrders.executeUpdate();
+
+            // 3. HỦY TẤT CẢ CHI TIẾT XÉT NGHIỆM (LabOrderTest)
+            String sqlCancelOrderTests = "UPDATE LabOrderTest SET Status = 'CANCELLED' WHERE BatchId = ?";
+            stCancelOrderTests = conn.prepareStatement(sqlCancelOrderTests);
+            stCancelOrderTests.setInt(1, batchId);
+            stCancelOrderTests.executeUpdate();
+
+            // 4. HỦY LÔ (LabTestBatch)
+            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED' WHERE BatchId = ?";
+            stCancelBatch = conn.prepareStatement(sqlCancelBatch);
+            stCancelBatch.setInt(1, batchId);
+            stCancelBatch.executeUpdate();
 
             conn.commit();
             return true;
@@ -293,31 +919,32 @@ public class LabTestDAO extends DBContext {
             return false;
         } finally {
             try {
-                if (psUpdateService != null) {
-                    psUpdateService.close();
+                if (stCheck != null) {
+                    stCheck.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if (psUpdateLabTest != null) {
-                    psUpdateLabTest.close();
+                if (stCancelOrders != null) {
+                    stCancelOrders.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if (psDeleteParams != null) {
-                    psDeleteParams.close();
+                if (stCancelOrderTests != null) {
+                    stCancelOrderTests.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if (psInsertParam != null) {
-                    psInsertParam.close();
+                if (stCancelBatch != null) {
+                    stCancelBatch.close();
                 }
             } catch (Exception e) {
             }
             try {
                 if (conn != null) {
+                    conn.setAutoCommit(true);
                     conn.close();
                 }
             } catch (Exception e) {
@@ -421,138 +1048,6 @@ public class LabTestDAO extends DBContext {
 
         // Trả về danh sách các Parameter đã được gộp đầy đủ Range
         return new java.util.ArrayList<>(paramMap.values());
-    }
-
-    public boolean createLabOrders(int patientId, int medicalRecordId, int doctorId, String[] labTestIds) {
-        if (labTestIds == null || labTestIds.length == 0) {
-            return false;
-        }
-
-        java.sql.Connection conn = null;
-        java.sql.PreparedStatement stBatch = null, stOrder = null, stOrderTest = null, stGetPrice = null;
-
-        try {
-            // Lưu ý: Nếu DBContext của bạn gọi getConnection() thì sửa lại chỗ này nhé
-            conn = new DBContext().conn;
-            conn.setAutoCommit(false); // Bắt đầu Transaction riêng cho Xét nghiệm
-
-            // 1. Tạo Lô (Batch)
-            String sqlBatch = "INSERT INTO LabTestBatch (PatientId, MedicalRecordId, CreatedByDoctorId, Status) VALUES (?, ?, ?, 'CREATED')";
-            stBatch = conn.prepareStatement(sqlBatch, java.sql.Statement.RETURN_GENERATED_KEYS);
-            stBatch.setInt(1, patientId);
-            stBatch.setInt(2, medicalRecordId);
-            stBatch.setInt(3, doctorId);
-            stBatch.executeUpdate();
-
-            int batchId = -1;
-            try (java.sql.ResultSet rs = stBatch.getGeneratedKeys()) {
-                if (rs.next()) {
-                    batchId = rs.getInt(1);
-                }
-            }
-            if (batchId == -1) {
-                conn.rollback();
-                return false;
-            }
-
-            // Chuẩn bị SQL
-            String sqlPrice = "SELECT t.ServiceId, s.CurrentPrice FROM LabTest t JOIN Service s ON t.ServiceId = s.ServiceId WHERE t.LabTestId = ?";
-            stGetPrice = conn.prepareStatement(sqlPrice);
-
-            String sqlOrder = "INSERT INTO ServiceOrder (PatientId, MedicalRecordId, ServiceId, AssignedById, PriceAtTime, Status) VALUES (?, ?, ?, ?, ?, 'UNPAID')";
-            stOrder = conn.prepareStatement(sqlOrder, java.sql.Statement.RETURN_GENERATED_KEYS);
-
-            String sqlOrderTest = "INSERT INTO LabOrderTest (ServiceOrderId, LabTestId, BatchId, Status) VALUES (?, ?, ?, 'ORDERED')";
-            stOrderTest = conn.prepareStatement(sqlOrderTest);
-
-            // 2. Duyệt qua mảng checkbox Bác sĩ chọn
-            for (String idStr : labTestIds) {
-                int labTestId = Integer.parseInt(idStr);
-
-                // Lấy giá thực tế
-                stGetPrice.setInt(1, labTestId);
-                try (java.sql.ResultSet rsPrice = stGetPrice.executeQuery()) {
-
-                    // 🔥 FIX BUG: Phải tìm thấy Dịch vụ & Giá tiền thì mới bắt đầu Insert hóa đơn
-                    if (rsPrice.next()) {
-                        int serviceId = rsPrice.getInt("ServiceId");
-                        double price = rsPrice.getDouble("CurrentPrice");
-
-                        // Tạo Hóa đơn (UNPAID)
-                        stOrder.setInt(1, patientId);
-                        stOrder.setInt(2, medicalRecordId);
-                        stOrder.setInt(3, serviceId);
-                        stOrder.setInt(4, doctorId);
-                        stOrder.setDouble(5, price);
-                        stOrder.executeUpdate();
-
-                        int orderId = -1;
-                        try (java.sql.ResultSet rsOrder = stOrder.getGeneratedKeys()) {
-                            if (rsOrder.next()) {
-                                orderId = rsOrder.getInt(1);
-                            }
-                        }
-
-                        // Liên kết Xét nghiệm vào Lô VÀ Hóa đơn
-                        if (orderId != -1) {
-                            stOrderTest.setInt(1, orderId);
-                            stOrderTest.setInt(2, labTestId);
-                            stOrderTest.setInt(3, batchId);
-                            stOrderTest.addBatch();
-                        }
-                    }
-                }
-            }
-
-            // Thực thi loạt Insert chi tiết
-            stOrderTest.executeBatch();
-            conn.commit(); // Chốt đơn thành công!
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-            }
-            return false;
-        } finally {
-            // Đóng các resource an toàn
-            try {
-                if (stOrderTest != null) {
-                    stOrderTest.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (stOrder != null) {
-                    stOrder.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (stGetPrice != null) {
-                    stGetPrice.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (stBatch != null) {
-                    stBatch.close();
-                }
-            } catch (Exception e) {
-            }
-            // CỰC KỲ QUAN TRỌNG: Phải trả lại AutoCommit cho Connection Pool
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (Exception e) {
-            }
-        }
     }
 
     public java.util.List<java.util.Map<String, Object>> getConsolidatedLabResults(int medicalRecordId) {
@@ -784,234 +1279,6 @@ public class LabTestDAO extends DBContext {
         return list;
     }
 
-    public boolean editLabOrders(int batchId, int patientId, int medicalRecordId, int doctorId, String[] newTestIds) {
-        // 1. NẾU BÁC SĨ BỎ TICK HẾT -> Tự động gọi hàm Hủy toàn bộ Lô
-        if (newTestIds == null || newTestIds.length == 0) {
-            return cancelLabBatch(batchId); // Gọi lại hàm lúc nãy anh em mình viết!
-        }
-
-        java.sql.Connection conn = null;
-        java.sql.PreparedStatement stGetCurrent = null;
-        java.sql.PreparedStatement stCancelTest = null;
-        java.sql.PreparedStatement stCancelOrder = null;
-        java.sql.PreparedStatement stGetPrice = null;
-        java.sql.PreparedStatement stOrder = null;
-        java.sql.PreparedStatement stOrderTest = null;
-
-        try {
-            conn = new DBContext().conn;
-            conn.setAutoCommit(false); // Vẫn phải dùng Transaction để Kế toán không bị lệch
-
-            // 2. LẤY DANH SÁCH CÁC CHỈ SỐ CŨ (Đang có trong Lô này)
-            java.util.List<Integer> currentTestIds = new java.util.ArrayList<>();
-            java.util.Map<Integer, Integer> testToOrderMap = new java.util.HashMap<>(); // Lưu cặp <TestId, ServiceOrderId> để lát Hủy hóa đơn
-
-            String sqlCurrent = "SELECT LabTestId, ServiceOrderId FROM LabOrderTest WHERE BatchId = ? AND Status != 'CANCELLED'";
-            stGetCurrent = conn.prepareStatement(sqlCurrent);
-            stGetCurrent.setInt(1, batchId);
-            try (java.sql.ResultSet rs = stGetCurrent.executeQuery()) {
-                while (rs.next()) {
-                    currentTestIds.add(rs.getInt("LabTestId"));
-                    testToOrderMap.put(rs.getInt("LabTestId"), rs.getInt("ServiceOrderId"));
-                }
-            }
-
-            // 3. PHÂN LOẠI: CÁI NÀO CẦN XÓA? CÁI NÀO CẦN THÊM?
-            java.util.List<Integer> newIdsList = new java.util.ArrayList<>();
-            for (String id : newTestIds) {
-                newIdsList.add(Integer.parseInt(id));
-            }
-
-            // Danh sách Xóa = Cũ - Mới (Có trong cũ nhưng Bác sĩ đã bỏ tick)
-            java.util.List<Integer> testsToRemove = new java.util.ArrayList<>(currentTestIds);
-            testsToRemove.removeAll(newIdsList);
-
-            // Danh sách Thêm = Mới - Cũ (Có trong mới nhưng Cũ chưa có)
-            java.util.List<Integer> testsToAdd = new java.util.ArrayList<>(newIdsList);
-            testsToAdd.removeAll(currentTestIds);
-
-            // ==========================================
-            // 4. THỰC THI XÓA (Cập nhật thành CANCELLED)
-            // ==========================================
-            if (!testsToRemove.isEmpty()) {
-                String sqlCancelTest = "UPDATE LabOrderTest SET Status = 'CANCELLED' WHERE BatchId = ? AND LabTestId = ?";
-                String sqlCancelOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' WHERE ServiceOrderId = ?";
-                stCancelTest = conn.prepareStatement(sqlCancelTest);
-                stCancelOrder = conn.prepareStatement(sqlCancelOrder);
-
-                for (int testId : testsToRemove) {
-                    stCancelTest.setInt(1, batchId);
-                    stCancelTest.setInt(2, testId);
-                    stCancelTest.addBatch();
-
-                    stCancelOrder.setInt(1, testToOrderMap.get(testId)); // Xóa đúng cái Hóa đơn của Test này
-                    stCancelOrder.addBatch();
-                }
-                stCancelTest.executeBatch();
-                stCancelOrder.executeBatch();
-            }
-
-            // ==========================================
-            // 5. THỰC THI THÊM MỚI (Copy logic y hệt hàm Create của bạn)
-            // ==========================================
-            if (!testsToAdd.isEmpty()) {
-                String sqlPrice = "SELECT t.ServiceId, s.CurrentPrice FROM LabTest t JOIN Service s ON t.ServiceId = s.ServiceId WHERE t.LabTestId = ?";
-                stGetPrice = conn.prepareStatement(sqlPrice);
-
-                String sqlOrder = "INSERT INTO ServiceOrder (PatientId, MedicalRecordId, ServiceId, AssignedById, PriceAtTime, Status) VALUES (?, ?, ?, ?, ?, 'UNPAID')";
-                stOrder = conn.prepareStatement(sqlOrder, java.sql.Statement.RETURN_GENERATED_KEYS);
-
-                String sqlOrderTest = "INSERT INTO LabOrderTest (ServiceOrderId, LabTestId, BatchId, Status) VALUES (?, ?, ?, 'ORDERED')";
-                stOrderTest = conn.prepareStatement(sqlOrderTest);
-
-                for (int labTestId : testsToAdd) {
-                    stGetPrice.setInt(1, labTestId);
-                    try (java.sql.ResultSet rsPrice = stGetPrice.executeQuery()) {
-                        if (rsPrice.next()) {
-                            int serviceId = rsPrice.getInt("ServiceId");
-                            double price = rsPrice.getDouble("CurrentPrice");
-
-                            // Tạo hóa đơn
-                            stOrder.setInt(1, patientId);
-                            stOrder.setInt(2, medicalRecordId);
-                            stOrder.setInt(3, serviceId);
-                            stOrder.setInt(4, doctorId);
-                            stOrder.setDouble(5, price);
-                            stOrder.executeUpdate();
-
-                            int orderId = -1;
-                            try (java.sql.ResultSet rsOrder = stOrder.getGeneratedKeys()) {
-                                if (rsOrder.next()) {
-                                    orderId = rsOrder.getInt(1);
-                                }
-                            }
-
-                            // Liên kết
-                            if (orderId != -1) {
-                                stOrderTest.setInt(1, orderId);
-                                stOrderTest.setInt(2, labTestId);
-                                stOrderTest.setInt(3, batchId);
-                                stOrderTest.addBatch();
-                            }
-                        }
-                    }
-                }
-                stOrderTest.executeBatch();
-            }
-
-            conn.commit();
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-            }
-            return false;
-        } finally {
-            // Nhớ đóng các Statement ở đây nhé (mình rút gọn cho đỡ dài)
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    public boolean cancelLabBatch(int batchId) {
-        java.sql.Connection conn = null;
-        java.sql.PreparedStatement stCheck = null;
-        java.sql.PreparedStatement stCancelOrders = null;
-        java.sql.PreparedStatement stCancelOrderTests = null;
-        java.sql.PreparedStatement stCancelBatch = null;
-
-        try {
-            conn = new DBContext().conn;
-            conn.setAutoCommit(false);
-
-            // 1. KIỂM TRA BẢO MẬT: Đảm bảo không có hóa đơn nào trong Lô này đã được thanh toán
-            String sqlCheck = "SELECT COUNT(*) FROM LabOrderTest lot "
-                    + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
-                    + "WHERE lot.BatchId = ? AND so.Status = 'PAID'";
-            stCheck = conn.prepareStatement(sqlCheck);
-            stCheck.setInt(1, batchId);
-            try (java.sql.ResultSet rs = stCheck.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    return false; // Đã đóng tiền rồi -> Không cho Hủy!
-                }
-            }
-
-            // 2. HỦY TẤT CẢ HÓA ĐƠN (ServiceOrder) liên quan đến Lô này
-            // Phép thuật SQL: Dùng IN kết hợp SubQuery để tìm ra đúng hóa đơn của Lô
-            String sqlCancelOrders = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
-                    + "WHERE ServiceOrderId IN (SELECT ServiceOrderId FROM LabOrderTest WHERE BatchId = ?)";
-            stCancelOrders = conn.prepareStatement(sqlCancelOrders);
-            stCancelOrders.setInt(1, batchId);
-            stCancelOrders.executeUpdate();
-
-            // 3. HỦY TẤT CẢ CHI TIẾT XÉT NGHIỆM (LabOrderTest)
-            String sqlCancelOrderTests = "UPDATE LabOrderTest SET Status = 'CANCELLED' WHERE BatchId = ?";
-            stCancelOrderTests = conn.prepareStatement(sqlCancelOrderTests);
-            stCancelOrderTests.setInt(1, batchId);
-            stCancelOrderTests.executeUpdate();
-
-            // 4. HỦY LÔ (LabTestBatch)
-            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED' WHERE BatchId = ?";
-            stCancelBatch = conn.prepareStatement(sqlCancelBatch);
-            stCancelBatch.setInt(1, batchId);
-            stCancelBatch.executeUpdate();
-
-            conn.commit();
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-            }
-            return false;
-        } finally {
-            try {
-                if (stCheck != null) {
-                    stCheck.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (stCancelOrders != null) {
-                    stCancelOrders.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (stCancelOrderTests != null) {
-                    stCancelOrderTests.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (stCancelBatch != null) {
-                    stCancelBatch.close();
-                }
-            } catch (Exception e) {
-            }
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (Exception e) {
-            }
-        }
-    }
 
     public java.util.List<model.LabTest> getLabTestsByBatchId(int batchId) {
         java.util.List<model.LabTest> list = new java.util.ArrayList<>();
@@ -1196,74 +1463,6 @@ public class LabTestDAO extends DBContext {
         return row;
     }
 
-    //cập nhật trạng thái của 1 chỉ định xét nghiệm (LabOrderTest)
-//    public boolean updateLabTestStatus(int labOrderTestId, String status, String rejectReason) {
-//        String sqlTest = "UPDATE LabOrderTest SET Status = ?, RejectReason = ? WHERE LabOrderTestId = ?";
-//
-//        // Cú pháp thần thánh: Tìm Hóa đơn thông qua ID của LabOrderTest để Hủy
-//        String sqlOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
-//                + "WHERE ServiceOrderId = (SELECT ServiceOrderId FROM LabOrderTest WHERE LabOrderTestId = ?)";
-//
-//        java.sql.Connection conn = null;
-//        java.sql.PreparedStatement stTest = null;
-//        java.sql.PreparedStatement stOrder = null;
-//
-//        try {
-//            conn = new DBContext().conn;
-//            conn.setAutoCommit(false); // 🔥 Bật khiên Transaction lên
-//
-//            // 1. Cập nhật bảng Xét nghiệm
-//            stTest = conn.prepareStatement(sqlTest);
-//            stTest.setString(1, status);
-//            if (rejectReason != null && !rejectReason.trim().isEmpty()) {
-//                stTest.setString(2, rejectReason);
-//            } else {
-//                stTest.setNull(2, java.sql.Types.NVARCHAR);
-//            }
-//            stTest.setInt(3, labOrderTestId);
-//            stTest.executeUpdate();
-//
-//            // 2. Nếu là REJECTED -> Chém luôn cái Hóa đơn (ServiceOrder) tương ứng
-//            if ("REJECTED".equals(status)) {
-//                stOrder = conn.prepareStatement(sqlOrder);
-//                stOrder.setInt(1, labOrderTestId);
-//                stOrder.executeUpdate();
-//            }
-//
-//            conn.commit(); // Chốt sổ 2 bảng cùng lúc!
-//            return true;
-//
-//        } catch (Exception e) {
-//            if (conn != null) {
-//                try {
-//                    conn.rollback();
-//                } catch (Exception ex) {
-//                    ex.printStackTrace();
-//                }
-//            }
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if (stTest != null) {
-//                    stTest.close();
-//                }
-//            } catch (Exception e) {
-//            }
-//            try {
-//                if (stOrder != null) {
-//                    stOrder.close();
-//                }
-//            } catch (Exception e) {
-//            }
-//            try {
-//                if (conn != null) {
-//                    conn.close();
-//                }
-//            } catch (Exception e) {
-//            }
-//        }
-//        return false;
-//    }
     public boolean updateLabTestStatus(int labOrderTestId, String status, String rejectReason, int technicianId) {
         String sqlTest = "UPDATE LabOrderTest SET Status = ?, RejectReason = ? WHERE LabOrderTestId = ?";
 
@@ -1404,94 +1603,6 @@ public class LabTestDAO extends DBContext {
         return false;
     }
 
-//    public java.util.List<java.util.Map<String, Object>> getTestsForProcessing(int medicalRecordId) {
-//        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
-//
-//        // Join với LabReferenceRange dựa trên Tuổi và Giới tính bệnh nhân
-//        String sql = "SELECT "
-//                + "c.CategoryName, "
-//                + "b.BatchId, "
-//                + "lot.LabOrderTestId, "
-//                + "lot.Status AS TestStatus, "
-//                + "lot.RejectReason, "
-//                + "t.TestName, "
-//                + "p.ParameterId, "
-//                + "p.ParameterName, "
-//                + "COALESCE(r.Unit, p.Unit) AS Unit, "
-//                // Ưu tiên lấy RefMin/Max từ bảng LabResult nếu đã nhập. Nếu chưa nhập thì lấy từ quy tắc phù hợp (rr)
-//                + "COALESCE(r.RefMin, rr.RefMin) AS RefMin, "
-//                + "COALESCE(r.RefMax, rr.RefMax) AS RefMax, "
-//                + "r.ResultId, "
-//                + "r.ResultValue, "
-//                + "r.Flag "
-//                + "FROM LabTestBatch b "
-//                + "JOIN Patient pat ON b.PatientId = pat.PatientId " // Cần bảng Patient để lấy Tuổi, Giới tính
-//                + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
-//                + "JOIN ServiceOrder so ON lot.ServiceOrderId = so.ServiceOrderId "
-//                + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
-//                + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
-//                + "JOIN LabTestParameter p ON t.LabTestId = p.LabTestId "
-//                // 💎 LEFT JOIN Quyết định: Tìm Range phù hợp với bệnh nhân này
-//                + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId "
-//                + "     AND rr.IsActive = 1 "
-//                + "     AND ("
-//                + "         rr.Gender = 'ALL' "
-//                + "         OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
-//                + "         OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
-//                + "     ) "
-//                + "     AND DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays "
-//                + "LEFT JOIN LabResult r ON lot.LabOrderTestId = r.LabOrderTestId AND p.ParameterId = r.ParameterId "
-//                + "WHERE b.MedicalRecordId = ? "
-//                + "AND so.Status = 'PAID' "
-//                + "AND b.Status != 'CANCELLED' "
-//                + "AND lot.Status != 'CANCELLED' "
-//                + "AND (t.IsActive = 1 OR r.ResultValue IS NOT NULL) "
-//                + "AND ( (p.IsActive = 1 AND lot.Status != 'COMPLETED') OR r.ResultId IS NOT NULL ) "
-//                + "ORDER BY c.SortOrder ASC, t.SortOrder ASC, p.SortOrder ASC";
-//
-//        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
-//
-//            st.setInt(1, medicalRecordId);
-//            try (java.sql.ResultSet rs = st.executeQuery()) {
-//                while (rs.next()) {
-//                    java.util.Map<String, Object> map = new java.util.HashMap<>();
-//                    map.put("batchId", rs.getInt("BatchId"));
-//                    map.put("categoryName", rs.getString("CategoryName"));
-//                    map.put("labOrderTestId", rs.getInt("LabOrderTestId"));
-//                    map.put("status", rs.getString("TestStatus"));
-//                    map.put("rejectReason", rs.getString("RejectReason"));
-//                    map.put("testName", rs.getString("TestName"));
-//                    map.put("parameterId", rs.getInt("ParameterId"));
-//                    map.put("parameterName", rs.getString("ParameterName"));
-//                    map.put("unit", rs.getString("Unit"));
-//
-//                    // Nối dải tham chiếu bình thường (VD: 4.0 - 5.5)
-//                    Object refMin = rs.getObject("RefMin");
-//                    Object refMax = rs.getObject("RefMax");
-//                    String normalRange = (refMin != null ? refMin.toString() : "") + " - " + (refMax != null ? refMax.toString() : "");
-//                    map.put("normalRange", normalRange.equals(" - ") ? "___" : normalRange);
-//
-//                    map.put("isNumeric", (refMin != null || refMax != null));
-//                    map.put("refMin", refMin);
-//                    map.put("refMax", refMax);
-//
-//                    // Lấy kết quả (nếu đã nhập)
-//                    map.put("resultId", rs.getObject("ResultId"));
-//                    map.put("resultValue", rs.getString("ResultValue"));
-//
-//                    // Cờ bất thường (Flag)
-//                    String flag = rs.getString("Flag");
-//                    map.put("isAbnormal", (flag != null && !flag.trim().isEmpty()));
-//                    map.put("flag", flag);
-//
-//                    list.add(map);
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return list;
-//    }
     public java.util.List<TestResultDetail> getTestsForProcessing(int medicalRecordId) {
         java.util.List<TestResultDetail> list = new java.util.ArrayList<>();
 
@@ -1583,173 +1694,6 @@ public class LabTestDAO extends DBContext {
     }
 
     //hàm lưu kết quả xét nghiệm
-    public boolean saveLabResults(TestResult testResult) {
-        java.sql.Connection conn = null;
-
-        // 🔥 SỬA LẠI CÂU LỆNH LẤY SNAPSHOT: Truyền MedicalRecordId để truy vết ra Bệnh nhân, từ đó tìm đúng Range
-        String sqlGetSnapshot = "SELECT TOP 1 rr.RefMin, rr.RefMax, p.Unit "
-                + "FROM LabTestParameter p "
-                + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId AND rr.IsActive = 1 "
-                + "JOIN MedicalRecord mr ON mr.MedicalRecordId = ? "
-                + "JOIN Patient pat ON mr.PatientId = pat.PatientId "
-                + "WHERE p.ParameterId = ? "
-                + "AND ("
-                + "     rr.Gender IS NULL "
-                + "     OR rr.Gender = 'ALL' "
-                + "     OR (rr.Gender = 'M' AND pat.Gender IN ('Nam', 'Male', 'M')) "
-                + "     OR (rr.Gender = 'F' AND pat.Gender IN ('Nữ', 'Nu', 'Female', 'F')) "
-                + ") "
-                + "AND (rr.AgeMinDays IS NULL OR DATEDIFF(day, pat.DateOfBirth, GETDATE()) BETWEEN rr.AgeMinDays AND rr.AgeMaxDays) "
-                // Ưu tiên Rule càng hẹp (có giới tính cụ thể) càng tốt
-                + "ORDER BY CASE WHEN rr.Gender = 'ALL' THEN 2 ELSE 1 END ASC";
-
-        String sqlCheckResult = "SELECT ResultId FROM LabResult WHERE LabOrderTestId = ? AND ParameterId = ?";
-        String sqlInsertResult = "INSERT INTO LabResult (LabOrderTestId, ParameterId, ResultValue, Flag, RefMin, RefMax, Unit, ResultTime) VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
-        String sqlUpdateResult = "UPDATE LabResult SET ResultValue = ?, Flag = ?, RefMin = ?, RefMax = ?, Unit = ?, ResultTime = GETDATE() WHERE ResultId = ?";
-        String sqlUpdateOrderTest = "UPDATE LabOrderTest SET Status = 'COMPLETED' WHERE LabOrderTestId = ?";
-        String sqlUpdateBatch = "UPDATE LabTestBatch SET Status = 'COMPLETED', TechnicianId = ? "
-                + "WHERE BatchId IN (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
-                + "AND NOT EXISTS ("
-                + "    SELECT 1 FROM LabOrderTest lot2 "
-                + "    WHERE lot2.BatchId = (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?) "
-                + "    AND lot2.Status != 'COMPLETED'"
-                + "    AND lot2.Status != 'CANCELLED'"
-                + ")";
-
-        try {
-            conn = new DBContext().conn;
-            conn.setAutoCommit(false);
-
-            java.sql.PreparedStatement stGetSnapshot = conn.prepareStatement(sqlGetSnapshot);
-            java.sql.PreparedStatement stCheckResult = conn.prepareStatement(sqlCheckResult);
-            java.sql.PreparedStatement stInsert = conn.prepareStatement(sqlInsertResult);
-            java.sql.PreparedStatement stUpdateResult = conn.prepareStatement(sqlUpdateResult);
-            java.sql.PreparedStatement stUpdateOrder = conn.prepareStatement(sqlUpdateOrderTest);
-            java.sql.PreparedStatement stUpdateBatch = conn.prepareStatement(sqlUpdateBatch);
-
-            boolean hasInsert = false;
-            boolean hasUpdate = false;
-            boolean hasStatusUpdate = false;
-
-            String[] orderTestIds = testResult.getOrderTestIds();
-            String[] paramIds = testResult.getParamIds();
-            if (orderTestIds != null && paramIds != null) {
-                for (int i = 0; i < orderTestIds.length; i++) {
-                    String orderTestId = orderTestIds[i];
-                    String paramId = paramIds[i];
-
-                    String[] resultValues = testResult.getParameterMap().get("result_" + orderTestId + "_" + paramId);
-                    String resultValue = (resultValues != null && resultValues.length > 0) ? resultValues[0] : "";
-
-                    if (resultValue != null && !resultValue.trim().isEmpty()) {
-
-                        java.math.BigDecimal refMin = null;
-                        java.math.BigDecimal refMax = null;
-                        String unit = null;
-
-                        stGetSnapshot.setInt(1, testResult.getMedicalRecordId());
-                        stGetSnapshot.setInt(2, Integer.parseInt(paramId));
-
-                        try (java.sql.ResultSet rsSnap = stGetSnapshot.executeQuery()) {
-                            if (rsSnap.next()) {
-                                refMin = rsSnap.getBigDecimal("RefMin");
-                                refMax = rsSnap.getBigDecimal("RefMax");
-                                unit = rsSnap.getString("Unit");
-                            }
-                        }
-
-                        // AUTO FLAG LOGIC (Giữ nguyên của bạn)
-                        String finalFlag = null;
-                        try {
-                            double val = Double.parseDouble(resultValue.replace(",", ".").trim());
-                            if (refMin != null && val < refMin.doubleValue()) {
-                                finalFlag = "L";
-                            } else if (refMax != null && val > refMax.doubleValue()) {
-                                finalFlag = "H";
-                            }
-                        } catch (Exception e) {
-                        }
-
-                        if (finalFlag == null) {
-                            String[] flags = testResult.getParameterMap().get("flag_" + orderTestId + "_" + paramId);
-                            if (flags != null && flags.length > 0 && flags[0] != null) {
-                                String uiFlag = flags[0].trim().toLowerCase();
-                                if (uiFlag.equals("on") || uiFlag.equals("true") || uiFlag.equals("y") || uiFlag.equals("1")) {
-                                    finalFlag = "Y";
-                                }
-                            }
-                        }
-
-                        Integer existResultId = null;
-                        stCheckResult.setInt(1, Integer.parseInt(orderTestId));
-                        stCheckResult.setInt(2, Integer.parseInt(paramId));
-                        try (java.sql.ResultSet rsCheck = stCheckResult.executeQuery()) {
-                            if (rsCheck.next()) {
-                                existResultId = rsCheck.getInt("ResultId");
-                            }
-                        }
-
-                        if (existResultId == null) {
-                            stInsert.setInt(1, Integer.parseInt(orderTestId));
-                            stInsert.setInt(2, Integer.parseInt(paramId));
-                            stInsert.setString(3, resultValue.trim());
-                            stInsert.setString(4, finalFlag);
-                            stInsert.setBigDecimal(5, refMin);
-                            stInsert.setBigDecimal(6, refMax);
-                            stInsert.setString(7, unit);
-                            stInsert.addBatch();
-                            hasInsert = true;
-                        } else {
-                            stUpdateResult.setString(1, resultValue.trim());
-                            stUpdateResult.setString(2, finalFlag);
-                            stUpdateResult.setBigDecimal(3, refMin);
-                            stUpdateResult.setBigDecimal(4, refMax);
-                            stUpdateResult.setString(5, unit);
-                            stUpdateResult.setInt(6, existResultId);
-                            stUpdateResult.addBatch();
-                            hasUpdate = true;
-                        }
-
-                        stUpdateOrder.setInt(1, Integer.parseInt(orderTestId));
-                        stUpdateOrder.addBatch();
-
-                        stUpdateBatch.setInt(1, testResult.getTechnicianId());
-                        stUpdateBatch.setInt(2, Integer.parseInt(orderTestId));
-                        stUpdateBatch.setInt(3, Integer.parseInt(orderTestId));
-                        stUpdateBatch.addBatch();
-                        hasStatusUpdate = true;
-                    }
-                }
-            }
-
-            if (hasInsert) {
-                stInsert.executeBatch();
-            }
-            if (hasUpdate) {
-                stUpdateResult.executeBatch();
-            }
-            if (hasStatusUpdate) {
-                stUpdateOrder.executeBatch();
-                stUpdateBatch.executeBatch();
-            }
-
-            conn.commit();
-            return true;
-
-        } catch (Exception e) {
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-            }
-            e.printStackTrace();
-            return false;
-        } finally {
-            // (Bạn copy lại đoạn Finally đóng PreparedStatement vào nhé)
-        }
-    }
-
     public int getInChargeLabTechinicianId(int mrId) {
         String sql = "SELECT TOP 1 (TechnicianId) FROM LabTestBatch WHERE MedicalRecordId = ?";
 
@@ -1770,4 +1714,5 @@ public class LabTestDAO extends DBContext {
     public static void main(String[] args) {
         System.out.println(new LabTestDAO().getInChargeLabTechinicianId(24));
     }
+
 }

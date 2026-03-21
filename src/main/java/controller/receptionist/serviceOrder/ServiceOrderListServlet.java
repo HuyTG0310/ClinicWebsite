@@ -17,7 +17,7 @@ import java.time.*;
 import java.util.*;
 import model.*;
 
-@WebServlet(name = "ServiceOrderListServlet", urlPatterns = {"/receptionist/service-order/list", "/doctor/service-order/list", "/admin/service-order/list"})
+@WebServlet(name = "ServiceOrderListServlet", urlPatterns = {"/receptionist/service-order/list", "/doctor/service-order/list", "/admin/service-order/list", "/lab/service-order/list"})
 public class ServiceOrderListServlet extends HttpServlet {
 
     @Override
@@ -37,6 +37,9 @@ public class ServiceOrderListServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

@@ -31,10 +31,8 @@ public class CertificationApprovalServlet extends HttpServlet {
         
         request.setAttribute("pageTitle", "Certification Approval");
         
-        request.setAttribute("contentPage",
-                "/WEB-INF/admin/certification/certificationApproval.jsp");
+        request.setAttribute("contentPage", "/WEB-INF/admin/certification/certificationApproval.jsp");
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }
 }

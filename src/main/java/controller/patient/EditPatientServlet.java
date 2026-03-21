@@ -16,7 +16,7 @@ import model.Patient;
  *
  * @author ClinicWebsite
  */
-@WebServlet(name = "EditPatient", urlPatterns = {"/admin/patient/edit", "/doctor/patient/edit", "/receptionist/patient/edit"})
+@WebServlet(name = "EditPatient", urlPatterns = {"/admin/patient/edit", "/doctor/patient/edit", "/receptionist/patient/edit", "/lab/patient/edit"})
 public class EditPatientServlet extends HttpServlet {
 
     @Override
@@ -32,6 +32,8 @@ public class EditPatientServlet extends HttpServlet {
             basePath = ctx + "/doctor";
         } else if (uri.startsWith(ctx + "/receptionist")) {
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -80,6 +82,8 @@ public class EditPatientServlet extends HttpServlet {
             basePath = ctx + "/doctor";
         } else if (uri.startsWith(ctx + "/receptionist")) {
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -118,7 +122,7 @@ public class EditPatientServlet extends HttpServlet {
             if (!fullName.matches("^[a-zA-ZÀ-ỿ\\s]*$")) {
                 request.setAttribute("error", "Patient names must contain only Vietnamese/English letters and spaces!");
                 request.setAttribute("patient", new PatientDAO().getPatientById(patientId));
-                request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
+                request.getRequestDispatcher(basePath + "/WEB-INF/receptionist/patient/viewPatient.jsp").forward(request, response);
                 return;
             }
 
@@ -129,14 +133,14 @@ public class EditPatientServlet extends HttpServlet {
                 request.setAttribute("error",
                         "Phone numbers must have exactly 10 digits, according to Vietnamese standards!");
                 request.setAttribute("patient", new PatientDAO().getPatientById(patientId));
-                request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
+                request.getRequestDispatcher(basePath + "/WEB-INF/receptionist/patient/viewPatient.jsp").forward(request, response);
                 return;
             }
 
             if (!phoneDigitsOnly.startsWith("0")) {
                 request.setAttribute("error", "Phone number must start with 0 (Vietnamese standard)!");
                 request.setAttribute("patient", new PatientDAO().getPatientById(patientId));
-                request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
+                request.getRequestDispatcher(basePath + "/WEB-INF/receptionist/patient/viewPatient.jsp").forward(request, response);
                 return;
             }
 
@@ -148,7 +152,7 @@ public class EditPatientServlet extends HttpServlet {
             if (dateOfBirth.getTime() > today.getTime()) {
                 request.setAttribute("error", "A birth date cannot be a date in the future!");
                 request.setAttribute("patient", new PatientDAO().getPatientById(patientId));
-                request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
+                request.getRequestDispatcher(basePath + "/WEB-INF/receptionist/patient/viewPatient.jsp").forward(request, response);
                 return;
             }
 
@@ -158,7 +162,7 @@ public class EditPatientServlet extends HttpServlet {
 
             if (patient == null) {
                 request.setAttribute("error", "No patient found!");
-                response.sendRedirect(request.getContextPath() + "/PatientList");
+                response.sendRedirect(basePath + "/patient/list");
                 return;
             }
 
@@ -166,7 +170,7 @@ public class EditPatientServlet extends HttpServlet {
             if (patientDAO.isPhoneExists(phone, patientId)) {
                 request.setAttribute("error", "This phone number already exists in the system!");
                 request.setAttribute("patient", patient);
-                request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
+                request.getRequestDispatcher(basePath + "/patient/viewPatient.jsp").forward(request, response);
                 return;
             }
 
@@ -186,7 +190,7 @@ public class EditPatientServlet extends HttpServlet {
             } else {
                 request.setAttribute("error", "Patient update: Treatment failed. Please try again!");
                 request.setAttribute("patient", patient);
-                request.getRequestDispatcher("WEB-INF/patient/viewPatient.jsp").forward(request, response);
+                request.getRequestDispatcher(basePath + "/WEB-INF/receptionist/patient/viewPatient.jsp").forward(request, response);
             }
 
         } catch (IllegalArgumentException e) {

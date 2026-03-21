@@ -18,7 +18,7 @@ import java.io.IOException;
  *
  * @author TRUONGTHINHNGUYEN
  */
-@WebServlet(name = "MedicineEditServlet", urlPatterns = {"/admin/medicine/edit", "/doctor/medicine/edit", "/receptionist/medicine/edit"})
+@WebServlet(name = "MedicineEditServlet", urlPatterns = {"/admin/medicine/edit", "/doctor/medicine/edit", "/receptionist/medicine/edit", "/lab/medicine/edit"})
 public class MedicineEditServlet extends HttpServlet {
 
     @Override
@@ -47,6 +47,9 @@ public class MedicineEditServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

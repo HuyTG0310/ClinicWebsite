@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author TRUONGTHINHNGUYEN
  */
-@WebServlet(name = "MedicineListServlet", urlPatterns = {"/admin/medicine/list", "/doctor/medicine/list", "/receptionist/medicine/list"})
+@WebServlet(name = "MedicineListServlet", urlPatterns = {"/admin/medicine/list", "/doctor/medicine/list", "/receptionist/medicine/list", "/lab/medicine/list"})
 public class MedicineListServlet extends HttpServlet {
 
     @Override
@@ -62,6 +62,9 @@ public class MedicineListServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-@WebServlet(name = "ServiceEditServlet", urlPatterns = {"/admin/service/edit"})
+@WebServlet(name = "ServiceEditServlet", urlPatterns = {"/admin/service/edit", "/doctor/service/edit", "/receptionist/service/edit", "/lab/service/edit"})
 public class ServiceEditServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO = new ServiceDAO();
@@ -29,6 +29,26 @@ public class ServiceEditServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+        
         String idRaw = request.getParameter("serviceId");
         String name = request.getParameter("serviceName");
         String category = request.getParameter("category"); // Được lấy từ thẻ input hidden
@@ -99,7 +119,7 @@ public class ServiceEditServlet extends HttpServlet {
                     }
                 }
 
-                // Gọi Transaction Update Gộp
+
                 success = labTestDAO.updateFullLabTest(s, labTest, paramList);
 
             } else {
@@ -118,7 +138,7 @@ public class ServiceEditServlet extends HttpServlet {
             request.getSession().setAttribute("error", "Invalid input!");
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/service/detail?id=" + id);
+        response.sendRedirect(basePath + "/service/detail?id=" + id);
     }
 
 }

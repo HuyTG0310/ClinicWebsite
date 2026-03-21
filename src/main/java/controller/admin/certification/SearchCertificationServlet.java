@@ -53,8 +53,13 @@ public class SearchCertificationServlet extends HttpServlet {
         }
 
         request.setAttribute("list", list);
+        
+        request.setAttribute("activePage", "certificationApproval");
+        
+        request.setAttribute("pageTitle", "Certification Approval");
+        
+        request.setAttribute("contentPage", "/WEB-INF/admin/certification/certificationApproval.jsp");
 
-        request.getRequestDispatcher("/WEB-INF/admin/certification/certificationApproval.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }
 }

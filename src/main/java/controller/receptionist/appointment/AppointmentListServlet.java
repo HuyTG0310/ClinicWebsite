@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 import model.Appointment;
 
-@WebServlet(name = "AppointmentListServlet", urlPatterns = {"/receptionist/appointment/list", "/doctor/appointment/list", "/admin/appointment/list"})
+@WebServlet(name = "AppointmentListServlet", urlPatterns = {"/receptionist/appointment/list", "/doctor/appointment/list", "/admin/appointment/list", "/lab/appointment/list"})
 public class AppointmentListServlet extends HttpServlet {
 
     @Override
@@ -37,6 +37,9 @@ public class AppointmentListServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

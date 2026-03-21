@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "ViewRoomServlet", urlPatterns = {"/admin/room/detail", "/receptionist/room/detail", "/doctor/room/detail"})
+@WebServlet(name = "ViewRoomServlet", urlPatterns = {"/admin/room/detail", "/receptionist/room/detail", "/doctor/room/detail", "/lab/room/detail"})
 public class ViewRoomServlet extends HttpServlet {
 
     private SpecialtyDAO specialtyDAO = new SpecialtyDAO();
@@ -24,27 +24,22 @@ public class ViewRoomServlet extends HttpServlet {
         String ctx = request.getContextPath();
 
         String layout;
-
+        String basePath;
         if (uri.startsWith(ctx + "/admin")) {
             layout = "/WEB-INF/layout/adminLayout.jsp";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/admin";
         } else if (uri.startsWith(ctx + "/doctor")) {
             layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
-        }
-
-        String basePath;
-        if (uri.startsWith(ctx + "/admin")) {
-            basePath = ctx + "/admin";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            basePath = ctx + "/receptionist";
-        } else if (uri.startsWith(ctx + "/doctor")) {
-            basePath = ctx + "/doctor";
-        } else {
-            basePath = ctx;
         }
 
         request.setAttribute("basePath", basePath);

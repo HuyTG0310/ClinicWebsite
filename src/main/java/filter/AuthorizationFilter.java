@@ -136,11 +136,14 @@ public class AuthorizationFilter implements Filter {
         req.setAttribute("hasPatientCreate", privileges.contains("PATIENT_CREATE"));
         req.setAttribute("hasPatientEdit", privileges.contains("PATIENT_EDIT"));
         req.setAttribute("hasPatientDelete", privileges.contains("PATIENT_DELETE"));
-
         req.setAttribute("hasAppointmentCreate", privileges.contains("APPOINTMENT_CREATE"));
         req.setAttribute("hasAppointmentEdit", privileges.contains("APPOINTMENT_EDIT"));
         req.setAttribute("hasAppointmentView", privileges.contains("APPOINTMENT_VIEW"));
-
+        req.setAttribute("hasServiceCreate", privileges.contains("SERVICE_CREATE"));
+        req.setAttribute("hasServiceEdit", privileges.contains("SERVICE_EDIT"));
+        req.setAttribute("hasServiceView", privileges.contains("SERVICE_VIEW"));
+        
+        
         if (path.startsWith("/profile")) {
             chain.doFilter(request, response);
             return;
@@ -213,6 +216,15 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "APPOINTMENT_EDIT";
         } else if (path.contains("/appointment/list") || path.contains("/appointment/detail")) {
             requiredPriv = "APPOINTMENT_VIEW";
+        }
+        
+        
+        if (path.contains("/service/add")) {
+            requiredPriv = "SERVICE_CREATE";
+        } else if (path.contains("/service/edit")) {
+            requiredPriv = "SERVICE_EDIT";
+        } else if (path.contains("/service/list") || path.contains("/service/detail")) {
+            requiredPriv = "SERVICE_VIEW";
         }
 
         if (requiredPriv != null) {

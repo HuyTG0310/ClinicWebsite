@@ -18,6 +18,30 @@ public class MyCertificationServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath); // Gửi sang JSP để dùng
+
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
@@ -47,7 +71,13 @@ public class MyCertificationServlet extends HttpServlet {
             String jspPath = "/WEB-INF/" + roleFolder + "/certification/myCertification.jsp";
 
             // 4. Forward tới giao diện của Role tương ứng
-            request.getRequestDispatcher(jspPath).forward(request, response);
+            request.setAttribute("activePage", "myCertification");
+
+            request.setAttribute("pageTitle", "My Certification");
+
+            request.setAttribute("contentPage", jspPath);
+
+            request.getRequestDispatcher(layout).forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();

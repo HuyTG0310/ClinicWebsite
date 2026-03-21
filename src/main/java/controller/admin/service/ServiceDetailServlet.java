@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
 
-@WebServlet(name = "ServiceDetailServlet", urlPatterns = {"/admin/service/detail"})
+@WebServlet(name = "ServiceDetailServlet", urlPatterns = {"/admin/service/detail", "/doctor/service/detail", "/receptionist/service/detail", "/lab/service/detail"})
 public class ServiceDetailServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO = new ServiceDAO();
@@ -25,9 +25,33 @@ public class ServiceDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+        
         String idRaw = request.getParameter("id");
         if (idRaw == null) {
-            response.sendRedirect(request.getContextPath() + "/admin/service/list");
+            response.sendRedirect(basePath + "/service/list");
             return;
         }
 
@@ -37,7 +61,7 @@ public class ServiceDetailServlet extends HttpServlet {
 
             if (service == null) {
                 request.getSession().setAttribute("error", "Service not found!");
-                response.sendRedirect(request.getContextPath() + "/admin/service/list");
+                response.sendRedirect(basePath + "/service/list");
                 return;
             }
 
@@ -46,7 +70,6 @@ public class ServiceDetailServlet extends HttpServlet {
             if ("Xét nghiệm".equals(service.getCategory())) {
                 LabTest labTest = labTestDAO.getLabTestByServiceId(id);
                 request.setAttribute("labTest", labTest);
-                //load nhóm đưa vào form edit
                 request.setAttribute("labCategories", labCateDAO.getAllCategories());
             }
 
@@ -57,10 +80,10 @@ public class ServiceDetailServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/admin/service/list");
+            response.sendRedirect(basePath + "/service/list");
         }
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override

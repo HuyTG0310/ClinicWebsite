@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
-@WebServlet(name = "AddPatient", urlPatterns = {"/admin/patient/create", "/doctor/patient/create", "/receptionist/patient/create"})
+@WebServlet(name = "AddPatient", urlPatterns = {"/admin/patient/create", "/doctor/patient/create", "/receptionist/patient/create", "/lab/patient/create"})
 public class AddPatientServlet extends HttpServlet {
 
     @Override
@@ -21,7 +21,7 @@ public class AddPatientServlet extends HttpServlet {
         String ctx = request.getContextPath();
         String layout;
         String basePath;
-
+        
         if (uri.startsWith(ctx + "/admin")) {
             layout = "/WEB-INF/layout/adminLayout.jsp";
             basePath = ctx + "/admin";
@@ -31,6 +31,9 @@ public class AddPatientServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -58,6 +61,9 @@ public class AddPatientServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

@@ -40,8 +40,37 @@ public class AddCertificationServlet extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher("/WEB-INF/certification/addCertification.jsp")
-                .forward(request, response);
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath); // Gửi sang JSP để dùng
+
+        request.setAttribute("activePage", "myCertification");
+
+        request.setAttribute("pageTitle", "Add Certification");
+
+        request.setAttribute("contentPage", "/WEB-INF/certification/addCertification.jsp");
+
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override
@@ -58,6 +87,29 @@ public class AddCertificationServlet extends HttpServlet {
             return;
         }
 
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
+        request.setAttribute("basePath", basePath); // Gửi sang JSP để dùng
         try {
             // =========================
             // 1. VALIDATE INPUT
@@ -150,22 +202,9 @@ public class AddCertificationServlet extends HttpServlet {
 
             dao.insertCertification(c);
 
-            // =========================
+
             // 4. REDIRECT THEO ROLE
-            // =========================
-            String role = user.getRoleName() != null ? user.getRoleName().trim() : "";
-
-            String redirectPath = "/profile";
-
-            if ("Doctor".equalsIgnoreCase(role)) {
-                redirectPath = "/doctor/certification/my";
-            } else if ("Receptionist".equalsIgnoreCase(role)) {
-                redirectPath = "/receptionist/certification/my";
-            } else if ("Lab technician".equalsIgnoreCase(role)) {
-                redirectPath = "/lab/certification/my";
-            }
-
-            response.sendRedirect(request.getContextPath() + redirectPath);
+            response.sendRedirect(basePath + "/certification/my");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -175,8 +214,14 @@ public class AddCertificationServlet extends HttpServlet {
             request.setAttribute("certificateNumber", request.getParameter("certificateNumber"));
             request.setAttribute("issueDate", request.getParameter("issueDate"));
             request.setAttribute("expiryDate", request.getParameter("expiryDate"));
-            request.getRequestDispatcher("/WEB-INF/certification/addCertification.jsp")
-                    .forward(request, response);
+
+            request.setAttribute("activePage", "myCertification");
+
+            request.setAttribute("pageTitle", "Add Certification");
+
+            request.setAttribute("contentPage", "/WEB-INF/certification/addCertification.jsp");
+
+            request.getRequestDispatcher(layout).forward(request, response);
         }
     }
 }
