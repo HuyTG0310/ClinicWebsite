@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
+
 <div class="container-fluid mb-5">
 
     <!-- HEADER -->
@@ -13,26 +14,18 @@
                 My Certifications
             </h2>
             <p class="text-muted mb-0">
-                Manage your professional certifications
+                Manage your certifications (Receptionist)
             </p>
         </div>
 
         <div>
-            <a href="${pageContext.request.contextPath}/doctor/certification/add"
+            <a href="${pageContext.request.contextPath}/receptionist/certification/add"
                class="btn btn-primary">
                 <i class="fa-solid fa-plus me-2"></i>Add Certification
             </a>
         </div>
 
     </div>
-
-    <!-- ALERT -->
-    <c:if test="${not empty success}">
-        <div class="alert alert-success alert-dismissible fade show shadow-sm">
-            <i class="fa-solid fa-circle-check me-2"></i>${success}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    </c:if>
 
     <!-- TABLE -->
     <div class="card shadow-sm">
@@ -58,7 +51,7 @@
                             <th>Expiry Date</th>
                             <th>Status</th>
                             <th>File</th>
-                            <th class="text-center">Action</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
 
@@ -86,6 +79,7 @@
 
                                 <td>
                                     <c:choose>
+
                                         <c:when test="${c.status == 'VERIFIED'}">
                                             <span class="badge bg-success">
                                                 <i class="fa-solid fa-check me-1"></i>Verified
@@ -101,10 +95,12 @@
                                         <c:otherwise>
                                             <span class="badge bg-danger"
                                                   data-bs-toggle="tooltip"
-                                                  title="Reason: ${not empty c.rejectionNote ? c.rejectionNote : 'Contact admin'}">
+                                                  title="Reason: ${not empty c.rejectionNote ? c.rejectionNote : 'N/A'}">
+
                                                 <i class="fa-solid fa-ban me-1"></i>Rejected
                                             </span>
                                         </c:otherwise>
+
                                     </c:choose>
                                 </td>
 
@@ -113,9 +109,10 @@
                                         <c:set var="fileUrl" value="${pageContext.request.contextPath}/certification/file?name=${c.filePath}" />
 
                                         <c:choose>
+
                                             <c:when test="${fn:endsWith(c.filePath,'.jpg') or fn:endsWith(c.filePath,'.jpeg') or fn:endsWith(c.filePath,'.png')}">
                                                 <a href="${fileUrl}" target="_blank">
-                                                    <img src="${fileUrl}" 
+                                                    <img src="${fileUrl}"
                                                          style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;">
                                                 </a>
                                             </c:when>
@@ -126,6 +123,7 @@
                                                     <i class="fa-solid fa-eye me-1"></i>View
                                                 </a>
                                             </c:otherwise>
+
                                         </c:choose>
                                     </c:if>
                                 </td>
@@ -238,7 +236,9 @@
 
         </div>
     </div>
-</div>           
+</div>         
+
+
 
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
@@ -265,30 +265,42 @@
 
         </div>
     </div>
-</div>
-            
+</div>       
+
+
+
+
 <script>
-    // 🔥 KHỞI TẠO TOOLTIP ĐỂ HIỆN LÝ DO REJECT
     document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });
+</script>
 
+
+<script>
     function openEditModal(id, name, number, issue, expiry) {
         document.getElementById("editId").value = id;
         document.getElementById("editName").value = name;
         document.getElementById("editNumber").value = number;
         document.getElementById("editIssue").value = issue;
         document.getElementById("editExpiry").value = expiry;
-        document.getElementById("ajaxError").classList.add("d-none");
-        new bootstrap.Modal(document.getElementById('editModal')).show();
+
+        // Reset trạng thái lỗi
+        const errorDiv = document.getElementById("ajaxError");
+        errorDiv.classList.add("d-none");
+        errorDiv.innerText = "";
+
+        var modal = new bootstrap.Modal(document.getElementById('editModal'));
+        modal.show();
     }
 
     function openDeleteModal(id) {
         document.getElementById("deleteId").value = id;
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
     }
 
     function submitEditForm() {
@@ -297,6 +309,7 @@
         const saveBtn = document.getElementById('saveBtn');
         const errorDiv = document.getElementById('ajaxError');
 
+        // Loading state
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
         errorDiv.classList.add("d-none");
@@ -307,9 +320,12 @@
         })
                 .then(async response => {
                     const message = await response.text();
+
                     if (response.ok && message === "SUCCESS") {
+                        // Thành công thì reload trang
                         window.location.reload();
                     } else {
+                        // Thất bại thì hiện lỗi từ Servlet (mã 400)
                         errorDiv.innerText = message || "Có lỗi xảy ra, vui lòng thử lại!";
                         errorDiv.classList.remove("d-none");
                         saveBtn.disabled = false;
@@ -317,7 +333,8 @@
                     }
                 })
                 .catch(err => {
-                    alert("Lỗi kết nối hệ thống!");
+                    console.error(err);
+                    alert("Lỗi kết nối máy chủ!");
                     saveBtn.disabled = false;
                     saveBtn.innerHTML = 'Save Changes';
                 });

@@ -21,18 +21,18 @@ import jakarta.servlet.http.HttpServletResponse;
 public class CertificationApprovalServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         CertificationDAO dao = new CertificationDAO();
 
         request.setAttribute("list", dao.getAll());
         request.setAttribute("activePage", "certificationApproval");
+        
+        request.setAttribute("pageTitle", "Certification Approval");
+        
+        request.setAttribute("contentPage", "/WEB-INF/admin/certification/certificationApproval.jsp");
 
-        request.setAttribute("contentPage",
-                "/WEB-INF/admin/certification/certificationApproval.jsp");
-
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
     }
 }
