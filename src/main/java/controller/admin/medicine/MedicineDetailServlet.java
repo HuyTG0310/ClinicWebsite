@@ -19,12 +19,34 @@ import java.io.IOException;
  *
  * @author TRUONGTHINHNGUYEN
  */
-@WebServlet(name = "MedicineDetailServlet", urlPatterns = {"/admin/medicine/detail", "/doctor/medicine/detail", "/receptionist/medicine/detail"})
+@WebServlet(name = "MedicineDetailServlet", urlPatterns = {"/admin/medicine/detail", "/doctor/medicine/detail", "/receptionist/medicine/detail", "/lab/medicine/detail"})
 public class MedicineDetailServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         // ===== VALIDATE ID =====
         String idRaw = request.getParameter("id");
@@ -42,27 +64,8 @@ public class MedicineDetailServlet extends HttpServlet {
         Medicine medicine = dao.getById(id);
 
         if (medicine == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        String uri = request.getRequestURI();
-        String ctx = request.getContextPath();
-
-        String layout;
-        String basePath;
-
-        if (uri.startsWith(ctx + "/admin")) {
-            layout = "/WEB-INF/layout/adminLayout.jsp";
-            basePath = ctx + "/admin";
-        } else if (uri.startsWith(ctx + "/doctor")) {
-            layout = "/WEB-INF/layout/doctorLayout.jsp";
-            basePath = ctx + "/doctor";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            layout = "/WEB-INF/layout/receptionistLayout.jsp";
-            basePath = ctx + "/receptionist";
-        } else {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            request.getSession().setAttribute("error", "Medicine not found!");
+            response.sendRedirect(basePath + "/medicine/list");
             return;
         }
 

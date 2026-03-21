@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "DeletePatient", urlPatterns = {"/admin/patient/delete", "/doctor/patient/delete", "/receptionist/patient/delete"})
+@WebServlet(name = "DeletePatient", urlPatterns = {"/admin/patient/delete", "/doctor/patient/delete", "/receptionist/patient/delete",  "/lab/patient/delete"})
 public class DeletePatientServlet extends HttpServlet {
 
     @Override
@@ -26,6 +26,8 @@ public class DeletePatientServlet extends HttpServlet {
             basePath = ctx + "/doctor";
         } else if (uri.startsWith(ctx + "/receptionist")) {
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

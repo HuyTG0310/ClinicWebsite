@@ -12,16 +12,6 @@
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
 
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'adminDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/admin/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i>
-                Dashboard
-            </a>
-        </li>
-
-
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageRole' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/role/list">
@@ -58,14 +48,16 @@
             </a>
         </li>
 
-        <!-- Test History -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/admin/service/list">
-                <i class="fa-solid fa-briefcase-medical me-2"></i>
-                Manage service
-            </a>
-        </li>
+        <c:if test="${hasServiceView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/service/list">
+                    <i class="fa-solid fa-briefcase-medical me-2"></i>
+                    Manage service
+                </a>
+            </li>
+        </c:if>
+
 
 
         <c:if test="${hasRoomView}">
@@ -119,7 +111,7 @@
             </a>
         </li>
 
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/queue/list">
@@ -136,7 +128,7 @@
                 Manage medical record
             </a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'managePrescription' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/prescription/list">
@@ -144,12 +136,12 @@
                 Manage prescription
             </a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageTest' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/lab-queue/list">
                 <i class="fa-solid fa-vials me-2"></i>
-                Manage test
+                Manage test result
             </a>
         </li>
 

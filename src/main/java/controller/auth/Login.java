@@ -57,13 +57,13 @@ public class Login extends HttpServlet {
             String ctx = request.getContextPath();
 
             if ("ADMIN".equalsIgnoreCase(role)) {
-                response.sendRedirect(ctx + "/admin/dashboard");
+                response.sendRedirect(ctx + "/admin/role/list");
             } else if ("DOCTOR".equalsIgnoreCase(role)) {
-                response.sendRedirect(ctx + "/doctor/dashboard");
+                response.sendRedirect(ctx + "/doctor/queue/list");
             } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
-                response.sendRedirect(ctx + "/receptionist/dashboard");
+                response.sendRedirect(ctx + "/receptionist/appointment/list");
             } else if ("LAB TECHNICIAN".equalsIgnoreCase(role)) {
-                response.sendRedirect(ctx + "/lab/dashboard");
+                response.sendRedirect(ctx + "/lab/lab-queue/list");
             } else {
                 // Các role khác nếu có
                 response.sendRedirect(ctx + "/index.jsp");

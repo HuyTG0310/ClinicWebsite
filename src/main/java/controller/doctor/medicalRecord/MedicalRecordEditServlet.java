@@ -108,8 +108,14 @@ public class MedicalRecordEditServlet extends HttpServlet {
                 dao.LabTestDAO testDAO = new dao.LabTestDAO();
                 dao.MedicineDAO medDAO = new dao.MedicineDAO();
 
+                List<LabTestBatch> batches = testDAO.getBatchesForMedicalRecord(actualRecordId);
+
+                for (LabTestBatch batch : batches) {
+                    testDAO.loadTestsForBatch(batch);
+                }
+
                 request.setAttribute("orderedTestIds", testDAO.getOrderedTestIds(actualRecordId));
-                request.setAttribute("batches", testDAO.getBatchesForMedicalRecord(actualRecordId));
+                request.setAttribute("batches", batches);
                 request.setAttribute("consolidatedResults", testDAO.getConsolidatedLabResults(actualRecordId));
                 request.setAttribute("savedPrescriptions", medDAO.getPrescriptionsByRecordId(actualRecordId));
             }

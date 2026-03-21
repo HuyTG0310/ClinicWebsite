@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <div class="col-md-3 col-lg-2 sidebar min-vh-100 p-3">
 
@@ -9,24 +10,75 @@
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
 
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'labDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/lab/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i>
-                Dashboard
-            </a>
-        </li>
-
-
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageTest' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/lab/lab-queue/list">
                 <i class="fa-solid fa-vials me-2"></i>
-                Manage test
+                Manage test result
             </a>
         </li>
 
+
+        <c:if test="${hasAppointmentView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/lab/appointment/list">
+                    <i class="fa-solid fa-gauge me-2"></i>
+                    Manage appointment
+                </a>
+            </li>
+        </c:if>
+
+            
+        <li class="nav-item">
+            <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/lab/service-order/list">
+                <i class="fa-solid fa-vials me-2"></i>
+                Manage service order
+            </a>
+        </li>
+
+
+        <c:if test="${hasServiceView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/lab/service/list">
+                    <i class="fa-solid fa-briefcase-medical me-2"></i>
+                    Manage service
+                </a>
+            </li>
+        </c:if>
+
+        <c:if test="${hasPatientView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'managePatient' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/lab/patient/list">
+                    <i class="fa-solid fa-user-injured me-2"></i>
+                    Manage patient
+                </a>
+            </li>
+        </c:if>
+
+        <c:if test="${hasMedicineView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/lab/medicine/list">
+                    <i class="fa-solid fa-pills me-2"></i>
+                    Manage medicine
+                </a>
+            </li>
+        </c:if>
+
+
+        <c:if test="${hasRoomView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/lab/room/list">
+                    <i class="fa-solid fa-door-open me-2"></i>
+                    Manage room
+                </a>
+            </li>
+        </c:if>
 
         <!-- Test History -->
         <li class="nav-item">

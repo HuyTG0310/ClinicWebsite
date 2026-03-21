@@ -18,7 +18,7 @@
     </div>
 </c:if>
 
-<form method="post" action="${pageContext.request.contextPath}/admin/service/add" id="frmServiceAdd" onsubmit="return validateLabTestParams(event)">
+<form method="post" action="${basePath}/service/add" id="frmServiceAdd" onsubmit="return validateLabTestParams(event)">
 
     <div class="row g-4">
 
@@ -214,7 +214,7 @@
 
     <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-4">
 
-        <a href="${pageContext.request.contextPath}/admin/service/list"
+        <a href="${basePath}/service/list"
            class="btn btn-outline-secondary">
 
             <i class="fa-solid fa-arrow-left me-1"></i>

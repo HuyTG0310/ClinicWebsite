@@ -15,10 +15,12 @@
         </h2>
         <p class="text-muted mb-0">Manage and monitor all medical services</p>
     </div>
+    <c:if test="${hasServiceCreate}">
+        <a href="${basePath}/service/add" class="btn btn-primary">
+            <i class="fa-solid fa-plus-circle me-2"></i>Add New Service
+        </a>
+    </c:if>
 
-    <a href="${pageContext.request.contextPath}/admin/service/add" class="btn btn-primary">
-        <i class="fa-solid fa-plus-circle me-2"></i>Add New Service
-    </a>
 </div>
 
 <c:if test="${not empty sessionScope.success}">
@@ -39,7 +41,7 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form method="get" action="${pageContext.request.contextPath}/admin/service/list">
+        <form method="get" action="${basePath}/service/list">
             <div class="row g-3">
 
                 <div class="col-md-9">
@@ -59,7 +61,7 @@
                     </button>
 
                     <c:if test="${not empty keyword}">
-                        <a href="${pageContext.request.contextPath}/admin/service/list"
+                        <a href="${basePath}/service/list"
                            class="btn btn-outline-secondary px-3" title="Clear Search">
                             <i class="fas fa-redo-alt"></i>
                         </a>
@@ -177,7 +179,7 @@
                                     </td>
 
                                     <td class="text-center">
-                                        <a href="${pageContext.request.contextPath}/admin/service/detail?id=${s.serviceId}"
+                                        <a href="${basePath}/service/detail?id=${s.serviceId}"
                                            class="btn btn-sm btn-outline-primary"
                                            title="View Detail">
                                             <i class="fas fa-eye me-1"></i>View

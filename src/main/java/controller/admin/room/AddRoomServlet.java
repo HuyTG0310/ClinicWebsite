@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
 
-@WebServlet(name = "AddRoomServlet", urlPatterns = {"/admin/room/create", "/receptionist/room/create", "/doctor/room/create"})
+@WebServlet(name = "AddRoomServlet", urlPatterns = {"/admin/room/create", "/receptionist/room/create", "/doctor/room/create", "/lab/room/create"})
 public class AddRoomServlet extends HttpServlet {
 
     private final SpecialtyDAO specialtyDAO = new SpecialtyDAO();
@@ -28,27 +28,22 @@ public class AddRoomServlet extends HttpServlet {
         String ctx = request.getContextPath();
 
         String layout;
-
+        String basePath;
         if (uri.startsWith(ctx + "/admin")) {
             layout = "/WEB-INF/layout/adminLayout.jsp";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/admin";
         } else if (uri.startsWith(ctx + "/doctor")) {
             layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
-        }
-
-        String basePath;
-        if (uri.startsWith(ctx + "/admin")) {
-            basePath = ctx + "/admin";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            basePath = ctx + "/receptionist";
-        } else if (uri.startsWith(ctx + "/doctor")) {
-            basePath = ctx + "/doctor";
-        } else {
-            basePath = ctx;
         }
 
         request.setAttribute("basePath", basePath);
@@ -64,27 +59,22 @@ public class AddRoomServlet extends HttpServlet {
         String ctx = request.getContextPath();
 
         String layout;
-
+        String basePath;
         if (uri.startsWith(ctx + "/admin")) {
             layout = "/WEB-INF/layout/adminLayout.jsp";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/admin";
         } else if (uri.startsWith(ctx + "/doctor")) {
             layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
-        }
-
-        String basePath;
-        if (uri.startsWith(ctx + "/admin")) {
-            basePath = ctx + "/admin";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            basePath = ctx + "/receptionist";
-        } else if (uri.startsWith(ctx + "/doctor")) {
-            basePath = ctx + "/doctor";
-        } else {
-            basePath = ctx;
         }
 
         request.setAttribute("basePath", basePath);

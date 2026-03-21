@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
-@WebServlet(name = "ViewPatient", urlPatterns = {"/admin/patient/detail", "/doctor/patient/detail", "/receptionist/patient/detail"})
+@WebServlet(name = "ViewPatient", urlPatterns = {"/admin/patient/detail", "/doctor/patient/detail", "/receptionist/patient/detail", "/lab/patient/detail"})
 public class ViewPatientServlet extends HttpServlet {
 
     @Override
@@ -30,6 +30,9 @@ public class ViewPatientServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

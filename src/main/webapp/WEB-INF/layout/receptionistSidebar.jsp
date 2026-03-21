@@ -10,16 +10,15 @@
     </h5>
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
-
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'receptionistDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/receptionist/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i>
-                Dashboard
-            </a>
-        </li>
-
+        <c:if test="${hasAppointmentView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/appointment/list">
+                    <i class="fa-solid fa-gauge me-2"></i>
+                    Manage appointment
+                </a>
+            </li>
+        </c:if>
 
         <c:if test="${hasPatientView}">
             <li class="nav-item">
@@ -31,15 +30,6 @@
             </li>
         </c:if>
 
-        <c:if test="${hasAppointmentView}">
-            <li class="nav-item">
-                <a class="nav-link ${activePage == 'manageAppointment' ? 'active' : ''}"
-                   href="${pageContext.request.contextPath}/receptionist/appointment/list">
-                    <i class="fa-solid fa-gauge me-2"></i>
-                    Manage appointment
-                </a>
-            </li>
-        </c:if>
 
 
         <!-- Test Requests -->
@@ -69,6 +59,15 @@
             </a>
         </c:if>
 
+        <c:if test="${hasServiceView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/service/list">
+                    <i class="fa-solid fa-briefcase-medical me-2"></i>
+                    Manage service
+                </a>
+            </li>
+        </c:if>
 
         <!-- Test History -->
         <li class="nav-item">

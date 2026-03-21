@@ -62,9 +62,8 @@ public class TestResultCreateServlet extends HttpServlet {
             testResult.setParameterMap(request.getParameterMap());
 
             LabTestDAO dao = new LabTestDAO();
-//            boolean success = dao.saveLabResults(medicalRecordId, orderTestIds, paramIds, request.getParameterMap(), technicianId);
             boolean success = dao.saveLabResults(testResult);
-
+            
             if (success) {
                 request.getSession().setAttribute("success", "Saved result successfully!");
             } else {

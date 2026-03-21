@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "EditRoomServlet", urlPatterns = {"/admin/room/edit", "/receptionist/room/edit", "/doctor/room/edit"})
+@WebServlet(name = "EditRoomServlet", urlPatterns = {"/admin/room/edit", "/receptionist/room/edit", "/doctor/room/edit", "/lab/room/edit"})
 public class EditRoomServlet extends HttpServlet {
 
     /**
@@ -30,32 +30,21 @@ public class EditRoomServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        //NEW
         String uri = request.getRequestURI();
         String ctx = request.getContextPath();
-
-        String layout;
-
-        if (uri.startsWith(ctx + "/admin")) {
-            layout = "/WEB-INF/layout/adminLayout.jsp";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            layout = "/WEB-INF/layout/receptionistLayout.jsp";
-        } else if (uri.startsWith(ctx + "/doctor")) {
-            layout = "/WEB-INF/layout/doctorLayout.jsp";
-        } else {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
 
         String basePath;
         if (uri.startsWith(ctx + "/admin")) {
             basePath = ctx + "/admin";
-        } else if (uri.startsWith(ctx + "/receptionist")) {
-            basePath = ctx + "/receptionist";
         } else if (uri.startsWith(ctx + "/doctor")) {
             basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
         } else {
-            basePath = ctx;
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
         }
 
         request.setAttribute("basePath", basePath);

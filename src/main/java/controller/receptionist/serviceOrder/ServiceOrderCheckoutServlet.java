@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
 
-@WebServlet(name = "ServiceOrderCheckoutServlet", urlPatterns = {"/receptionist/service-order/checkout", "/doctor/service-order/checkout", "/admin/service-order/checkout"})
+@WebServlet(name = "ServiceOrderCheckoutServlet", urlPatterns = {"/receptionist/service-order/checkout", "/doctor/service-order/checkout", "/admin/service-order/checkout", "/lab/service-order/checkout"})
 public class ServiceOrderCheckoutServlet extends HttpServlet {
 
     @Override
@@ -36,6 +36,8 @@ public class ServiceOrderCheckoutServlet extends HttpServlet {
             basePath = ctx + "/doctor";
         } else if (uri.startsWith(ctx + "/receptionist")) {
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
