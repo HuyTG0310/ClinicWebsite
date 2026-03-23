@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
-@WebServlet(name = "AppointmentEditServlet", urlPatterns = {"/receptionist/appointment/edit", "/doctor/appointment/edit", "/admin/appointment/edit"})
+@WebServlet(name = "AppointmentEditServlet", urlPatterns = {"/receptionist/appointment/edit", "/doctor/appointment/edit", "/admin/appointment/edit", "/lab/appointment/edit"})
 public class AppointmentEditServlet extends HttpServlet {
 
     @Override
@@ -37,6 +37,8 @@ public class AppointmentEditServlet extends HttpServlet {
             basePath = ctx + "/doctor";
         } else if (uri.startsWith(ctx + "/receptionist")) {
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

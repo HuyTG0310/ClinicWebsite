@@ -1,16 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 
-/**
- *
- * @author Tai Loi
- */
 public class Certification {
 
     private int certificationId;
@@ -19,16 +11,28 @@ public class Certification {
     private String certificateName;
     private String certificateNumber;
 
+    private String fullName;
+    private String phoneNumber;
+    private String roleName;
     private Date issueDate;
     private Date expiryDate;
 
     private String filePath;
-
     private String status;
 
     private Integer verifiedBy;
+    private Timestamp verifiedAt;
 
-    public Certification(int certificationId, int userId, String certificateName, String certificateNumber, Date issueDate, Date expiryDate, String filePath, String status, Integer verifiedBy, Timestamp verifiedAt) {
+    private String rejectionNote;
+
+    public Certification() {
+    }
+
+    public Certification(int certificationId, int userId, String certificateName,
+            String certificateNumber, Date issueDate, Date expiryDate,
+            String filePath, String status, Integer verifiedBy,
+            Timestamp verifiedAt) {
+
         this.certificationId = certificationId;
         this.userId = userId;
         this.certificateName = certificateName;
@@ -40,7 +44,38 @@ public class Certification {
         this.verifiedBy = verifiedBy;
         this.verifiedAt = verifiedAt;
     }
-    private Timestamp verifiedAt;
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+    
+    public String getRejectionNote() {
+        return rejectionNote;
+    }
+
+    public void setRejectionNote(String rejectionNote) {
+        this.rejectionNote = rejectionNote;
+    }
 
     public int getCertificationId() {
         return certificationId;
@@ -120,8 +155,5 @@ public class Certification {
 
     public void setVerifiedAt(Timestamp verifiedAt) {
         this.verifiedAt = verifiedAt;
-    }
-
-    public Certification() {
     }
 }

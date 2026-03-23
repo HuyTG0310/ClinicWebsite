@@ -76,7 +76,7 @@ public class LabOrderCreateServlet extends HttpServlet {
             // 2. Gọi DAO tạo Lô Xét nghiệm (Hàm này chúng ta đã viết ở LabTestDAO lúc trước)
             dao.LabTestDAO labDAO = new dao.LabTestDAO();
             boolean success = labDAO.createLabOrders(patientId, medicalRecordId, doctor.getUserId(), labTestIds);
-
+            
             // 3. Xử lý kết quả và thông báo
             if (success) {
                 session.setAttribute("success", "The Clinical Laboratory Order Form has been successfully created.!");

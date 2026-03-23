@@ -22,7 +22,7 @@ public class ProfileViewServlet extends HttpServlet {
 
         String layout;
         String basePath;
-        
+
         if (uri.startsWith(ctx + "/lab")) {
             layout = "/WEB-INF/layout/labLayout.jsp";
             basePath = ctx + "/lab";
@@ -36,19 +36,37 @@ public class ProfileViewServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        
+
+        request.setAttribute("basePath", basePath);
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
+        // Lấy thông tin mới nhất từ Database
         UserDAO dao = new UserDAO();
-        User userr = dao.getUserById(user.getUserId());
-        
-        request.setAttribute("basePath", basePath);
-        request.setAttribute("user", userr);
-        request.setAttribute("pageTitle", "Profile Detail");
+        User updatedUser = dao.getUserById(user.getUserId());
+        request.setAttribute("user", updatedUser);
+
+        String roleName = updatedUser.getRoleName().toLowerCase();
+        String layoutPath = "/WEB-INF/layout/doctorLayout.jsp"; // Mặc định
+        String pageTitle = "Doctor Profile";
+
+        if (roleName.contains("admin")) {
+            layoutPath = "/WEB-INF/layout/adminLayout.jsp";
+            pageTitle = "Admin Profile";
+        } else if (roleName.contains("receptionist")) {
+            layoutPath = "/WEB-INF/layout/receptionistLayout.jsp";
+            pageTitle = "Receptionist Profile";
+        } else if (roleName.contains("lab")) {
+            layoutPath = "/WEB-INF/layout/labLayout.jsp";
+            pageTitle = "Lab Profile";
+        }
+
+        request.setAttribute("pageTitle", pageTitle);
         request.setAttribute("activePage", "profile");
         request.setAttribute("contentPage", "/WEB-INF/profile/profileDetail.jsp");
 
-        request.getRequestDispatcher(layout).forward(request, response);
+        // Đẩy sang đúng Layout của Role đó
+        request.getRequestDispatcher(layoutPath).forward(request, response);
     }
 }

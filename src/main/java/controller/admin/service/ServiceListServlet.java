@@ -16,7 +16,7 @@ import java.util.*;
 import model.*;
 
 
-@WebServlet(name = "ServiceListServlet", urlPatterns = {"/admin/service/list"})
+@WebServlet(name = "ServiceListServlet", urlPatterns = {"/admin/service/list", "/receptionist/service/list", "/doctor/service/list", "/lab/service/list"})
 public class ServiceListServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO = new ServiceDAO();
@@ -24,7 +24,30 @@ public class ServiceListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
 
+        String layout;
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+        
         String keyword = request.getParameter("keyword");
         String status = request.getParameter("status");
 
@@ -45,7 +68,7 @@ public class ServiceListServlet extends HttpServlet {
         request.setAttribute("activePage", "manageService");
         request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceList.jsp");
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override

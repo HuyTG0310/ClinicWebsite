@@ -108,14 +108,15 @@
                     <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
-                            Phone
+                            Phone <span class="text-danger">*</span>
                         </label>
 
                         <input type="text"
                                name="phone"
                                value="${phone}"
                                class="form-control"
-                               placeholder="Enter phone number">
+                               placeholder="Enter phone number"
+                               required>
 
                     </div>
 
@@ -125,14 +126,15 @@
                     <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
-                            Email
+                            Email <span class="text-danger">*</span>
                         </label>
 
                         <input type="email"
                                name="email"
                                value="${email}"
                                class="form-control"
-                               placeholder="example@email.com">
+                               placeholder="example@email.com"
+                               required>
 
                     </div>
 

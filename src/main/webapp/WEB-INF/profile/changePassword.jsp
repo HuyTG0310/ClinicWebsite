@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
+
 <div class="container-fluid mb-5">
 
     <!-- HEADER -->
@@ -10,12 +11,10 @@
                 <i class="fa-solid fa-lock text-primary me-2"></i>
                 Change Password
             </h2>
-
             <p class="text-muted mb-0">
                 Update your account password securely
             </p>
         </div>
-
     </div>
 
 

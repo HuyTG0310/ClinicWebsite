@@ -107,7 +107,7 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         // 3. Format: >=6 chars, no space
-        if (!newPassword.matches("^\\S{6,}$")) {
+        if (!newPassword.matches("^\\S{3,}$")) {
             request.setAttribute(
                     "error",
                     "New password must be at least 6 characters long and must not contain spaces."

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Filter.java to edit this template
- */
 package filter;
 
 import dao.*;
@@ -22,10 +18,6 @@ import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import model.*;
 
-/**
- *
- * @author huytr
- */
 @WebFilter(filterName = "/*", urlPatterns = {"/*"})
 public class AuthorizationFilter implements Filter {
 
@@ -51,7 +43,6 @@ public class AuthorizationFilter implements Filter {
     }
 
     private PrivilegeDAO privilegeDAO = new PrivilegeDAO();
-//    private static final Map<String, String> URL_PRIVILEGE_MAP = new LinkedHashMap<>();
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -59,10 +50,9 @@ public class AuthorizationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        // Fix lỗi nếu path ngắn hơn context
         String ctx = req.getContextPath();
         String uri = req.getRequestURI();
-
+        String path = uri.substring(ctx.length());
         if (!uri.startsWith(ctx)) {
             res.sendError(404);
             return;
@@ -73,10 +63,9 @@ public class AuthorizationFilter implements Filter {
             return; // Cho đi qua luôn và thoát hàm filter
         }
 
-        String path = uri.substring(ctx.length());
         System.out.println("DEBUG FILTER PATH: " + path);
 
-        // --- 1. Bỏ qua Login, Forget password & Assets ---
+        // --- 1. Bỏ qua các file tĩnh và trang công khai ---
         if (path.startsWith("/login")
                 || path.startsWith("/forget-password")
                 || path.startsWith("/send-otp")
@@ -87,40 +76,35 @@ public class AuthorizationFilter implements Filter {
                 || path.startsWith("/resetPassword.jsp")
                 || path.startsWith("/assets")
                 || path.startsWith("/css")
-                || path.startsWith("/js")) {
+                || path.startsWith("/js")
+                || path.startsWith("/uploads")) {
 
             chain.doFilter(request, response);
             return;
         }
 
-        // --- 2. Check Login ---
+        // --- 2. Kiểm tra Login ---
         HttpSession session = req.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
-
         System.out.println("🔍 KIỂM TRA SESSION: ID = " + (session != null ? session.getId() : "NULL") + " | User = " + user);
 
         if (user == null) {
             res.sendRedirect(ctx + "/login");
             return;
         }
-
-        // --- DEBUG LOG START ---
         System.out.println("🚀 FILTER CHECK: Path = " + path);
         System.out.println("👤 User: " + user.getFullName() + " | Role: " + user.getRoleName());
 
-        // --- 3. LOAD & CLEAN QUYỀN (FIX LỖI KHOẢNG TRẮNG) ---
+        // --- 3. Tải & Làm sạch danh sách quyền ---
         List<String> rawPrivileges = privilegeDAO.getPrivilegeCodesByUserId(user.getUserId());
         List<String> privileges = new ArrayList<>();
-
         if (rawPrivileges != null) {
             for (String p : rawPrivileges) {
                 if (p != null) {
-                    // 🔥 TRIM() Ở ĐÂY: Xử lý dứt điểm vụ thừa khoảng trắng
                     privileges.add(p.trim());
                 }
             }
         }
-
         //KIỂM TRA ROLE CÓ BỊ INACTIVE KHÔNG
         RoleDAO roleDAO = new RoleDAO();
         Role currentRole = roleDAO.getRoleById(user.getRoleId());
@@ -135,11 +119,13 @@ public class AuthorizationFilter implements Filter {
             res.sendRedirect(ctx + "/login?error=role_inactive");
             return;
         }
-        //END
 
         System.out.println("🔑 Quyền đã xử lý (Cleaned): " + privileges);
 
-        // --- 4. SET ATTRIBUTE CHO UI (QUAN TRỌNG ĐỂ HIỆN NÚT) ---
+        // QUYỀN CERTIFICATION DO ADMIN CẤP
+        req.setAttribute("hasCertView", privileges.contains("CERTIFICATION_VIEW"));
+        req.setAttribute("hasCertAdd", privileges.contains("CERTIFICATION_ADD"));
+
         req.setAttribute("hasMedicineView", privileges.contains("MEDICINE_VIEW"));
         req.setAttribute("hasMedicineCreate", privileges.contains("MEDICINE_CREATE"));
         req.setAttribute("hasMedicineEdit", privileges.contains("MEDICINE_EDIT"));
@@ -150,47 +136,54 @@ public class AuthorizationFilter implements Filter {
         req.setAttribute("hasPatientCreate", privileges.contains("PATIENT_CREATE"));
         req.setAttribute("hasPatientEdit", privileges.contains("PATIENT_EDIT"));
         req.setAttribute("hasPatientDelete", privileges.contains("PATIENT_DELETE"));
-
         req.setAttribute("hasAppointmentCreate", privileges.contains("APPOINTMENT_CREATE"));
         req.setAttribute("hasAppointmentEdit", privileges.contains("APPOINTMENT_EDIT"));
         req.setAttribute("hasAppointmentView", privileges.contains("APPOINTMENT_VIEW"));
-
+        req.setAttribute("hasServiceCreate", privileges.contains("SERVICE_CREATE"));
+        req.setAttribute("hasServiceEdit", privileges.contains("SERVICE_EDIT"));
+        req.setAttribute("hasServiceView", privileges.contains("SERVICE_VIEW"));
+        
+        
         if (path.startsWith("/profile")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // --- 6. Check Role Prefix 
+        // --- 5. Kiểm tra Role Prefix (Bảo vệ folder mẹ) ---
         String role = user.getRoleName() != null ? user.getRoleName().trim() : "";
 
         if (path.startsWith("/admin") && !"ADMIN".equalsIgnoreCase(role)) {
-            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            res.sendError(403);
             return;
         }
-
         if (path.startsWith("/doctor") && !"DOCTOR".equalsIgnoreCase(role)) {
-            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            res.sendError(403);
             return;
         }
-
         if (path.startsWith("/receptionist") && !"RECEPTIONIST".equalsIgnoreCase(role)) {
-            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            res.sendError(403);
             return;
         }
-
         if (path.startsWith("/lab") && !"LAB TECHNICIAN".equalsIgnoreCase(role)) {
-            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            res.sendError(403);
             return;
         }
 
-        // --- 5. Dashboard Always OK ---
         if (path.equals("/admin/dashboard") || path.equals("/doctor/dashboard") || path.equals("/receptionist/dashboard") || path.equals("/lab/dashboard")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // --- 7. Check Privilege Map ---
+        // --- 6. CHECK PRIVILEGE MAP (Chặn truy cập Module cụ thể) ---
         String requiredPriv = null;
+
+        // Mapping quyền cho Certification
+        if (path.contains("/certification/add")) {
+            requiredPriv = "CERTIFICATION_ADD";
+        } else if (path.contains("/certification/my")) {
+            requiredPriv = "CERTIFICATION_VIEW";
+        }
+        
         if (path.contains("/medicine/create")) {
             requiredPriv = "MEDICINE_CREATE";
         } else if (path.contains("/medicine/edit")) {
@@ -198,8 +191,7 @@ public class AuthorizationFilter implements Filter {
         } else if (path.contains("/medicine/list") || path.contains("/medicine/detail")) { // Bao gồm cả /list và /detail
             requiredPriv = "MEDICINE_VIEW";
         }
-
-        // Kiểm tra Module Room
+        
         if (path.contains("/room/create")) {
             requiredPriv = "ROOM_CREATE";
         } else if (path.contains("/room/edit")) {
@@ -224,6 +216,15 @@ public class AuthorizationFilter implements Filter {
             requiredPriv = "APPOINTMENT_EDIT";
         } else if (path.contains("/appointment/list") || path.contains("/appointment/detail")) {
             requiredPriv = "APPOINTMENT_VIEW";
+        }
+        
+        
+        if (path.contains("/service/add")) {
+            requiredPriv = "SERVICE_CREATE";
+        } else if (path.contains("/service/edit")) {
+            requiredPriv = "SERVICE_EDIT";
+        } else if (path.contains("/service/list") || path.contains("/service/detail")) {
+            requiredPriv = "SERVICE_VIEW";
         }
 
         if (requiredPriv != null) {
@@ -317,5 +318,4 @@ public class AuthorizationFilter implements Filter {
     public void log(String msg) {
         filterConfig.getServletContext().log(msg);
     }
-
 }

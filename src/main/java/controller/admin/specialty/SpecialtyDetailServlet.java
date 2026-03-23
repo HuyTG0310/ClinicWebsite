@@ -61,7 +61,7 @@ public class SpecialtyDetailServlet extends HttpServlet {
         if (name == null || name.trim().isEmpty()
                 || description == null || description.trim().isEmpty()) {
 
-            request.setAttribute("error", "Name và Description không được chỉ chứa khoảng trắng.");
+            request.setAttribute("error", "Name and Description not null or only contain spaces.");
             request.setAttribute("openModal", true); // ⚠️ QUAN TRỌNG
             request.setAttribute("specialty", dao.getById(id));
             request.setAttribute("pageTitle", "Manage speiclaty");

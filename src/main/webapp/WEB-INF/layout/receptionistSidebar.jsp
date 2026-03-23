@@ -1,35 +1,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <div class="col-md-3 col-lg-2 sidebar min-vh-100 p-3">
-
     <h5 class="text-center mb-4 sidebar-title">
-        <i class="fa-solid fa-vials me-1"></i>
-        Receptionist
+        <i class="fa-solid fa-user-tie me-1"></i> Receptionist
     </h5>
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
-
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'receptionistDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/receptionist/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i>
-                Dashboard
-            </a>
-        </li>
-
-
-        <c:if test="${hasPatientView}">
-            <li class="nav-item">
-                <a class="nav-link ${activePage == 'managePatient' ? 'active' : ''}"
-                   href="${pageContext.request.contextPath}/receptionist/patient/list">
-                    <i class="fa-solid fa-user-injured me-2"></i>
-                    Manage patient
-                </a>
-            </li>
-        </c:if>
 
         <c:if test="${hasAppointmentView}">
             <li class="nav-item">
@@ -42,45 +20,68 @@
         </c:if>
 
 
-        <!-- Test Requests -->
+        <c:if test="${hasPatientView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'managePatient' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/patient/list">
+                    <i class="fa-solid fa-user-injured me-2"></i> Manage patient
+                </a>
+            </li>
+        </c:if>
+
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/receptionist/service-order/list">
-                <i class="fa-solid fa-vials me-2"></i>
-                Manage service order
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i> Manage service order
             </a>
         </li>
 
-
         <c:if test="${hasRoomView}">
-            <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/receptionist/room/list">
-                <i class="fa-solid fa-vials me-2"></i>
-                Manage room
-            </a>
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageRoom' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/room/list">
+                    <i class="fa-solid fa-door-open me-2"></i> Manage room
+                </a>
+            </li>
         </c:if>
-
 
         <c:if test="${hasMedicineView}">
-            <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/receptionist/medicine/list">
-                <i class="fa-solid fa-vials me-2"></i>
-                Manage medicine
-            </a>
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageMedicine' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/medicine/list">
+                    <i class="fa-solid fa-pills me-2"></i> Manage medicine
+                </a>
+            </li>
         </c:if>
 
 
-        <!-- Test History -->
+        <c:if test="${hasServiceView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/service/list">
+                    <i class="fa-solid fa-briefcase-medical me-2"></i>Manage service
+                </a>
+            </li>
+        </c:if>
+
+        <c:if test="${hasCertView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/receptionist/certification/my">
+                    <i class="fa-solid fa-certificate me-2"></i> My Certifications
+                </a>
+            </li>
+        </c:if>
+
         <li class="nav-item">
-            <a class="nav-link ${activePage == 'labHistory' ? 'active' : ''}"
+            <a class="nav-link ${activePage == 'profile' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/receptionist/profile/view">
                 <i class="fa-solid fa-clock-rotate-left me-2"></i>
                 Profile
             </a>
         </li>
 
-
-        <!-- Logout -->
         <li class="nav-item mt-3">
             <a class="nav-link logout"
                href="${pageContext.request.contextPath}/logout">
@@ -88,6 +89,5 @@
                 Logout
             </a>
         </li>
-
     </ul>
 </div>

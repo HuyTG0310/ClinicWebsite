@@ -1,187 +1,232 @@
-<%-- 
-    Document   : certificationApproval
-    Created on : Mar 13, 2026, 3:57:42 PM
-    Author     : Tai Loi
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<!DOCTYPE html>
-<html>
-    <head>
 
-        <meta charset="UTF-8">
-        <title>Certification Approval</title>
+<div class="container-fluid">
 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+        <div>
+            <h2 class="mb-1">
+                <i class="fa-solid fa-certificate text-primary me-2"></i>
+                Certification Approval
+            </h2>
+            <p class="text-muted mb-0">
+                Review and approve user certifications
+            </p>
+        </div>
 
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    </div>
 
-        <style>
 
-            body{
-                font-family:'Poppins',sans-serif;
-                background:linear-gradient(135deg,#0d6efd,#0dcaf0);
-                min-height:100vh;
-                padding:40px;
-            }
 
-            .table-card{
+    <!-- FILTER -->
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
 
-                background:white;
-                border-radius:20px;
-                padding:35px;
+            <form action="${pageContext.request.contextPath}/admin/certification/search" method="GET">
 
-                box-shadow:0 20px 40px rgba(0,0,0,0.15);
+                <div class="row g-3 align-items-end">
 
-            }
+                    <!-- NAME -->
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold small text-muted">
+                            Full Name / Certificate
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text"
+                                   name="searchName"
+                                   class="form-control"
+                                   value="${param.searchName}"
+                                   placeholder="Search name or certificate..." required>
+                        </div>
+                    </div>
 
-            .badge{
-                font-size:14px;
-                padding:6px 10px;
-            }
+                    <!-- PHONE -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">
+                            Phone Number
+                        </label>
+                        <input type="text"
+                               id="searchPhone"
+                               name="searchPhone"
+                               class="form-control"
+                               value="${param.searchPhone}"
+                               placeholder="Enter phone number">
 
-        </style>
+                        <small id="phoneError" class="text-danger d-none">
+                            Số điện thoại chỉ được chứa chữ số!
+                        </small>
 
-    </head>
+                        <c:if test="${not empty error}">
+                            <div class="text-danger mt-1">${error}</div>
+                        </c:if>
+                    </div>
 
-    <body>
+                    <!-- BUTTON -->
+                    <div class="col-md-3 d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-filter me-2"></i>Filter
+                        </button>
 
-        <div class="container">
-
-            <div class="table-card">
-
-                <div class="d-flex justify-content-between mb-4">
-
-                    <h3>
-
-                        <i class="fa-solid fa-certificate text-primary me-2"></i>
-
-                        Certification Approval
-
-                    </h3>
-
-                    <a href="${pageContext.request.contextPath}/admin/dashboard"
-                       class="btn btn-outline-primary">
-
-                        <i class="fa-solid fa-arrow-left me-1"></i>
-                        Back Dashboard
-
-                    </a>
+                        <c:if test="${not empty param.searchName}">
+                            <a href="${pageContext.request.contextPath}/admin/certification/list"
+                               class="btn btn-outline-secondary"
+                               title="Clear">
+                                <i class="fas fa-redo-alt"></i>
+                            </a>
+                        </c:if>
+                    </div>
 
                 </div>
 
-                <table class="table table-striped align-middle">
+            </form>
+
+        </div>
+    </div>
+
+
+
+    <!-- TABLE -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-list me-2 text-primary"></i>
+                Certification List
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
 
                     <thead class="table-light">
-
                         <tr>
-
-                            <th>User ID</th>
-
+                            <th>Owner</th>
+                            <th>Role</th>
                             <th>Certificate</th>
-
                             <th>Number</th>
-
                             <th>Issue Date</th>
-
                             <th>Expiry Date</th>
-
-                            <th>Status</th>
-
-                            <th>File</th>
-
-                            <th>Action</th>
-
+                            <th class="text-center">Status</th>
+                            <th class="text-center">File</th>
+                            <th class="text-center">Actions</th>
                         </tr>
-
                     </thead>
 
                     <tbody>
 
-                    <c:forEach items="${list}" var="c">
+                        <c:forEach items="${list}" var="c">
+                            <tr>
 
-                        <tr>
+                                <!-- OWNER -->
+                                <td>
+                                    <div class="fw-bold text-primary">
+                                        ${not empty c.fullName ? c.fullName : 'User ID: '.concat(c.userId)}
+                                    </div>
+                                    <div class="small text-muted">${c.phoneNumber}</div>
+                                </td>
 
-                            <td>${c.userId}</td>
+                                <!-- ROLE -->
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        ${not empty c.roleName ? c.roleName : 'N/A'}
+                                    </span>
+                                </td>
 
-                            <td>${c.certificateName}</td>
+                                <td>${c.certificateName}</td>
+                                <td>${c.certificateNumber}</td>
+                                <td>${c.issueDate}</td>
+                                <td>${c.expiryDate}</td>
 
-                            <td>${c.certificateNumber}</td>
+                                <!-- STATUS -->
+                                <td class="text-center">
+                                    <c:choose>
+                                        <c:when test="${c.status == 'VERIFIED'}">
+                                            <span class="badge bg-success">
+                                                <i class="fa-solid fa-check me-1"></i>Verified
+                                            </span>
+                                        </c:when>
+                                        <c:when test="${c.status == 'PENDING'}">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fa-solid fa-clock me-1"></i>Pending
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-danger"
+                                                  data-bs-toggle="tooltip"
+                                                  title="Reason: ${not empty c.rejectionNote ? c.rejectionNote : 'N/A'}">
+                                                <i class="fa-solid fa-ban me-1"></i>Rejected
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
 
-                            <td>${c.issueDate}</td>
+                                <!-- FILE -->
+                                <td class="text-center">
+                                    <c:if test="${not empty c.filePath}">
+                                        <a href="${pageContext.request.contextPath}/certification/file?name=${c.filePath}"
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                    </c:if>
+                                </td>
 
-                            <td>${c.expiryDate}</td>
+                                <!-- ACTION -->
+                                <td class="text-center">
 
-                            <td>
+                                    <c:choose>
 
-                        <c:choose>
+                                        <c:when test="${c.status == 'PENDING'}">
 
-                            <c:when test="${c.status == 'VERIFIED'}">
+                                            <a href="${pageContext.request.contextPath}/admin/certification/approve?id=${c.certificationId}"
+                                               class="btn btn-sm btn-success">
+                                                <i class="fa-solid fa-check"></i>
+                                            </a>
 
-                                <span class="badge bg-success">Verified</span>
+                                            <button class="btn btn-sm btn-danger"
+                                                    onclick="openRejectModal('${c.certificationId}')">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
 
-                            </c:when>
+                                        </c:when>
 
-                            <c:when test="${c.status == 'PENDING'}">
+                                        <c:otherwise>
 
-                                <span class="badge bg-warning text-dark">Pending</span>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="openDeleteModal('${c.certificationId}')">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
 
-                            </c:when>
+                                        </c:otherwise>
 
-                            <c:otherwise>
+                                    </c:choose>
 
-                                <span class="badge bg-danger">Rejected</span>
+                                </td>
 
-                            </c:otherwise>
+                            </tr>
+                        </c:forEach>
 
-                        </c:choose>
 
-                        </td>
 
-                        <td>
-
-                            <a href="${pageContext.request.contextPath}/${c.filePath}"
-                               target="_blank"
-                               class="btn btn-sm btn-outline-primary">
-
-                                <i class="fa-solid fa-eye"></i>
-                                View
-
-                            </a>
-
-                        </td>
-
-                        <td>
-
-                        <c:if test="${c.status == 'PENDING'}">
-
-                            <a href="${pageContext.request.contextPath}/admin/certification/approve?id=${c.certificationId}"
-                               class="btn btn-success btn-sm">
-
-                                <i class="fa-solid fa-check"></i>
-                                Approve
-
-                            </a>
-
-                            <a href="${pageContext.request.contextPath}/admin/certification/reject?id=${c.certificationId}"
-                               class="btn btn-danger btn-sm">
-
-                                <i class="fa-solid fa-xmark"></i>
-                                Reject
-
-                            </a>
-
+                        <!-- EMPTY -->
+                        <c:if test="${empty list}">
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                                    No certifications found
+                                </td>
+                            </tr>
                         </c:if>
-
-                        </td>
-
-                        </tr>
-
-                    </c:forEach>
 
                     </tbody>
 
@@ -191,5 +236,168 @@
 
         </div>
 
-    </body>
-</html>
+    </div>
+
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="post"
+                  action="${pageContext.request.contextPath}/admin/certification/delete">
+
+                <input type="hidden"
+                       name="id"
+                       id="deleteId">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        Confirm Delete
+                    </h5>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <p class="mb-2">
+                        Are you sure you want to delete this certification?
+                    </p>
+
+                    <div class="alert alert-danger mb-0">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>
+                        This action cannot be undone.
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger px-4">
+                        <i class="fa-solid fa-trash me-1"></i>
+                        Delete
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+                  
+        <div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered"> <!-- FIX CHỖ NÀY -->
+        <div class="modal-content">
+
+            <form id="rejectForm">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-xmark me-2"></i>
+                        Reject Certification
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="rejectId">
+
+                    <div class="mb-2 fw-semibold">
+                        Reason for rejection
+                    </div>
+
+                    <textarea name="rejectionNote"
+                              id="rejectionNote"
+                              class="form-control"
+                              rows="4"
+                              required></textarea>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="submitReject()">
+                        Reject
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        [...document.querySelectorAll('[data-bs-toggle="tooltip"]')]
+                .map(el => new bootstrap.Tooltip(el));
+    });
+
+    function openRejectModal(id) {
+        document.getElementById("rejectId").value = id;
+        new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    }
+
+    function openDeleteModal(id) {
+        document.getElementById("deleteId").value = id;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    function submitReject() {
+        const id = document.getElementById("rejectId").value;
+        const note = document.getElementById("rejectionNote").value;
+
+        if (!note.trim())
+            return alert("Nhập lý do!");
+
+        fetch('${pageContext.request.contextPath}/admin/certification/reject', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: "id=" + id + "&rejectionNote=" + note
+        }).then(r => r.text()).then(msg => {
+            if (msg === "SUCCESS")
+                location.reload();
+            else
+                alert(msg);
+        });
+    }
+</script>
+<script>
+    const phoneInput = document.getElementById("searchPhone");
+    const phoneError = document.getElementById("phoneError");
+
+    phoneInput.addEventListener("input", function () {
+        let value = this.value;
+
+        // ❌ Nếu có ký tự không phải số → hiện lỗi
+        if (!/^\d*$/.test(value)) {
+            phoneError.classList.remove("d-none");
+        } else {
+            phoneError.classList.add("d-none");
+        }
+
+        // 🔥 Tự động xóa ký tự không phải số
+        this.value = value.replace(/\D/g, '');
+    });
+</script>

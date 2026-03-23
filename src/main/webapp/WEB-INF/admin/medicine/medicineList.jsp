@@ -17,6 +17,23 @@
     </c:if>
 </div>
 
+
+<c:if test="${sessionScope.success != null}">
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.success}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% session.removeAttribute("success"); %>
+</c:if>
+
+<c:if test="${sessionScope.error != null}">
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>${sessionScope.error}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% session.removeAttribute("error");%>
+</c:if>
+
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <form method="get" action="${basePath}/medicine/list">

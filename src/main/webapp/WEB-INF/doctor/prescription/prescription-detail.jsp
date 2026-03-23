@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+ <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %> 
 
 <div class="container-fluid mb-5">
     <!-- HEADER -->
@@ -22,7 +22,7 @@
                class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to list
             </a>
-               
+
             <a href="${basePath}/prescription/print?medicalRecordId=${record.medicalRecordId}"
                target="_blank"
                class="btn btn-primary">
@@ -199,8 +199,21 @@
                                     ${st.index + 1}
                                 </td>
 
-                                <td class="fw-semibold">
-                                    ${p.medicineName}
+                                <%-- <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %> --%>
+
+                                <td class="fw-semibold d-flex justify-content-between align-items-center">
+                                    <span>${p.medicineName}</span>
+
+                                    <button type="button" 
+                                            class="btn btn-sm btn-link text-info p-0 ms-2"
+                                            data-name="${fn:escapeXml(p.medicineName)}"
+                                            data-ingredients="${fn:escapeXml(p.ingredients)}"
+                                            data-usage="${fn:escapeXml(p.usage)}"
+                                            data-contra="${fn:escapeXml(p.contraindication)}"
+                                            onclick="showMedInfo(this)" 
+                                            title="View Medicine Info">
+                                        <i class="fa-solid fa-circle-info fs-6"></i>
+                                    </button>
                                 </td>
 
                                 <td class="text-center fw-bold">
@@ -462,6 +475,49 @@
     </div>
 
 
+
+    <div class="modal fade" id="medicineInfoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-pills text-dark me-2"></i>
+                        <span id="infoMedName" class="fw-bold text-dark">Medicine</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-1">
+                            <i class="fa-solid fa-flask me-2 text-dark"></i>Ingredients
+                        </h6>
+                        <p id="infoMedIngredients" class="text-muted small mb-0">No data</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-1">
+                            <i class="fa-solid fa-book-medical me-2 text-dark"></i>Usage
+                        </h6>
+                        <p id="infoMedUsage" class="text-muted small mb-0">No data</p>
+                    </div>
+
+                    <div class="mb-0">
+                        <h6 class="fw-bold text-dark border-bottom pb-1">
+                            <i class="fa-solid fa-triangle-exclamation me-2 text-dark"></i>Contraindication
+                        </h6>
+                        <p id="infoMedContra" class="text-muted small mb-0">No data</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <style>
         .card {
             border-radius: 12px;
@@ -568,4 +624,23 @@
                 }
             });
         });
+        
+        function showMedInfo(btnElement) {
+        // 1. Lấy dữ liệu từ các thuộc tính data-* của nút bấm
+        let name = btnElement.getAttribute('data-name') || 'Không xác định';
+        let ingredients = btnElement.getAttribute('data-ingredients') || 'Đang cập nhật...';
+        let usage = btnElement.getAttribute('data-usage') || 'Đang cập nhật...';
+        let contra = btnElement.getAttribute('data-contra') || 'Đang cập nhật...';
+
+        // 2. Đổ dữ liệu vào Modal
+        document.getElementById('infoMedName').textContent = name;
+        document.getElementById('infoMedIngredients').textContent = ingredients;
+        document.getElementById('infoMedUsage').textContent = usage;
+        document.getElementById('infoMedContra').textContent = contra;
+
+        // 3. Hiển thị Modal lên
+        let infoModal = new bootstrap.Modal(document.getElementById('medicineInfoModal'));
+        infoModal.show();
+    }
+        
     </script>

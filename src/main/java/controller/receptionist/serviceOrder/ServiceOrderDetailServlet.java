@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author huytr
  */
-@WebServlet(name = "ServiceOrderDetailServlet", urlPatterns = {"/receptionist/service-order/detail", "/doctor/service-order/detail", "/admin/service-order/detail"})
+@WebServlet(name = "ServiceOrderDetailServlet", urlPatterns = {"/receptionist/service-order/detail", "/doctor/service-order/detail", "/admin/service-order/detail", "/lab/service-order/detail"})
 public class ServiceOrderDetailServlet extends HttpServlet {
 
     @Override
@@ -39,6 +39,9 @@ public class ServiceOrderDetailServlet extends HttpServlet {
         } else if (uri.startsWith(ctx + "/receptionist")) {
             layout = "/WEB-INF/layout/receptionistLayout.jsp";
             basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

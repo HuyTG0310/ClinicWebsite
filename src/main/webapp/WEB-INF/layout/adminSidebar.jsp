@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -11,16 +11,6 @@
     </h5>
 
     <ul class="nav nav-pills flex-column gap-2 sidebar-menu">
-
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'adminDashboard' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/admin/dashboard">
-                <i class="fa-solid fa-gauge me-2"></i>
-                Dashboard
-            </a>
-        </li>
-
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageRole' ? 'active' : ''}"
@@ -58,14 +48,16 @@
             </a>
         </li>
 
-        <!-- Test History -->
-        <li class="nav-item">
-            <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/admin/service/list">
-                <i class="fa-solid fa-briefcase-medical me-2"></i>
-                Manage service
-            </a>
-        </li>
+        <c:if test="${hasServiceView}">
+            <li class="nav-item">
+                <a class="nav-link ${activePage == 'manageService' ? 'active' : ''}"
+                   href="${pageContext.request.contextPath}/admin/service/list">
+                    <i class="fa-solid fa-briefcase-medical me-2"></i>
+                    Manage service
+                </a>
+            </li>
+        </c:if>
+
 
 
         <c:if test="${hasRoomView}">
@@ -110,6 +102,21 @@
                 </a>
             </li>
         </c:if>
+            
+        <%-- Thêm đoạn này vào Sidebar của Doctor, Receptionist và Lab --%>
+<c:if test="${hasCertView}">
+    <li class="nav-item">
+        <%-- Tự động xác định prefix dựa trên role của user --%>
+        <c:set var="rolePath" value="${fn:replace(fn:toLowerCase(sessionScope.user.roleName), ' ', '')}" />
+        <c:set var="prefix" value="${fn:contains(rolePath, 'lab') ? 'lab' : (fn:contains(rolePath, 'receptionist') ? 'receptionist' : 'doctor')}" />
+        
+        <a class="nav-link ${activePage == 'myCertification' ? 'active' : ''}"
+           href="${pageContext.request.contextPath}/${prefix}/certification/my">
+            <i class="fa-solid fa-certificate me-2"></i>
+            My Certifications
+        </a>
+    </li>
+</c:if>
 
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageServiceOrder' ? 'active' : ''}"
@@ -119,7 +126,7 @@
             </a>
         </li>
 
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'myQueue' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/queue/list">
@@ -136,7 +143,7 @@
                 Manage medical record
             </a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'managePrescription' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/prescription/list">
@@ -144,12 +151,12 @@
                 Manage prescription
             </a>
         </li>
-        
+
         <li class="nav-item">
             <a class="nav-link ${activePage == 'manageTest' ? 'active' : ''}"
                href="${pageContext.request.contextPath}/admin/lab-queue/list">
                 <i class="fa-solid fa-vials me-2"></i>
-                Manage test
+                Manage test result
             </a>
         </li>
 

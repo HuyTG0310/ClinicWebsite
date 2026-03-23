@@ -16,8 +16,7 @@ import model.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-
-@WebServlet(name = "ServiceAddServlet", urlPatterns = {"/admin/service/add"})
+@WebServlet(name = "ServiceAddServlet", urlPatterns = {"/admin/service/add", "/doctor/service/add", "/receptionist/service/add", "/lab/service/add"})
 public class ServiceAddServlet extends HttpServlet {
 
     ServiceDAO serviceDAO = new ServiceDAO();
@@ -26,6 +25,30 @@ public class ServiceAddServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String layout;
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            layout = "/WEB-INF/layout/adminLayout.jsp";
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            layout = "/WEB-INF/layout/doctorLayout.jsp";
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            layout = "/WEB-INF/layout/receptionistLayout.jsp";
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            layout = "/WEB-INF/layout/labLayout.jsp";
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
+
         //lấy danh sách cate của dịch vụ như khám bệnh hoặc xét nghiệm
         request.setAttribute("categories", ServiceCategory.getAll());
 
@@ -37,12 +60,30 @@ public class ServiceAddServlet extends HttpServlet {
         request.setAttribute("activePage", "manageService");
         request.setAttribute("contentPage", "/WEB-INF/admin/service/serviceAdd.jsp");
 
-        request.getRequestDispatcher("/WEB-INF/layout/adminLayout.jsp").forward(request, response);
+        request.getRequestDispatcher(layout).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+
+        String basePath;
+        if (uri.startsWith(ctx + "/admin")) {
+            basePath = ctx + "/admin";
+        } else if (uri.startsWith(ctx + "/doctor")) {
+            basePath = ctx + "/doctor";
+        } else if (uri.startsWith(ctx + "/receptionist")) {
+            basePath = ctx + "/receptionist";
+        } else if (uri.startsWith(ctx + "/lab")) {
+            basePath = ctx + "/lab";
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        request.setAttribute("basePath", basePath);
 
         try {
             // Lấy thông tin chung (luôn luôn có)
@@ -80,7 +121,7 @@ public class ServiceAddServlet extends HttpServlet {
 
                 java.util.List<model.LabTestParameter> paramList = new java.util.ArrayList<>();
                 if (paramCodes != null) {
-                    Gson gson = new Gson(); 
+                    Gson gson = new Gson();
                     java.lang.reflect.Type listType = new TypeToken<java.util.ArrayList<model.LabReferenceRange>>() {
                     }.getType();
                     for (int i = 0; i < paramCodes.length; i++) {
@@ -95,14 +136,14 @@ public class ServiceAddServlet extends HttpServlet {
                             try {
                                 rangesList = gson.fromJson(paramRangesData[i], listType);
                             } catch (Exception e) {
-                                System.out.println("Lỗi Parse JSON Range: " + e.getMessage());
+                                System.out.println("Error Parse JSON Range: " + e.getMessage());
                             }
                         }
                         p.setReferenceRanges(rangesList);
                         paramList.add(p);
                     }
                 }
-                // Gọi Transaction Gộp
+
                 success = labTestDAO.insertFullLabTest(s, labTest, paramList);
             } else {
                 // NẾU LÀ DỊCH VỤ BÌNH THƯỜNG -> Lưu bình thường
@@ -111,14 +152,14 @@ public class ServiceAddServlet extends HttpServlet {
 
             if (success) {
                 request.getSession().setAttribute("success", "Add service successful!");
-                response.sendRedirect(request.getContextPath() + "/admin/service/list");
+                response.sendRedirect(basePath + "/service/list");
             } else {
                 throw new Exception("Database Insert Failed");
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.getSession().setAttribute("error", "Error: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/admin/service/add");
+            response.sendRedirect(basePath + "/service/add");
         }
     }
 
