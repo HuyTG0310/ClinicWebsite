@@ -16,6 +16,7 @@ import model.*;
  * @author huytr
  */
 public class LabTestDAO extends DBContext {
+
     public void loadTestsForBatch(LabTestBatch batch) {
 
         String sql = "SELECT t.LabTestId, t.TestName "
@@ -46,7 +47,6 @@ public class LabTestDAO extends DBContext {
         batch.setTestIds(testIds);
         batch.setTestNames(testNames);
     }
-
 
     private static final String SQL_GET_SNAPSHOT
             = "SELECT TOP 1 rr.RefMin, rr.RefMax, p.Unit "
@@ -349,10 +349,9 @@ public class LabTestDAO extends DBContext {
 
     private int insertLabTest(Connection conn, int serviceId, LabTest labTest) throws Exception {
         String sql = "INSERT INTO LabTest (ServiceId, TestCode, TestName, CategoryId, IsPanel, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
-        
-        
+
         int nextSortOrder = getNextSortOrder(conn, labTest.getCategoryId());
-        
+
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, serviceId);
@@ -372,10 +371,10 @@ public class LabTestDAO extends DBContext {
 
         throw new RuntimeException("Insert LabTest failed");
     }
-    
+
     private int getNextSortOrder(Connection conn, int categoryId) throws Exception {
         String sql = "SELECT ISNULL(MAX(SortOrder), 0) + 1 AS NextOrder FROM LabTest WHERE CategoryId = ?";
-        
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, categoryId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -455,24 +454,58 @@ public class LabTestDAO extends DBContext {
         }
     }
 
-    public boolean createLabOrders(int patientId, int medicalRecordId, int doctorId, String[] labTestIds) {
+//    public boolean createLabOrders(int patientId, int medicalRecordId, int doctorId, String[] labTestIds) {
+//
+//        if (labTestIds == null || labTestIds.length == 0) {
+//            return false;
+//        }
+//
+//        Connection conn = null;
+//
+//        try {
+//            conn = new DBContext().conn;
+//            conn.setAutoCommit(false);
+//
+//            int batchId = createBatch(conn, patientId, medicalRecordId, doctorId);
+//
+//            for (String idStr : labTestIds) {
+//                int labTestId = Integer.parseInt(idStr);
+//
+//                processSingleLabOrder(conn, batchId, patientId, medicalRecordId, doctorId, labTestId);
+//            }
+//
+//            conn.commit();
+//            return true;
+//
+//        } catch (Exception e) {
+//            rollback(conn);
+//            e.printStackTrace();
+//            return false;
+//        } finally {
+//            close(conn);
+//        }
+//    }
+    public boolean createLabOrders(model.LabTestBatch batchOrder) {
 
-        if (labTestIds == null || labTestIds.length == 0) {
+        // Rút danh sách ID ra bằng getTestIds()
+        java.util.List<Integer> testIds = batchOrder.getTestIds();
+
+        if (testIds == null || testIds.isEmpty()) {
             return false;
         }
 
-        Connection conn = null;
+        java.sql.Connection conn = null;
 
         try {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
-            int batchId = createBatch(conn, patientId, medicalRecordId, doctorId);
+            // Gọi các hàm Get từ Model
+            int batchId = createBatch(conn, batchOrder.getPatientId(), batchOrder.getMedicalRecordId(), batchOrder.getCreatedByDoctorId());
 
-            for (String idStr : labTestIds) {
-                int labTestId = Integer.parseInt(idStr);
-
-                processSingleLabOrder(conn, batchId, patientId, medicalRecordId, doctorId, labTestId);
+            // Duyệt vòng lặp
+            for (Integer labTestId : testIds) {
+                processSingleLabOrder(conn, batchId, batchOrder.getPatientId(), batchOrder.getMedicalRecordId(), batchOrder.getCreatedByDoctorId(), labTestId);
             }
 
             conn.commit();
@@ -744,9 +777,56 @@ public class LabTestDAO extends DBContext {
         ps.executeUpdate();
     }
 
-    public boolean editLabOrders(int batchId, int patientId, int medicalRecordId, int doctorId, String[] newTestIds) {
+//    public boolean editLabOrders(int batchId, int patientId, int medicalRecordId, int doctorId, String[] newTestIds) {
+//
+//        if (newTestIds == null || newTestIds.length == 0) {
+//            return cancelLabBatch(batchId);
+//        }
+//
+//        Connection conn = null;
+//
+//        try {
+//            conn = new DBContext().conn;
+//            conn.setAutoCommit(false);
+//
+//            Map<Integer, Integer> currentMap = getCurrentTests(conn, batchId);
+//            List<Integer> currentIds = new ArrayList<>(currentMap.keySet());
+//
+//            List<Integer> newIds = parseIds(newTestIds);
+//
+//            List<Integer> toRemove = getTestsToRemove(currentIds, newIds);
+//            List<Integer> toAdd = getTestsToAdd(currentIds, newIds);
+//
+//            if (!toRemove.isEmpty()) {
+//                cancelTests(conn, batchId, toRemove, currentMap);
+//            }
+//
+//            if (!toAdd.isEmpty()) {
+//                addNewTests(conn, batchId, patientId, medicalRecordId, doctorId, toAdd);
+//            }
+//
+//            conn.commit();
+//            return true;
+//
+//        } catch (Exception e) {
+//            rollback(conn);
+//            e.printStackTrace();
+//            return false;
+//        } finally {
+//            close(conn);
+//        }
+//    }
+    public boolean editLabOrders(model.LabTestBatch batchUpdate) {
 
-        if (newTestIds == null || newTestIds.length == 0) {
+        // Rút các thông tin cần thiết từ Model ra
+        int batchId = batchUpdate.getBatchId();
+        int patientId = batchUpdate.getPatientId();
+        int medicalRecordId = batchUpdate.getMedicalRecordId();
+        int doctorId = batchUpdate.getCreatedByDoctorId();
+        List<Integer> newIds = batchUpdate.getTestIds(); // Lấy List ID mới
+
+        // Nếu rỗng -> Hủy luôn cái Lô đó
+        if (newIds == null || newIds.isEmpty()) {
             return cancelLabBatch(batchId);
         }
 
@@ -756,14 +836,16 @@ public class LabTestDAO extends DBContext {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
+            // Lấy danh sách ID hiện tại từ DB
             Map<Integer, Integer> currentMap = getCurrentTests(conn, batchId);
             List<Integer> currentIds = new ArrayList<>(currentMap.keySet());
 
-            List<Integer> newIds = parseIds(newTestIds);
-
+            // Hàm parseIds không cần nữa vì testIds đã là List<Integer> sẵn rồi
+            // Tìm ra những ID cần thêm và cần xóa
             List<Integer> toRemove = getTestsToRemove(currentIds, newIds);
             List<Integer> toAdd = getTestsToAdd(currentIds, newIds);
 
+            // Xử lý Hủy/Thêm
             if (!toRemove.isEmpty()) {
                 cancelTests(conn, batchId, toRemove, currentMap);
             }
@@ -900,7 +982,7 @@ public class LabTestDAO extends DBContext {
             stCancelOrderTests.executeUpdate();
 
             // 4. HỦY LÔ (LabTestBatch)
-            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED' WHERE BatchId = ?";
+            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED', TechnicianId = 4 WHERE BatchId = ?";
             stCancelBatch = conn.prepareStatement(sqlCancelBatch);
             stCancelBatch.setInt(1, batchId);
             stCancelBatch.executeUpdate();
@@ -1278,7 +1360,6 @@ public class LabTestDAO extends DBContext {
         }
         return list;
     }
-
 
     public java.util.List<model.LabTest> getLabTestsByBatchId(int batchId) {
         java.util.List<model.LabTest> list = new java.util.ArrayList<>();

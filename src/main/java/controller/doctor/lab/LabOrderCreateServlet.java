@@ -70,13 +70,21 @@ public class LabOrderCreateServlet extends HttpServlet {
                 return;
             }
 
-            int medicalRecordId = Integer.parseInt(recordIdStr);
-            int patientId = Integer.parseInt(patientIdStr);
+            model.LabTestBatch batchOrder = new model.LabTestBatch();
+            batchOrder.setMedicalRecordId(Integer.parseInt(recordIdStr));
+            batchOrder.setPatientId(Integer.parseInt(patientIdStr));
+            batchOrder.setCreatedByDoctorId(doctor.getUserId());
 
-            // 2. Gọi DAO tạo Lô Xét nghiệm (Hàm này chúng ta đã viết ở LabTestDAO lúc trước)
+            java.util.List<Integer> testIdList = new java.util.ArrayList<>();
+            for (String idStr : labTestIds) {
+                testIdList.add(Integer.parseInt(idStr));
+            }
+
+            batchOrder.setTestIds(testIdList);
+
             dao.LabTestDAO labDAO = new dao.LabTestDAO();
-            boolean success = labDAO.createLabOrders(patientId, medicalRecordId, doctor.getUserId(), labTestIds);
-            
+            boolean success = labDAO.createLabOrders(batchOrder);
+
             // 3. Xử lý kết quả và thông báo
             if (success) {
                 session.setAttribute("success", "The Clinical Laboratory Order Form has been successfully created.!");

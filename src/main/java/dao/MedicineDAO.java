@@ -170,56 +170,7 @@ public class MedicineDAO extends DBContext {
         }
     }
 
-    public void savePrescription(int medicalRecordId, String[] medicineIds, String[] quantities, String[] dosages, String[] notes) {
-        java.sql.Connection conn = null;
-        try {
-            conn = new DBContext().conn;
-            conn.setAutoCommit(false); // Bắt đầu Transaction
-
-            // 1. Xóa sạch đơn thuốc cũ của ca này (để tránh bị trùng lặp khi Bác sĩ sửa đơn)
-            // LƯU Ý: Đổi tên bảng PrescriptionDetail cho đúng với DB của bạn nhé
-            String sqlDelete = "DELETE FROM Prescription WHERE MedicalRecordId = ?";
-            java.sql.PreparedStatement stDel = conn.prepareStatement(sqlDelete);
-            stDel.setInt(1, medicalRecordId);
-            stDel.executeUpdate();
-
-            // 2. Nếu Bác sĩ có kê thuốc mới thì Insert toàn bộ vào
-            if (medicineIds != null && medicineIds.length > 0) {
-                String sqlInsert = "INSERT INTO Prescription (MedicalRecordId, MedicineId, Quantity, Dosage, Note) VALUES (?, ?, ?, ?, ?)";
-                java.sql.PreparedStatement stIns = conn.prepareStatement(sqlInsert);
-
-                for (int i = 0; i < medicineIds.length; i++) {
-                    stIns.setInt(1, medicalRecordId);
-                    stIns.setInt(2, Integer.parseInt(medicineIds[i]));
-                    stIns.setInt(3, Integer.parseInt(quantities[i]));
-                    stIns.setString(4, dosages[i]);
-                    // Ghi chú có thể rỗng nên phải check độ dài mảng
-                    stIns.setString(5, (notes != null && notes.length > i) ? notes[i] : "");
-                    stIns.addBatch(); // Đưa vào hàng đợi Batch
-                }
-                stIns.executeBatch(); // Thực thi Insert 1 lượt cho lẹ
-            }
-
-            conn.commit(); // Chốt Transaction
-        } catch (Exception e) {
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-            }
-            System.out.println("Lỗi lưu đơn thuốc: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (Exception e) {
-            }
-        }
-    }
+    
 
     public java.util.List<model.Prescription> getPrescriptionsByRecordId(int medicalRecordId) {
         java.util.List<model.Prescription> list = new java.util.ArrayList<>();
