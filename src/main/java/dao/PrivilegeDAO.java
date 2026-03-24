@@ -11,7 +11,7 @@ import util.DBContext;
 
 /**
  *
- * @author huytr
+ * @author Tan Vinh
  */
 public class PrivilegeDAO extends DBContext {
 

@@ -16,6 +16,10 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import model.*;
 
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "MedicalRecordEditServlet", urlPatterns = {"/doctor/medical-record/edit", "/admin/medical-record/edit"})
 public class MedicalRecordEditServlet extends HttpServlet {
 

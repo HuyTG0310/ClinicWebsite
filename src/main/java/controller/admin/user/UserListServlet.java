@@ -15,6 +15,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
+
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "UserListServlet", urlPatterns = {"/admin/user/list"})
 public class UserListServlet extends HttpServlet {
 

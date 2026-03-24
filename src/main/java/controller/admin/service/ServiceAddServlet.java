@@ -16,6 +16,11 @@ import model.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+
+/**
+ *
+ * @author Gia Huy
+ */
 @WebServlet(name = "ServiceAddServlet", urlPatterns = {"/admin/service/add", "/doctor/service/add", "/receptionist/service/add", "/lab/service/add"})
 public class ServiceAddServlet extends HttpServlet {
 

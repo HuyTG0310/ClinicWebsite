@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabOrderCancelServlet", urlPatterns = {"/doctor/lab-order/cancel", "/admin/lab-order/cancel"})
 public class LabOrderCancelServlet extends HttpServlet {

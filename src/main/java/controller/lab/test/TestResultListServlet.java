@@ -17,7 +17,7 @@ import model.TestResult;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabQueueServlet", urlPatterns = {"/lab/lab-queue/list", "/admin/lab-queue/list"})
 public class TestResultListServlet extends HttpServlet {

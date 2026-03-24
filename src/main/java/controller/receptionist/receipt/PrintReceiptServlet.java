@@ -15,6 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet(name = "PrintReceiptServlet", urlPatterns = {"/receptionist/receipt/print", "/doctor/receipt/print", "/admin/receipt/print", "/lab/receipt/print"})
 public class PrintReceiptServlet extends HttpServlet {
 

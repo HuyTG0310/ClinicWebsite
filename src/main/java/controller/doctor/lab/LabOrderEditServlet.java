@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabOrderEditServlet", urlPatterns = {"/doctor/lab-order/edit", "/admin/lab-order/edit"})
 public class LabOrderEditServlet extends HttpServlet {
@@ -48,7 +48,7 @@ public class LabOrderEditServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         model.User doctor = (model.User) session.getAttribute("user");
 
-        // Bảo mật: Trục xuất nếu chưa đăng nhập
+        // Bảo mật
         if (doctor == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -80,7 +80,7 @@ public class LabOrderEditServlet extends HttpServlet {
             // Set List vào Model (Nếu bác sĩ gỡ tick hết thì list này empty)
             batchUpdate.setTestIds(testIdList);
 
-            // Gọi DAO xử lý logic Thêm/Bớt siêu phức tạp
+            // Gọi DAO xử lý logic Thêm/Bớt
             dao.LabTestDAO labDAO = new dao.LabTestDAO();
 
             boolean success = labDAO.editLabOrders(batchUpdate);
@@ -95,7 +95,6 @@ public class LabOrderEditServlet extends HttpServlet {
                 session.setAttribute("error", "Error update lab test batch!");
             }
 
-            // Quay xe về lại đúng trang Bệnh án
             response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appointmentId);
 
         } catch (NumberFormatException e) {

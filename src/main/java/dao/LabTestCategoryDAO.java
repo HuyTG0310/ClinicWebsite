@@ -12,7 +12,7 @@ import util.DBContext;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 public class LabTestCategoryDAO extends DBContext {
 

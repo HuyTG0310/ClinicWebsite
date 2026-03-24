@@ -16,7 +16,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "LoadRoomForEdit", urlPatterns = {"/api/room-detail"})
 public class LoadRoomForEdit extends HttpServlet {
 

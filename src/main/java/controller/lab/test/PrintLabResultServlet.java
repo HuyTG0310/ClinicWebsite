@@ -17,7 +17,7 @@ import java.util.*;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "PrintLabResultServlet", urlPatterns = {"/lab/lab-test/print", "/doctor/lab-test/print", "/admin/lab-test/print"})
 public class PrintLabResultServlet extends HttpServlet {
@@ -29,7 +29,6 @@ public class PrintLabResultServlet extends HttpServlet {
             int mrId = Integer.parseInt(request.getParameter("mrId"));
 
             // 1. Lấy thông tin Hành chính của Bệnh án (Tên, tuổi, chẩn đoán, bác sĩ chỉ định...)
-            // Lưu ý: Đổi tên hàm getRecordById sao cho khớp với hàm trong MedicalRecordDAO của bạn nhé
             dao.MedicalRecordDAO mrDao = new dao.MedicalRecordDAO();
             model.MedicalRecord mr = mrDao.getRecordById(mrId);
 
@@ -39,12 +38,12 @@ public class PrintLabResultServlet extends HttpServlet {
             }
             request.setAttribute("mr", mr);
 
-            // 2. Lấy Danh sách Kết quả Xét nghiệm Tổng hợp (Tận dụng lại đúng hàm của Bác sĩ)
+            // 2. Lấy Danh sách Kết quả Xét nghiệm Tổng hợp
             dao.LabTestDAO labDao = new dao.LabTestDAO();
             List<Map<String, Object>> results = labDao.getConsolidatedLabResults(mrId);
             request.setAttribute("results", results);
                         request.setAttribute("inChargeLab", new UserDAO().getUserById(new LabTestDAO().getInChargeLabTechinicianId(mrId)).getFullName());
-            // Đẩy ra trang JSP In Ấn
+            // Đẩy ra trang JSP
             request.getRequestDispatcher("/WEB-INF/lab/printLabResult.jsp").forward(request, response);
 
         } catch (Exception e) {

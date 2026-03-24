@@ -10,6 +10,10 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.User;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet(name = "ProfileViewServlet", urlPatterns = {"/doctor/profile/view", "/receptionist/profile/view", "/lab/profile/view"})
 public class ProfileViewServlet extends HttpServlet {
 

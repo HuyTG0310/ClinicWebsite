@@ -10,6 +10,11 @@ import java.util.List;
 import model.Specialty;
 import util.DBContext;
 
+
+/**
+ *
+ * @author Tan Vinh
+ */
 public class SpecialtyDAO extends DBContext {
     
     // VIEW LIST

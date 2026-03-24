@@ -16,7 +16,7 @@ import model.TestResultDetail;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabResultDetailServlet", urlPatterns = {"/lab/lab-test/detail", "/admin/lab-test/detail"})
 public class TestResultDetailServlet extends HttpServlet {
@@ -56,7 +56,7 @@ public class TestResultDetailServlet extends HttpServlet {
             request.setAttribute("tests", tests);
             request.setAttribute("mrId", mrId);
 
-            // 🔥 CỜ BÁO HIỆU CHO JSP: ĐÂY LÀ CHẾ ĐỘ CHỈ XEM (READ-ONLY)
+            //CHẾ ĐỘ CHỈ XEM (READ-ONLY)
             request.setAttribute("isViewMode", true);
 
             dao.MedicalRecordDAO mrDao = new dao.MedicalRecordDAO();
@@ -66,7 +66,6 @@ public class TestResultDetailServlet extends HttpServlet {
             request.setAttribute("pageTitle", "Result Detail");
             request.setAttribute("activePage", "manageTest");
 
-            // Dùng chung file JSP Nhập liệu, nhờ cờ isViewMode để khóa Form lại
             request.setAttribute("contentPage", "/WEB-INF/lab/labTestEdit.jsp");
 
             request.getRequestDispatcher(layout).forward(request, response);

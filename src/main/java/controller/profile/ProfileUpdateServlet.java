@@ -9,6 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import model.User;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet(name = "ProfileUpdateServlet", urlPatterns = {"/doctor/profile/update", "/receptionist/profile/update", "/lab/profile/update"})
 public class ProfileUpdateServlet extends HttpServlet {
 

@@ -17,7 +17,7 @@ import model.*;
 
 /**
  *
- * @author huytr
+ * @author Truong Thinh
  */
 @WebServlet(name = "PrescriptionDetailServlet", urlPatterns = {"/doctor/prescription/detail", "/admin/prescription/detail"})
 public class PrescriptionDetailServlet extends HttpServlet {
@@ -49,7 +49,7 @@ public class PrescriptionDetailServlet extends HttpServlet {
         boolean isAdmin = (currentUser.getRoleId() == 1);
 
         try {
-            // 1. Lấy ID của Bệnh án từ URL (ví dụ: ?id=105)
+            // 1. Lấy ID của Bệnh án từ URL
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.isEmpty()) {
                 response.sendRedirect(basePath + "/prescription/list");
@@ -73,16 +73,14 @@ public class PrescriptionDetailServlet extends HttpServlet {
             boolean canEdit = perms[1];
 
             if (!canView) {
-                // Có Bác sĩ nào cố tình gõ URL để xem lén -> Đá văng ra ngoài!
                 request.getSession().setAttribute("error", "You have no permission to view this prescription!");
                 response.sendRedirect(basePath + "/prescription/list");
                 return;
             }
 
-            // 3. Lấy 3 luồng dữ liệu thần thánh
             Map<String, Object> recordInfo = pDao.getMedicalRecordDetail(medicalRecordId);
             List<Map<String, Object>> prescribedMedicines = pDao.getPrescribedMedicines(medicalRecordId);
-            List<Medicine> allMedicines = mDao.getAllActiveMedicines(); // HÀM CŨ CỦA BẠN ĐÂY!
+            List<Medicine> allMedicines = mDao.getAllActiveMedicines();
 
             request.setAttribute("basePath", basePath);
             request.setAttribute("record", recordInfo);

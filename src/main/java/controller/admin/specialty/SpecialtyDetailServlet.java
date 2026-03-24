@@ -10,6 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.Specialty;
 import java.io.IOException;
 
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet("/admin/specialty/detail")
 public class SpecialtyDetailServlet extends HttpServlet {
 

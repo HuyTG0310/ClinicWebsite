@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabOrderCreateServlet", urlPatterns = {"/doctor/lab-order/create", "/admin/lab-order/create"})
 public class LabOrderCreateServlet extends HttpServlet {
@@ -48,7 +48,7 @@ public class LabOrderCreateServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         model.User doctor = (model.User) session.getAttribute("user");
 
-        // Bảo mật: Chưa đăng nhập thì đá văng ra ngoài
+        // Bảo mật: Chưa đăng nhập thì vào login
         if (doctor == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -62,10 +62,10 @@ public class LabOrderCreateServlet extends HttpServlet {
             String patientIdStr = request.getParameter("patientId");
             String[] labTestIds = request.getParameterValues("labTestIds");
 
-            // 1. Kiểm tra an toàn: Bác sĩ chưa lưu bệnh án hoặc chưa chọn XN
+            // 1. Bác sĩ chưa lưu bệnh án hoặc chưa chọn XN
             if (recordIdStr == null || recordIdStr.isEmpty() || labTestIds == null || labTestIds.length == 0) {
                 session.setAttribute("error", "Please SAVE medical record first and choose AT LEAST one service!");
-                // Quay lại đúng cái ca bệnh đang khám
+                // Quay lại đúng ca bệnh đang khám
                 response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appointmentId);
                 return;
             }
@@ -91,14 +91,12 @@ public class LabOrderCreateServlet extends HttpServlet {
             } else {
                 session.setAttribute("error", "Error. Please try again!");
             }
-
-            // 4. QUAY XE: Bắn Bác sĩ về lại đúng trang Bệnh án đang mở
+            
             response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appointmentId);
 
         } catch (Exception e) {
             e.printStackTrace();
             request.getSession().setAttribute("error", "Invalid input!");
-            // Nếu lỗi nặng (VD: mất ID lịch hẹn) thì mới đá ra ngoài Hàng chờ
             response.sendRedirect(basePath + "/queue/list");
         }
     }

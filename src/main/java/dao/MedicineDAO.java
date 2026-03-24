@@ -174,8 +174,6 @@ public class MedicineDAO extends DBContext {
 
     public java.util.List<model.Prescription> getPrescriptionsByRecordId(int medicalRecordId) {
         java.util.List<model.Prescription> list = new java.util.ArrayList<>();
-
-        // Nhớ đổi tên bảng PrescriptionDetail cho khớp với DB của bạn nhé
         String sql = "SELECT MedicineId, Quantity, Dosage, Note "
                 + "FROM Prescription WHERE MedicalRecordId = ?";
 
@@ -222,11 +220,10 @@ public class MedicineDAO extends DBContext {
     public java.util.List<model.PrescriptionItem> getPrescriptionItems(int medicalRecordId) {
         java.util.List<model.PrescriptionItem> list = new java.util.ArrayList<>();
 
-        // Giả sử bạn lưu đơn thuốc vào bảng PrescriptionDetail
         String sql = "SELECT m.MedicineName, m.Unit, pd.Quantity, pd.Dosage, pd.Note "
                 + "FROM Prescription pd "
                 + "JOIN Medicine m ON pd.MedicineId = m.MedicineId "
-                + "WHERE pd.MedicalRecordId = ?"; // Hoặc nối qua bảng Prescription nếu bạn tách riêng
+                + "WHERE pd.MedicalRecordId = ?"; 
 
         try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
             

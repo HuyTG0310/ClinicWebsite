@@ -16,7 +16,7 @@ import model.TestResult;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabTestSaveServlet", urlPatterns = {"/lab/lab-test/save", "/admin/lab-test/save"})
 public class TestResultCreateServlet extends HttpServlet {

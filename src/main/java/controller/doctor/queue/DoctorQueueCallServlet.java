@@ -13,7 +13,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "DoctorQueueCallServlet", urlPatterns = {"/doctor/queue/call", "/admin/queue/call"})
 public class DoctorQueueCallServlet extends HttpServlet {
 

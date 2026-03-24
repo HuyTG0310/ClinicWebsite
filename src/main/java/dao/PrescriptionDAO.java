@@ -14,9 +14,7 @@ import util.DBContext;
  */
 public class PrescriptionDAO extends DBContext {
 
-    // =========================================================================
-    // 🔥 KHUNG SQL GỐC (Tránh lặp code)
-    // =========================================================================
+    // KHUNG SQL GỐC (Tránh lặp code)
     private final String BASE_PR_SQL = "SELECT "
             + "mr.MedicalRecordId, p.PatientId, p.FullName AS PatientName, p.Gender, "
             + "(YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, "
@@ -206,7 +204,6 @@ public class PrescriptionDAO extends DBContext {
         return list;
     }
 
-    // 🔥 Đổi tham số thành List<Prescription>
     public boolean savePrescription(int medicalRecordId, java.util.List<model.Prescription> prescriptionList) {
         java.sql.Connection conn = null;
         String sqlDelete = "DELETE FROM Prescription WHERE MedicalRecordId = ?";
@@ -234,13 +231,13 @@ public class PrescriptionDAO extends DBContext {
                         psIns.setString(4, p.getDosage());
                         psIns.setString(5, p.getNote());
 
-                        psIns.addBatch(); // Gom lại thành 1 mẻ
+                        psIns.addBatch(); 
                     }
-                    psIns.executeBatch(); // Thực thi 1 lần
+                    psIns.executeBatch(); 
                 }
             }
 
-            conn.commit(); // Chốt đơn!
+            conn.commit(); 
             return true;
 
         } catch (Exception e) {

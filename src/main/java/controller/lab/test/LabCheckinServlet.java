@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabCheckinServlet", urlPatterns = {"/lab/lab-test/checkin", "/admin/lab-test/checkin"})
 public class LabCheckinServlet extends HttpServlet {
