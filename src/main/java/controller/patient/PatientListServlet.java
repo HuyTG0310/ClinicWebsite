@@ -11,6 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "PatientList", urlPatterns = {"/admin/patient/list", "/doctor/patient/list", "/receptionist/patient/list", "/lab/patient/list"})
 public class PatientListServlet extends HttpServlet {
 
@@ -55,9 +59,6 @@ public class PatientListServlet extends HttpServlet {
 
         // Set the patient list as request attribute to pass to JSP
         request.setAttribute("patientList", patientList);
-
-        // Forward to the JSP page
-//        request.getRequestDispatcher("WEB-INF/patient/patientList.jsp").forward(request, response);
         request.setAttribute("pageTitle", "Patient List");
         request.setAttribute("activePage", "managePatient");
         request.setAttribute("contentPage", "/WEB-INF/receptionist/patient/patientList.jsp");

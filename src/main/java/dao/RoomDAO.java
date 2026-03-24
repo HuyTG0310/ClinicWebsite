@@ -7,6 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+
+/**
+ *
+ * @author Chi Duong
+ */
 public class RoomDAO extends DBContext {
     
     public List<RoomView> getAllActiveRoomsForAppointment() {

@@ -15,6 +15,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.Role;
 
+
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "RoleListServlet", urlPatterns = {"/admin/role/list"})
 public class RoleListServlet extends HttpServlet {
 

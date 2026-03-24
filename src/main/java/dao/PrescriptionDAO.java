@@ -14,9 +14,7 @@ import util.DBContext;
  */
 public class PrescriptionDAO extends DBContext {
 
-    // =========================================================================
-    // 🔥 KHUNG SQL GỐC (Tránh lặp code)
-    // =========================================================================
+    // KHUNG SQL GỐC (Tránh lặp code)
     private final String BASE_PR_SQL = "SELECT "
             + "mr.MedicalRecordId, p.PatientId, p.FullName AS PatientName, p.Gender, "
             + "(YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, "
@@ -65,7 +63,7 @@ public class PrescriptionDAO extends DBContext {
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, mrId);
-            
+
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (Exception e) {
@@ -205,16 +203,15 @@ public class PrescriptionDAO extends DBContext {
         }
         return list;
     }
-    
 
-    public boolean savePrescription(int medicalRecordId, String[] medicineIds, String[] quantities, String[] dosages, String[] notes) {
+    public boolean savePrescription(int medicalRecordId, java.util.List<model.Prescription> prescriptionList) {
         java.sql.Connection conn = null;
         String sqlDelete = "DELETE FROM Prescription WHERE MedicalRecordId = ?";
         String sqlInsert = "INSERT INTO Prescription (MedicalRecordId, MedicineId, Quantity, Dosage, Note) VALUES (?, ?, ?, ?, ?)";
 
         try {
             conn = new DBContext().conn;
-            conn.setAutoCommit(false); // Bắt đầu Transaction để an toàn dữ liệu
+            conn.setAutoCommit(false); // Bắt đầu Transaction
 
             // 1. Xóa các dòng thuốc cũ của hồ sơ này
             try (java.sql.PreparedStatement psDel = conn.prepareStatement(sqlDelete)) {
@@ -222,33 +219,34 @@ public class PrescriptionDAO extends DBContext {
                 psDel.executeUpdate();
             }
 
-            // 2. Chèn danh sách thuốc mới vào
-            if (medicineIds != null && medicineIds.length > 0) {
+            // 2. Chèn danh sách thuốc mới vào từ List Model
+            if (prescriptionList != null && !prescriptionList.isEmpty()) {
                 try (java.sql.PreparedStatement psIns = conn.prepareStatement(sqlInsert)) {
-                    for (int i = 0; i < medicineIds.length; i++) {
-                        if (medicineIds[i] == null || medicineIds[i].isEmpty()) {
-                            continue;
-                        }
 
-                        psIns.setInt(1, medicalRecordId);
-                        psIns.setInt(2, Integer.parseInt(medicineIds[i]));
-                        psIns.setInt(3, Integer.parseInt(quantities[i]));
-                        psIns.setString(4, dosages[i]);
-                        psIns.setString(5, notes[i]);
-                        psIns.addBatch(); // Dùng Batch để thực thi nhanh
+                    // Dùng vòng lặp for-each siêu gọn
+                    for (model.Prescription p : prescriptionList) {
+                        psIns.setInt(1, p.getMedicalRecordId());
+                        psIns.setInt(2, p.getMedicineId());
+                        psIns.setInt(3, p.getQuantity());
+                        psIns.setString(4, p.getDosage());
+                        psIns.setString(5, p.getNote());
+
+                        psIns.addBatch(); 
                     }
-                    psIns.executeBatch();
+                    psIns.executeBatch(); 
                 }
             }
 
-            conn.commit(); // Chốt đơn!
+            conn.commit(); 
             return true;
+
         } catch (Exception e) {
             try {
                 if (conn != null) {
                     conn.rollback();
                 }
             } catch (java.sql.SQLException ex) {
+                ex.printStackTrace();
             }
             e.printStackTrace();
             return false;
@@ -259,6 +257,7 @@ public class PrescriptionDAO extends DBContext {
                     conn.close();
                 }
             } catch (java.sql.SQLException e) {
+                e.printStackTrace();
             }
         }
     }

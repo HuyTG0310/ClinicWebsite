@@ -14,7 +14,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "UserDetailServlet", urlPatterns = {"/admin/user/detail"})
 public class UserDetailServlet extends HttpServlet {
 

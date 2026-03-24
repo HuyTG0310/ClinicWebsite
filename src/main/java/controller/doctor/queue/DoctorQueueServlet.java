@@ -17,7 +17,10 @@ import java.time.LocalDate;
 import java.util.List;
 import model.*;
 
-
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "DoctorQueueServlet", urlPatterns = {"/doctor/queue/list", "/admin/queue/list"})
 public class DoctorQueueServlet extends HttpServlet {
 

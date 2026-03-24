@@ -12,6 +12,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.Room;
 import model.RoomView;
 
+
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "RoomListServlet", urlPatterns = {"/admin/room/list", "/receptionist/room/list", "/doctor/room/list", "/lab/room/list"})
 public class RoomListServlet extends HttpServlet {
 

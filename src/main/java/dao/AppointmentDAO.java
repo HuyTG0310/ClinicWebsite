@@ -95,7 +95,7 @@ public class AppointmentDAO extends DBContext {
         // Câu SQL lấy toàn bộ thông tin chi tiết
         String sql = "SELECT a.AppointmentId, a.PatientId, a.AppointmentTime, a.Status, a.MedicalRecordId, \n"
                 + "       p.FullName AS PatientName, p.Phone AS PatientPhone, p.Gender AS PatientGender, p.DateOfBirth AS PatientDob, p.Address AS PatientAddress, \n"
-                + "       r.RoomName, s.SpecialtyName, -- 🔥 Thêm s.SpecialtyName\n"
+                + "       r.RoomName, s.SpecialtyName, \n"
                 + "       uDoc.FullName AS DoctorName, \n"
                 + "       uRec.FullName AS ReceptionistName, \n"
                 + "       so.PriceAtTime, so.PaymentMethod, \n"
@@ -103,7 +103,7 @@ public class AppointmentDAO extends DBContext {
                 + "FROM Appointment a \n"
                 + "JOIN Patient p ON a.PatientId = p.PatientId \n"
                 + "JOIN Room r ON a.RoomId = r.RoomId \n"
-                + "JOIN Specialty s ON r.SpecialtyId = s.SpecialtyId -- 🔥 Thêm JOIN bảng Specialty\n"
+                + "JOIN Specialty s ON r.SpecialtyId = s.SpecialtyId \n"
                 + "LEFT JOIN [User] uDoc ON r.CurrentDoctorId = uDoc.UserId \n"
                 + "LEFT JOIN [User] uRec ON a.CreatedBy = uRec.UserId \n"
                 + "LEFT JOIN ServiceOrder so ON so.AppointmentId = a.AppointmentId \n"
@@ -128,7 +128,7 @@ public class AppointmentDAO extends DBContext {
                 app.setPatientPhone(rs.getString("PatientPhone"));
                 app.setPatientGender(rs.getString("PatientGender"));
                 app.setPatientDob(rs.getDate("PatientDob"));
-                // Nếu bạn có PatientAddress thì set thêm, không thì bỏ qua
+                // Nếu có PatientAddress thì set thêm, không thì bỏ qua
 
                 app.setSpecialtyName(rs.getString("SpecialtyName"));
                 app.setPatientAddress(rs.getString("PatientAddress"));
@@ -161,12 +161,10 @@ public class AppointmentDAO extends DBContext {
             conn = new DBContext().conn;
             conn.setAutoCommit(false); // BẮT ĐẦU TRANSACTION
 
-            // ==========================================
             // BƯỚC 1: TẠO LỊCH HẸN (APPOINTMENT) VÀ LẤY ID CỦA NÓ
-            // ==========================================
             String sqlApp = "INSERT INTO Appointment (PatientId, RoomId, CreatedBy, Status) VALUES (?, ?, ?, 'WAITING')";
 
-            // 🔥 Yêu cầu SQL trả về ID của Lịch khám
+            // trả về ID của Lịch khám
             stApp = conn.prepareStatement(sqlApp, PreparedStatement.RETURN_GENERATED_KEYS);
             stApp.setInt(1, patientId);
             stApp.setInt(2, roomId);
@@ -184,10 +182,8 @@ public class AppointmentDAO extends DBContext {
                 generatedAppId = rsApp.getInt(1);
             }
 
-            // ==========================================
-            // BƯỚC 2: TẠO SERVICE ORDER (GẮN CÁI AppointmentId VÀO)
-            // ==========================================
-            int clinicalExamServiceId = 1; // ID dịch vụ khám lâm sàng (Check lại DB của bạn)
+            // BƯỚC 2: TẠO SERVICE ORDER
+            int clinicalExamServiceId = 1; // ID dịch vụ khám lâm sàng (mặc định là 1)
 
             double examPrice = new ServiceDAO().getById(1).getCurrentPrice().doubleValue();     // Giá tiền khám
 
@@ -195,18 +191,16 @@ public class AppointmentDAO extends DBContext {
             String status = "CASH".equals(paymentMethod) ? "PAID" : "UNPAID";
             String paidAtFragment = "CASH".equals(paymentMethod) ? "GETDATE()" : "NULL";
 
-            // Có tổng cộng 8 dấu chấm hỏi (?)
             String sqlOrder = "INSERT INTO ServiceOrder "
                     + "(PatientId, AppointmentId, MedicalRecordId, ServiceId, AssignedById, CashierId, PriceAtTime, Status, PaidAt, PaymentMethod) "
                     + "VALUES (?, ?, NULL, ?, ?, ?, ?, ?, " + paidAtFragment + ", ?)";
 
             stOrder = conn.prepareStatement(sqlOrder, PreparedStatement.RETURN_GENERATED_KEYS);
 
-            // Gán giá trị cẩn thận theo ĐÚNG THỨ TỰ các dấu ?
             stOrder.setInt(1, patientId);             // ?: PatientId
-            stOrder.setInt(2, generatedAppId);        // ?: AppointmentId (Móc nối quan trọng nhất)
+            stOrder.setInt(2, generatedAppId);        // ?: AppointmentId
             stOrder.setInt(3, clinicalExamServiceId); // ?: ServiceId
-            stOrder.setInt(4, receptionistId);        // ?: AssignedById (Lễ tân chỉ định)
+            stOrder.setInt(4, receptionistId);        // ?: AssignedById
 
             // ?: CashierId (Người thu tiền: Nếu CASH thì là Lễ tân, BANKING thì để NULL)
             if ("CASH".equals(paymentMethod)) {
@@ -230,7 +224,7 @@ public class AppointmentDAO extends DBContext {
                 generatedServiceOrderId = rsOrder.getInt(1);
             }
 
-            // THÀNH CÔNG -> CHỐT ĐƠN
+            // THÀNH CÔNG
             conn.commit();
             return generatedServiceOrderId; // Trả về ID Hóa đơn
 
@@ -245,7 +239,6 @@ public class AppointmentDAO extends DBContext {
             }
             return -1;
         } finally {
-            // Đóng kết nối...
             try {
                 if (rsApp != null) {
                     rsApp.close();
@@ -367,10 +360,10 @@ public class AppointmentDAO extends DBContext {
         // LEFT JOIN với User để lấy tên Bác sĩ đang ngồi phòng đó
         sql.append("LEFT JOIN [User] u ON r.CurrentDoctorId = u.UserId ");
 
-        // 🔥 LÁ CHẮN KIM CƯƠNG: JOIN trực tiếp với hóa đơn của chính Lịch khám này!
+        // JOIN trực tiếp với hóa đơn của chính Lịch khám này!
         sql.append("JOIN ServiceOrder so ON a.AppointmentId = so.AppointmentId ");
 
-        // Mẹo SQL động: Dùng WHERE 1=1 để nối AND cho dễ
+        //Dùng WHERE 1=1 để nối AND cho dễ
         sql.append("WHERE 1=1 ");
 
         // Nếu KHÔNG PHẢI Admin -> Bắt buộc lọc theo Bác sĩ đang đăng nhập
@@ -436,9 +429,6 @@ public class AppointmentDAO extends DBContext {
                     app.setPatientGender(rs.getString("PatientGender"));
                     app.setPatientDob(rs.getDate("PatientDob"));
                     app.setRoomName(rs.getString("RoomName"));
-
-                    // Bạn có thể tạo thêm biến String doctorName trong model Appointment để hứng cái này 
-                    // cho Admin hiển thị ngoài view (app.setDoctorName(rs.getString("DoctorName"));)
                     list.add(app);
                 }
             }

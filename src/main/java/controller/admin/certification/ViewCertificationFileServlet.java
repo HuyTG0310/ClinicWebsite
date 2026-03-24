@@ -40,7 +40,7 @@ public class ViewCertificationFileServlet extends HttpServlet {
             return;
         }
 
-        // 🔥 FIX MIME TYPE NULL
+        // FIX MIME TYPE NULL
         String mime = getServletContext().getMimeType(file.getName());
         if (mime == null) {
             mime = "application/octet-stream";

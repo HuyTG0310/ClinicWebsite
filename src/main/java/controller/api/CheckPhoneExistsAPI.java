@@ -10,9 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * CheckPhoneExistsAPI - API to check if phone number already exists
  * 
- * @author ClinicWebsite
+ * @author Chi Duong
  */
 @WebServlet(name = "CheckPhoneExistsAPI", urlPatterns = { "/api/checkPhoneExists" })
 public class CheckPhoneExistsAPI extends HttpServlet {

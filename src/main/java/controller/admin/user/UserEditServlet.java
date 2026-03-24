@@ -15,7 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import model.*;
 
-
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "UserEditServlet", urlPatterns = {"/admin/user/edit"})
 public class UserEditServlet extends HttpServlet {
 

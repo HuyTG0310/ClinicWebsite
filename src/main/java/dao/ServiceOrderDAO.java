@@ -5,6 +5,11 @@ import java.util.*;
 import model.*;
 import util.DBContext;
 
+
+/**
+ *
+ * @author Tai Loi
+ */
 public class ServiceOrderDAO extends DBContext {
 
     public List<model.ServiceOrder> getServiceOrders(String dateStr, String paymentMethod, String status) {
@@ -159,7 +164,7 @@ public class ServiceOrderDAO extends DBContext {
         }
 
         // ====================================================================
-        // 🔥 PHÂN NHÁNH NGHIỆP VỤ KẾ TOÁN (ĐỒNG BỘ 100% VỚI DANH SÁCH)
+        // PHÂN NHÁNH NGHIỆP VỤ KẾ TOÁN
         // ====================================================================
         if ("UNPAID".equals(status)) {
             // 1. CHỜ THU TIỀN

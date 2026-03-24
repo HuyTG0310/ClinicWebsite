@@ -16,6 +16,11 @@ import jakarta.servlet.http.HttpSession;
 import model.MedicalRecord;
 import model.User;
 
+
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "MedicalRecordPrintServlet", urlPatterns = {"/doctor/medical-record/print", "/admin/medical-record/print"})
 public class MedicalRecordPrintServlet extends HttpServlet {
 

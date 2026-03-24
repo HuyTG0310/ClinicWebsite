@@ -16,6 +16,10 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import model.*;
 
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "MedicalRecordEditServlet", urlPatterns = {"/doctor/medical-record/edit", "/admin/medical-record/edit"})
 public class MedicalRecordEditServlet extends HttpServlet {
 
@@ -228,17 +232,20 @@ public class MedicalRecordEditServlet extends HttpServlet {
                 mr.setFollowUpStatus("PENDING");
             }
 
-            String action = request.getParameter("action");
+             String action = request.getParameter("action");
             dao.MedicalRecordDAO mrDAO = new dao.MedicalRecordDAO();
-            dao.MedicineDAO medDAO = new dao.MedicineDAO();
+            
+            // 🔥 THAY ĐỔI 1: Không dùng MedicineDAO nữa, gọi trực tiếp PrescriptionDAO đã được tối ưu
+            dao.PrescriptionDAO presDAO = new dao.PrescriptionDAO(); 
 
             // 🔥 XỬ LÝ RIÊNG CHO LUỒNG "LƯU THAY ĐỔI BỆNH ÁN CŨ"
             if ("update_only".equals(action)) {
-                mrDAO.updateCompletedMedicalRecord(mr); // Gọi hàm mới tạo
-                medDAO.savePrescription(medicalRecordId, medicineIds, quantities, dosages, notes);
+                mrDAO.updateCompletedMedicalRecord(mr); 
+                
+                // 🔥 THAY ĐỔI 2: Truyền thẳng cái Model prescriptionList vào
+                presDAO.savePrescription(medicalRecordId, prescriptionList);
 
                 request.getSession().setAttribute("success", "Update medical record successful!");
-                // Đá ngược về trang Chi tiết Bệnh án (chứ không phải hàng chờ)
                 response.sendRedirect(basePath + "/medical-record/detail?id=" + medicalRecordId);
                 return;
             }
@@ -256,11 +263,10 @@ public class MedicalRecordEditServlet extends HttpServlet {
 
                 //kiểm tra các chỉ định xn phải completed
                 if (medicalRecordId > 0) {
-                    dao.LabTestDAO labDao = new dao.LabTestDAO(); // Đảm bảo gọi đúng class DAO chứa hàm của bạn
+                    dao.LabTestDAO labDao = new dao.LabTestDAO(); 
                     java.util.List<model.LabTestBatch> batches = labDao.getBatchesForMedicalRecord(medicalRecordId);
 
                     for (model.LabTestBatch batch : batches) {
-                        // Nếu có 1 lô nào đó chưa COMPLETED (đang CREATED hoặc IN_PROGRESS)
                         if (!"COMPLETED".equals(batch.getStatus())) {
                             request.getSession().setAttribute("error", "Can not finish examination! Patient has ongoing clinical tests that have not been completed.");
                             response.sendRedirect(basePath + "/medical-record/edit?appointmentId=" + appointmentId);
@@ -270,12 +276,23 @@ public class MedicalRecordEditServlet extends HttpServlet {
                 }
             }
 
+            // 🔥 THAY ĐỔI 3: Xử lý gán ID nếu là Bệnh án tạo mới
             if (medicalRecordId > 0) {
                 mrDAO.updateMedicalRecord(mr, appointmentId, nextStatus);
             } else {
+                // Nếu là ca mới, DB sẽ sinh ra ID mới. Ta hứng lấy ID đó.
                 medicalRecordId = mrDAO.saveMedicalRecord(mr, appointmentId, nextStatus);
+                
+                // Cập nhật cái ID mới tinh này vào từng viên thuốc trong Model
+                if (prescriptionList != null) {
+                    for (model.Prescription p : prescriptionList) {
+                        p.setMedicalRecordId(medicalRecordId);
+                    }
+                }
             }
-            medDAO.savePrescription(medicalRecordId, medicineIds, quantities, dosages, notes);
+            
+            // 🔥 THAY ĐỔI 4: Truyền thẳng Model xuống DAO
+            presDAO.savePrescription(medicalRecordId, prescriptionList);
 
             if ("complete".equals(action)) {
                 request.getSession().setAttribute("success", "Finished examination!");

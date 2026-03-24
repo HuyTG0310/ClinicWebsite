@@ -17,7 +17,7 @@ import model.*;
 
 /**
  *
- * @author huytr
+ * @author Truong Thinh
  */
 @WebServlet(name = "PrescriptionDetailServlet", urlPatterns = {"/doctor/prescription/detail", "/admin/prescription/detail"})
 public class PrescriptionDetailServlet extends HttpServlet {
@@ -49,7 +49,7 @@ public class PrescriptionDetailServlet extends HttpServlet {
         boolean isAdmin = (currentUser.getRoleId() == 1);
 
         try {
-            // 1. Lấy ID của Bệnh án từ URL (ví dụ: ?id=105)
+            // 1. Lấy ID của Bệnh án từ URL
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.isEmpty()) {
                 response.sendRedirect(basePath + "/prescription/list");
@@ -73,16 +73,14 @@ public class PrescriptionDetailServlet extends HttpServlet {
             boolean canEdit = perms[1];
 
             if (!canView) {
-                // Có Bác sĩ nào cố tình gõ URL để xem lén -> Đá văng ra ngoài!
                 request.getSession().setAttribute("error", "You have no permission to view this prescription!");
                 response.sendRedirect(basePath + "/prescription/list");
                 return;
             }
 
-            // 3. Lấy 3 luồng dữ liệu thần thánh
             Map<String, Object> recordInfo = pDao.getMedicalRecordDetail(medicalRecordId);
             List<Map<String, Object>> prescribedMedicines = pDao.getPrescribedMedicines(medicalRecordId);
-            List<Medicine> allMedicines = mDao.getAllActiveMedicines(); // HÀM CŨ CỦA BẠN ĐÂY!
+            List<Medicine> allMedicines = mDao.getAllActiveMedicines();
 
             request.setAttribute("basePath", basePath);
             request.setAttribute("record", recordInfo);
@@ -130,10 +128,32 @@ public class PrescriptionDetailServlet extends HttpServlet {
 
         try {
             int medicalRecordId = Integer.parseInt(mrIdStr);
+
+            // 🔥 ĐÓNG GÓI DỮ LIỆU THÀNH MODEL
+            java.util.List<model.Prescription> prescriptionList = new java.util.ArrayList<>();
+
+            if (medicineIds != null && medicineIds.length > 0) {
+                for (int i = 0; i < medicineIds.length; i++) {
+                    if (medicineIds[i] == null || medicineIds[i].trim().isEmpty()) {
+                        continue; // Bỏ qua nếu dòng đó bị trống
+                    }
+
+                    model.Prescription p = new model.Prescription();
+                    p.setMedicalRecordId(medicalRecordId);
+                    p.setMedicineId(Integer.parseInt(medicineIds[i]));
+                    p.setQuantity(Integer.parseInt(quantities[i]));
+                    p.setDosage(dosages[i]);
+                    // Tránh lỗi NullPointerException nếu note bị null
+                    p.setNote(notes != null && notes.length > i ? notes[i] : "");
+
+                    prescriptionList.add(p);
+                }
+            }
+
             PrescriptionDAO dao = new PrescriptionDAO();
 
-            // 2. Gọi hàm lưu vào Database
-            boolean success = dao.savePrescription(medicalRecordId, medicineIds, quantities, dosages, notes);
+            // 2. Gọi hàm lưu vào Database (Chỉ truyền ID và cái List)
+            boolean success = dao.savePrescription(medicalRecordId, prescriptionList);
 
             if (success) {
                 request.getSession().setAttribute("success", "Update prescription successfully!");
@@ -141,7 +161,7 @@ public class PrescriptionDetailServlet extends HttpServlet {
                 request.getSession().setAttribute("error", "Update error.");
             }
 
-            // 3. Quay trở lại trang chi tiết của chính hồ sơ đó
+            // 3. Quay trở lại trang chi tiết
             response.sendRedirect(basePath + "/prescription/detail?id=" + medicalRecordId);
 
         } catch (Exception e) {

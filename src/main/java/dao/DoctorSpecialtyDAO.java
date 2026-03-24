@@ -14,9 +14,6 @@ import util.DBContext;
  */
 public class DoctorSpecialtyDAO extends DBContext {
 
-    /* =========================================
-       1. Lấy danh sách SpecialtyId của Doctor
-       ========================================= */
     public List<Integer> getSpecialtyIdsByDoctor(int doctorId) {
 
         List<Integer> list = new ArrayList<>();
@@ -38,9 +35,7 @@ public class DoctorSpecialtyDAO extends DBContext {
         return list;
     }
 
-    /* =========================================
-       2. Lấy Primary SpecialtyId của Doctor
-       ========================================= */
+
     public Integer getPrimarySpecialtyId(int doctorId) {
 
         String sql = "            SELECT SpecialtyId\n"
@@ -60,9 +55,7 @@ public class DoctorSpecialtyDAO extends DBContext {
         return null;
     }
 
-    /* =========================================
-       3. Xoá toàn bộ Specialty của Doctor
-       ========================================= */
+
     public void deleteByDoctor(int doctorId) {
 
         String sql = "DELETE FROM DoctorSpecialty WHERE UserId = ?";
@@ -75,9 +68,7 @@ public class DoctorSpecialtyDAO extends DBContext {
         }
     }
 
-    /* =========================================
-       4. Insert 1 Specialty cho Doctor
-       ========================================= */
+
     public void insert(int doctorId, int specialtyId, boolean isPrimary) {
 
         String sql = "            INSERT INTO DoctorSpecialty (UserId, SpecialtyId, IsPrimary)\n"

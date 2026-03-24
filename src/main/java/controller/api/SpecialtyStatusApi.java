@@ -16,6 +16,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "SpecialtyStatusApi", urlPatterns = {"/api/specialty-status"})
 public class SpecialtyStatusApi extends HttpServlet {
 

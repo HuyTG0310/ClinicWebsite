@@ -244,7 +244,7 @@ public class MedicalRecordDAO extends DBContext {
                 return -1;
             }
 
-            // 🔥 LẤY ID CỦA BỆNH ÁN VỪA LƯU
+            // LẤY ID CỦA BỆNH ÁN VỪA LƯU
             int newMedicalRecordId = -1;
             try (ResultSet generatedKeys = stRecord.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -412,7 +412,7 @@ public class MedicalRecordDAO extends DBContext {
 
     public boolean[] checkPermissionDetail(int medicalRecordId, int currentUserId, boolean isAdmin) {
         if (isAdmin) {
-            return new boolean[]{true, true}; // Admin trùm cuối
+            return new boolean[]{true, true}; // Admin
         }
         boolean[] perms = new boolean[]{false, false};
         String sql = "SELECT "
@@ -535,7 +535,6 @@ public class MedicalRecordDAO extends DBContext {
     public java.util.Map<String, String> getPrescriptionPrintInfo(int medicalRecordId) {
         java.util.Map<String, String> info = new java.util.HashMap<>();
 
-        // Cần xem lại cấu trúc DB của bạn để JOIN cho chuẩn nhé (Dưới đây là form chuẩn chung)
         String sql = "SELECT \n"
                 + "    p.FullName AS PatientName, \n"
                 + "    (YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, \n"

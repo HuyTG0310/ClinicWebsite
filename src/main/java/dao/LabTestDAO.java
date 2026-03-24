@@ -13,9 +13,10 @@ import model.*;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 public class LabTestDAO extends DBContext {
+
     public void loadTestsForBatch(LabTestBatch batch) {
 
         String sql = "SELECT t.LabTestId, t.TestName "
@@ -46,7 +47,6 @@ public class LabTestDAO extends DBContext {
         batch.setTestIds(testIds);
         batch.setTestNames(testNames);
     }
-
 
     private static final String SQL_GET_SNAPSHOT
             = "SELECT TOP 1 rr.RefMin, rr.RefMax, p.Unit "
@@ -349,10 +349,9 @@ public class LabTestDAO extends DBContext {
 
     private int insertLabTest(Connection conn, int serviceId, LabTest labTest) throws Exception {
         String sql = "INSERT INTO LabTest (ServiceId, TestCode, TestName, CategoryId, IsPanel, SortOrder, IsActive) VALUES (?, ?, ?, ?, ?, ?, 1)";
-        
-        
+
         int nextSortOrder = getNextSortOrder(conn, labTest.getCategoryId());
-        
+
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, serviceId);
@@ -372,10 +371,10 @@ public class LabTestDAO extends DBContext {
 
         throw new RuntimeException("Insert LabTest failed");
     }
-    
+
     private int getNextSortOrder(Connection conn, int categoryId) throws Exception {
         String sql = "SELECT ISNULL(MAX(SortOrder), 0) + 1 AS NextOrder FROM LabTest WHERE CategoryId = ?";
-        
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, categoryId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -455,24 +454,28 @@ public class LabTestDAO extends DBContext {
         }
     }
 
-    public boolean createLabOrders(int patientId, int medicalRecordId, int doctorId, String[] labTestIds) {
 
-        if (labTestIds == null || labTestIds.length == 0) {
+    public boolean createLabOrders(model.LabTestBatch batchOrder) {
+
+        // Rút danh sách ID ra bằng getTestIds()
+        java.util.List<Integer> testIds = batchOrder.getTestIds();
+
+        if (testIds == null || testIds.isEmpty()) {
             return false;
         }
 
-        Connection conn = null;
+        java.sql.Connection conn = null;
 
         try {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
-            int batchId = createBatch(conn, patientId, medicalRecordId, doctorId);
+            // Gọi các hàm Get từ Model
+            int batchId = createBatch(conn, batchOrder.getPatientId(), batchOrder.getMedicalRecordId(), batchOrder.getCreatedByDoctorId());
 
-            for (String idStr : labTestIds) {
-                int labTestId = Integer.parseInt(idStr);
-
-                processSingleLabOrder(conn, batchId, patientId, medicalRecordId, doctorId, labTestId);
+            // Duyệt vòng lặp
+            for (Integer labTestId : testIds) {
+                processSingleLabOrder(conn, batchId, batchOrder.getPatientId(), batchOrder.getMedicalRecordId(), batchOrder.getCreatedByDoctorId(), labTestId);
             }
 
             conn.commit();
@@ -744,9 +747,17 @@ public class LabTestDAO extends DBContext {
         ps.executeUpdate();
     }
 
-    public boolean editLabOrders(int batchId, int patientId, int medicalRecordId, int doctorId, String[] newTestIds) {
+    public boolean editLabOrders(model.LabTestBatch batchUpdate) {
 
-        if (newTestIds == null || newTestIds.length == 0) {
+        // Rút các thông tin cần thiết từ Model ra
+        int batchId = batchUpdate.getBatchId();
+        int patientId = batchUpdate.getPatientId();
+        int medicalRecordId = batchUpdate.getMedicalRecordId();
+        int doctorId = batchUpdate.getCreatedByDoctorId();
+        List<Integer> newIds = batchUpdate.getTestIds(); // Lấy List ID mới
+
+        // Nếu rỗng -> Hủy luôn Lô đó
+        if (newIds == null || newIds.isEmpty()) {
             return cancelLabBatch(batchId);
         }
 
@@ -756,14 +767,16 @@ public class LabTestDAO extends DBContext {
             conn = new DBContext().conn;
             conn.setAutoCommit(false);
 
+            // Lấy danh sách ID hiện tại từ DB
             Map<Integer, Integer> currentMap = getCurrentTests(conn, batchId);
             List<Integer> currentIds = new ArrayList<>(currentMap.keySet());
 
-            List<Integer> newIds = parseIds(newTestIds);
-
+            // Hàm parseIds không cần nữa vì testIds đã là List<Integer> sẵn rồi
+            // Tìm ra những ID cần thêm và cần xóa
             List<Integer> toRemove = getTestsToRemove(currentIds, newIds);
             List<Integer> toAdd = getTestsToAdd(currentIds, newIds);
 
+            // Xử lý Hủy/Thêm
             if (!toRemove.isEmpty()) {
                 cancelTests(conn, batchId, toRemove, currentMap);
             }
@@ -886,7 +899,7 @@ public class LabTestDAO extends DBContext {
             }
 
             // 2. HỦY TẤT CẢ HÓA ĐƠN (ServiceOrder) liên quan đến Lô này
-            // Phép thuật SQL: Dùng IN kết hợp SubQuery để tìm ra đúng hóa đơn của Lô
+            // Dùng IN kết hợp SubQuery để tìm ra đúng hóa đơn của Lô
             String sqlCancelOrders = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
                     + "WHERE ServiceOrderId IN (SELECT ServiceOrderId FROM LabOrderTest WHERE BatchId = ?)";
             stCancelOrders = conn.prepareStatement(sqlCancelOrders);
@@ -900,7 +913,7 @@ public class LabTestDAO extends DBContext {
             stCancelOrderTests.executeUpdate();
 
             // 4. HỦY LÔ (LabTestBatch)
-            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED' WHERE BatchId = ?";
+            String sqlCancelBatch = "UPDATE LabTestBatch SET Status = 'CANCELLED', TechnicianId = 4 WHERE BatchId = ?";
             stCancelBatch = conn.prepareStatement(sqlCancelBatch);
             stCancelBatch.setInt(1, batchId);
             stCancelBatch.executeUpdate();
@@ -988,7 +1001,7 @@ public class LabTestDAO extends DBContext {
     public java.util.List<model.LabTestParameter> getParametersByLabTestId(int labTestId) {
         java.util.Map<Integer, model.LabTestParameter> paramMap = new java.util.LinkedHashMap<>();
 
-        // 🔥 LEFT JOIN: Lấy Parameter và tất cả các Range của nó (nếu có)
+        // LEFT JOIN: Lấy Parameter và tất cả các Range của nó (nếu có)
         String sql = "SELECT p.*, r.RangeId, r.Gender, r.AgeMinDays, r.AgeMaxDays, r.RefMin, r.RefMax "
                 + "FROM LabTestParameter p "
                 + "LEFT JOIN LabReferenceRange r ON p.ParameterId = r.ParameterId AND r.IsActive = 1 "
@@ -1059,7 +1072,7 @@ public class LabTestDAO extends DBContext {
                 + "t.TestName, "
                 + "t.IsPanel, "
                 + "p.ParameterName, "
-                // 🔥 SNAPSHOT LOGIC: Ưu tiên LabResult (đã lưu). Nếu chưa lưu, mò vào Quy tắc tham chiếu (rr)
+                // SNAPSHOT LOGIC: Ưu tiên LabResult (đã lưu). Nếu chưa lưu -> Quy tắc tham chiếu (rr)
                 + "COALESCE(r.Unit, p.Unit) AS Unit, "
                 + "COALESCE(r.RefMin, rr.RefMin) AS RefMin, "
                 + "COALESCE(r.RefMax, rr.RefMax) AS RefMax, "
@@ -1069,12 +1082,12 @@ public class LabTestDAO extends DBContext {
                 + "lot.Status, "
                 + "lot.RejectReason "
                 + "FROM LabTestBatch b "
-                + "JOIN Patient pat ON b.PatientId = pat.PatientId " // 🔥 Cần bảng Patient để tính Tuổi, Giới tính
+                + "JOIN Patient pat ON b.PatientId = pat.PatientId " // Cần bảng Patient để tính Tuổi, Giới tính
                 + "JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
                 + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
                 + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
                 + "JOIN LabTestParameter p ON t.LabTestId = p.LabTestId "
-                // 🔥 LEFT JOIN Quyết định: Tìm Range phù hợp nếu chưa có Snapshot
+                // LEFT JOIN: Tìm Range phù hợp nếu chưa có Snapshot
                 + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId "
                 + "     AND rr.IsActive = 1 "
                 + "     AND ("
@@ -1096,8 +1109,6 @@ public class LabTestDAO extends DBContext {
             try (java.sql.ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     java.util.Map<String, Object> map = new java.util.HashMap<>();
-
-                    // Giữ nguyên 100% logic Map Data của Chủ tịch
                     map.put("categoryName", rs.getString("CategoryName"));
                     map.put("batchId", rs.getInt("BatchId"));
                     map.put("testName", rs.getString("TestName"));
@@ -1160,7 +1171,7 @@ public class LabTestDAO extends DBContext {
         try {
             conn = new DBContext().conn;
 
-            // 🔥 1. THÊM b.Status AS PhysicalStatus ĐỂ LẤY TRẠNG THÁI GỐC CỦA LỄ TÂN
+            // 1. THÊM b.Status AS PhysicalStatus ĐỂ LẤY TRẠNG THÁI GỐC CỦA LỄ TÂN
             String sqlBatch = "SELECT b.BatchId, b.Status AS PhysicalStatus, u.FullName AS DoctorName, b.CreatedAt, "
                     + "SUM(CASE WHEN lot.Status != 'REJECTED' AND lot.Status != 'CANCELLED' THEN 1 ELSE 0 END) AS TotalValid, "
                     + "SUM(CASE WHEN lot.Status = 'COMPLETED' THEN 1 ELSE 0 END) AS TotalCompleted "
@@ -1168,7 +1179,7 @@ public class LabTestDAO extends DBContext {
                     + "LEFT JOIN [User] u ON b.CreatedByDoctorId = u.UserId "
                     + "LEFT JOIN LabOrderTest lot ON b.BatchId = lot.BatchId "
                     + "WHERE b.MedicalRecordId = ? AND b.Status != 'CANCELLED' "
-                    + "GROUP BY b.BatchId, b.Status, u.FullName, b.CreatedAt " // Nhớ thêm b.Status vào GROUP BY
+                    + "GROUP BY b.BatchId, b.Status, u.FullName, b.CreatedAt " 
                     + "ORDER BY b.BatchId DESC";
 
             stBatch = conn.prepareStatement(sqlBatch);
@@ -1189,26 +1200,23 @@ public class LabTestDAO extends DBContext {
                 batch.setDoctorName(rsBatch.getString("DoctorName"));
                 batch.setOrderTime(rsBatch.getTimestamp("CreatedAt"));
 
-                // =========================================================
-                // 🔥 LOGIC TÍNH TOÁN TRẠNG THÁI LAI (HYBRID STATUS)
-                // =========================================================
+                //  LOGIC TÍNH TOÁN TRẠNG THÁI LAI (HYBRID STATUS)
                 int totalValid = rsBatch.getInt("TotalValid");
                 int totalCompleted = rsBatch.getInt("TotalCompleted");
                 String physicalStatus = rsBatch.getString("PhysicalStatus"); // Lấy trạng thái thực tế từ DB
 
                 String finalStatus;
 
-                // Cảnh 1: Nếu đã làm xong 100% các test hợp lệ (hoặc Lab từ chối sạch sành sanh)
+                // Nếu đã làm xong 100% các test hợp lệ (hoặc Lab từ chối sạch sành sanh)
                 if (totalValid == 0 || totalCompleted == totalValid) {
                     finalStatus = "COMPLETED";
-                } // Cảnh 2: Nếu chưa xong, lấy đúng trạng thái gốc dưới DB 
+                } // Nếu chưa xong, lấy đúng trạng thái gốc dưới DB 
                 // (Chưa đóng tiền = CREATED, Đã đóng tiền = IN_PROGRESS)
                 else {
                     finalStatus = physicalStatus;
                 }
 
                 batch.setStatus(finalStatus);
-                // =========================================================
 
                 java.util.List<Integer> testIds = new java.util.ArrayList<>();
                 java.util.List<String> testNames = new java.util.ArrayList<>();
@@ -1278,7 +1286,6 @@ public class LabTestDAO extends DBContext {
         }
         return list;
     }
-
 
     public java.util.List<model.LabTest> getLabTestsByBatchId(int batchId) {
         java.util.List<model.LabTest> list = new java.util.ArrayList<>();
@@ -1439,9 +1446,7 @@ public class LabTestDAO extends DBContext {
         return queue;
     }
 
-    // =========================================================================
-    // 🔥 HÀM TIỆN ÍCH CHUẨN HÓA DỮ LIỆU
-    // =========================================================================
+    // HÀM TIỆN ÍCH CHUẨN HÓA DỮ LIỆU
     private model.TestResult mapResultSetToTestResult(java.sql.ResultSet rs) throws Exception {
         model.TestResult row = new model.TestResult();
         row.setMedicalRecordId(rs.getInt("MedicalRecordId"));
@@ -1470,7 +1475,7 @@ public class LabTestDAO extends DBContext {
         String sqlOrder = "UPDATE ServiceOrder SET Status = 'CANCELLED' "
                 + "WHERE ServiceOrderId = (SELECT ServiceOrderId FROM LabOrderTest WHERE LabOrderTestId = ?)";
 
-        // MỚI: Cập nhật KTV vào Batch
+        // Cập nhật KTV vào Batch
         String sqlBatch = "UPDATE LabTestBatch SET TechnicianId = ? "
                 + "WHERE BatchId = (SELECT BatchId FROM LabOrderTest WHERE LabOrderTestId = ?)";
 
@@ -1481,7 +1486,7 @@ public class LabTestDAO extends DBContext {
 
         try {
             conn = new DBContext().conn;
-            conn.setAutoCommit(false); // 🔥 Bật khiên Transaction lên
+            conn.setAutoCommit(false); // 
 
             // 1. Cập nhật bảng Xét nghiệm (LabOrderTest)
             stTest = conn.prepareStatement(sqlTest);
@@ -1630,7 +1635,7 @@ public class LabTestDAO extends DBContext {
                 + "JOIN LabTest t ON lot.LabTestId = t.LabTestId "
                 + "JOIN LabTestCategory c ON t.CategoryId = c.CategoryId "
                 + "JOIN LabTestParameter p ON t.LabTestId = p.LabTestId "
-                // 💎 LEFT JOIN Quyết định: Tìm Range phù hợp với bệnh nhân này
+                // LEFT JOIN: Tìm Range phù hợp với bệnh nhân này
                 + "LEFT JOIN LabReferenceRange rr ON p.ParameterId = rr.ParameterId "
                 + "     AND rr.IsActive = 1 "
                 + "     AND ("
@@ -1653,7 +1658,6 @@ public class LabTestDAO extends DBContext {
             st.setInt(1, medicalRecordId);
             try (java.sql.ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-//                    java.util.Map<String, Object> map = new java.util.HashMap<>();
                     TestResultDetail result = new TestResultDetail();
                     result.setBatchId(rs.getInt("BatchId"));
                     result.setCategoryName(rs.getString("CategoryName"));

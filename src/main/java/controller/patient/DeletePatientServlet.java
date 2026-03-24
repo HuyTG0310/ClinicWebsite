@@ -9,6 +9,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "DeletePatient", urlPatterns = {"/admin/patient/delete", "/doctor/patient/delete", "/receptionist/patient/delete",  "/lab/patient/delete"})
 public class DeletePatientServlet extends HttpServlet {
 

@@ -14,7 +14,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Appointment;
 
-
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "AppointmentDetailServlet", urlPatterns = {"/receptionist/appointment/detail", "/doctor/appointment/detail", "/admin/appointment/detail", "/lab/appointment/detail"})
 public class AppointmentDetailServlet extends HttpServlet {
 
