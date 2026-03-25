@@ -225,7 +225,7 @@ public class PrescriptionDAO extends DBContext {
 
                     // Dùng vòng lặp for-each siêu gọn
                     for (model.Prescription p : prescriptionList) {
-                        psIns.setInt(1, p.getMedicalRecordId());
+                        psIns.setInt(1, medicalRecordId);
                         psIns.setInt(2, p.getMedicineId());
                         psIns.setInt(3, p.getQuantity());
                         psIns.setString(4, p.getDosage());

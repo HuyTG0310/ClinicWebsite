@@ -10,9 +10,8 @@ import model.Patient;
 import util.DBContext;
 
 /**
- * PatientDAO - Data Access Object for Patient
  *
- * @author ClinicWebsite
+ * @author Chi Duong
  */
 public class PatientDAO extends DBContext {
 

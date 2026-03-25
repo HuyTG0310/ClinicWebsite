@@ -15,6 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 import util.EmailUtil;
 
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "UserAddServlet", urlPatterns = {"/admin/user/add"})
 public class UserAddServlet extends HttpServlet {
 

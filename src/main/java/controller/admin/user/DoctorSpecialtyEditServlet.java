@@ -14,7 +14,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.*;
 
-
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "DoctorSpecialtyEditServlet", urlPatterns = {"/admin/doctor-specialty/edit"})
 public class DoctorSpecialtyEditServlet extends HttpServlet {
 

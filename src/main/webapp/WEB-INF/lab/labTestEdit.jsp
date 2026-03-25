@@ -272,7 +272,7 @@
                                                            data-checkbox="flag_${t.labOrderTestId}_${t.parameterId}"
                                                            placeholder="Enter number..."
                                                            ${isLocked ? 'readonly' : 'required'}
-                                                           oninput="checkAutoFlag(this)">
+                                                           oninput="checkAutoFlag(this)" min="0">
 
                                                 </c:when>
 
