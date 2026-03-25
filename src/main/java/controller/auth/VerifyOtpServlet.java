@@ -6,6 +6,10 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet("/verify-otp")
 public class VerifyOtpServlet extends HttpServlet {
 

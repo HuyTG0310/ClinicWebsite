@@ -10,11 +10,15 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.User;
 
+
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet(name = "ChangePasswordServlet", urlPatterns = {"/lab/profile/change-password", "/doctor/profile/change-password", "/receptionist/profile/change-password"})
 public class ChangePasswordServlet extends HttpServlet {
 
     private String hashPassword(String password) {
-        // TODO: replace with BCrypt later
         return password;
     }
 

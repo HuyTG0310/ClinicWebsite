@@ -15,7 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 import model.*;
 
-
+/**
+ *
+ * @author Tan Vinh
+ */
 @WebServlet(name = "RoleDetailServlet", urlPatterns = {"/admin/role/detail"})
 public class RoleDetailServlet extends HttpServlet {
 

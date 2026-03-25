@@ -14,6 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
 
+
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet(name = "ServiceOrderCheckoutServlet", urlPatterns = {"/receptionist/service-order/checkout", "/doctor/service-order/checkout", "/admin/service-order/checkout", "/lab/service-order/checkout"})
 public class ServiceOrderCheckoutServlet extends HttpServlet {
 

@@ -11,7 +11,7 @@
         <div>
             <h2 class="mb-1">
                 <i class="fa-solid fa-certificate text-primary me-2"></i>
-                Certification Approval
+                Manage Certification
             </h2>
             <p class="text-muted mb-0">
                 Review and approve user certifications
@@ -71,7 +71,7 @@
                     <!-- BUTTON -->
                     <div class="col-md-3 d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-filter me-2"></i>Filter
+                            <i class="fas fa-search me-2"></i>Search
                         </button>
 
                         <c:if test="${not empty param.searchName}">
@@ -176,7 +176,7 @@
                                         <a href="${pageContext.request.contextPath}/certification/file?name=${c.filePath}"
                                            target="_blank"
                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="fa-solid fa-eye"></i>
+                                            <i class="fa-solid fa-eye me-2"></i>View
                                         </a>
                                     </c:if>
                                 </td>
@@ -204,7 +204,7 @@
 
                                             <button class="btn btn-sm btn-outline-danger"
                                                     onclick="openDeleteModal('${c.certificationId}')">
-                                                <i class="fa-solid fa-trash"></i>
+                                                <i class="fa-solid fa-trash me-2"></i>Delete
                                             </button>
 
                                         </c:otherwise>

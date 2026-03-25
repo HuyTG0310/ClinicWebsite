@@ -14,7 +14,7 @@ import model.Specialty;
 
 /**
  *
- * @author ADMIN
+ * @author Tan Vinh
  */
 @WebServlet("/admin/specialty/list")
 public class SpecialtyListServlet extends HttpServlet {

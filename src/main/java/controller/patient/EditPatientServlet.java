@@ -12,9 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.Patient;
 
 /**
- * EditPatientServlet - Controller for Editing Patient
  *
- * @author ClinicWebsite
+ * @author Chi Duong
  */
 @WebServlet(name = "EditPatient", urlPatterns = {"/admin/patient/edit", "/doctor/patient/edit", "/receptionist/patient/edit", "/lab/patient/edit"})
 public class EditPatientServlet extends HttpServlet {

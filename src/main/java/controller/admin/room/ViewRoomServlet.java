@@ -10,6 +10,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "ViewRoomServlet", urlPatterns = {"/admin/room/detail", "/receptionist/room/detail", "/doctor/room/detail", "/lab/room/detail"})
 public class ViewRoomServlet extends HttpServlet {
 

@@ -10,6 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.Certification;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet("/admin/certification/search")
 public class SearchCertificationServlet extends HttpServlet {
 
@@ -22,7 +26,7 @@ public class SearchCertificationServlet extends HttpServlet {
         String name = request.getParameter("searchName");
         String phone = request.getParameter("searchPhone");
 
-        // 🔥 Trim dữ liệu
+        //  Trim dữ liệu
         if (name != null) {
             name = name.trim();
         }
@@ -30,7 +34,7 @@ public class SearchCertificationServlet extends HttpServlet {
         if (phone != null) {
             phone = phone.trim();
 
-            // 🔥 Validate số điện thoại chỉ chứa số
+            //  Validate số điện thoại chỉ chứa số
             if (!phone.isEmpty() && !phone.matches("\\d+")) {
                 request.setAttribute("error", "Số điện thoại chỉ được chứa chữ số!");
                 request.getRequestDispatcher("/WEB-INF/admin/certification/certificationApproval.jsp")

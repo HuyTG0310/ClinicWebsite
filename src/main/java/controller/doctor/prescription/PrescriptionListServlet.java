@@ -17,7 +17,10 @@ import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import model.User;
 
-
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "PrescriptionListServlet", urlPatterns = {"/doctor/prescription/list", "/admin/prescription/list"})
 public class PrescriptionListServlet extends HttpServlet {
 
@@ -49,14 +52,12 @@ public class PrescriptionListServlet extends HttpServlet {
         boolean hasKeyword = searchKeyword != null && !searchKeyword.trim().isEmpty();
         boolean hasDate = searchDate != null && !searchDate.trim().isEmpty();
 
-        // 3. Gọi DAO: Có lọc thì gọi Search, không lọc thì gọi GetAll
         if (hasKeyword || hasDate) {
             rawList = dao.searchPrescriptions(searchKeyword, searchDate, currentUserId);
         } else {
             rawList = dao.getAllPrescriptions(currentUserId);
         }
 
-        // 4. Xử lý đóng/mở khóa cho từng dòng
         for (Map<String, Object> map : rawList) {
 
             boolean isOwner = (boolean) map.get("isOwner");
@@ -76,9 +77,9 @@ public class PrescriptionListServlet extends HttpServlet {
                 canView = true;
                 canEdit = false;
             }
-            // Các trường hợp còn lại (Khác khoa + Không liên quan) -> Khóa mỏ (false)
+            // Các trường hợp còn lại (Khác khoa + Không liên quan) -> (false)
 
-            // Gắn quyền đã chốt vào lại map để ném sang JSP
+            // Gắn quyền đã chốt vào lại map để đưa sang JSP
             map.put("canView", canView);
             map.put("canEdit", canEdit);
         }

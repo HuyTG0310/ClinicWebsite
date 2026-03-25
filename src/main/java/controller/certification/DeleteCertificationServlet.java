@@ -12,6 +12,10 @@ import java.net.URLEncoder;
 import model.Certification;
 import model.User;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet({
     "/doctor/certification/delete",
     "/receptionist/certification/delete",

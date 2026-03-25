@@ -10,6 +10,10 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.Random;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet("/send-otp")
 public class SendOtpServlet extends HttpServlet {
 

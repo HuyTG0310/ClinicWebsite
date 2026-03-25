@@ -14,6 +14,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+/**
+ *
+ * @author Gia Huy
+ */
 @WebServlet(name = "ServiceEditServlet", urlPatterns = {"/admin/service/edit", "/doctor/service/edit", "/receptionist/service/edit", "/lab/service/edit"})
 public class ServiceEditServlet extends HttpServlet {
 

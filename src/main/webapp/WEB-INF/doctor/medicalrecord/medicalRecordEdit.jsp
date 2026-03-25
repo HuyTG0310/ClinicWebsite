@@ -95,21 +95,21 @@
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Heart beat</label>
                             <div class="input-group input-group-sm">
-                                <input type="number" class="form-control" name="heartRate" value="${mr.heartRate}" placeholder="80">
+                                <input type="number" class="form-control" name="heartRate" value="${mr.heartRate}" placeholder="80" min="0">
                                 <span class="input-group-text">bpm</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Temp</label>
                             <div class="input-group input-group-sm">
-                                <input type="number" step="0.1" class="form-control" name="temperature" value="${mr.temperature}" placeholder="37.0">
+                                <input type="number" step="0.1" class="form-control" name="temperature" value="${mr.temperature}" placeholder="37.0" min="0">
                                 <span class="input-group-text">°C</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Weight</label>
                             <div class="input-group input-group-sm">
-                                <input type="number" step="0.1" class="form-control" name="weight" value="${mr.weight}">
+                                <input type="number" step="0.1" class="form-control" name="weight" value="${mr.weight}" min="0">
                                 <span class="input-group-text">kg</span>
                             </div>
                         </div>
@@ -428,20 +428,20 @@
                     <div>
                         <c:choose>
                             <c:when test="${empty app}">
-                                <button type="submit" name="action" value="update_only" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
+                                <button type="submit" name="action" value="update_only" class="btn btn-primary px-5 fw-bold shadow-sm">
                                     <i class="fa-solid fa-save me-2"></i>Save
                                 </button>
                             </c:when>
                             <c:otherwise>
-                                <button type="submit" name="action" value="save_draft" class="btn btn-warning btn-lg fw-bold shadow-sm me-2" formnovalidate>
+                                <button type="submit" name="action" value="save_draft" class="btn btn-warning fw-bold shadow-sm me-2" formnovalidate>
                                     <i class="fa-solid fa-floppy-disk me-2"></i>Save draft
                                 </button>
 
-                                <button type="submit" name="action" value="complete_print" class="btn btn-success btn-lg px-4 fw-bold shadow-sm me-2">
+                                <button type="submit" name="action" value="complete_print" class="btn btn-success px-4 fw-bold shadow-sm me-2">
                                     <i class="fa-solid fa-print me-2"></i>Finish (print)
                                 </button>
 
-                                <button type="submit" name="action" value="complete" class="btn btn-primary btn-lg px-4 fw-bold shadow-sm">
+                                <button type="submit" name="action" value="complete" class="btn btn-primary px-4 fw-bold shadow-sm">
                                     <i class="fa-solid fa-check-double me-2"></i>Finish (no print)
                                 </button>
                             </c:otherwise>
@@ -457,8 +457,8 @@
 <div class="modal fade" id="addLabOrderModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title fw-bold"><i class="fa-solid fa-microscope me-2"></i>Tạo Phiếu Chỉ Định Mới</h5>
+            <div class="modal-header bg-white text-dark">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-microscope me-2"></i>Create a new form</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
@@ -470,7 +470,7 @@
 
                 <div class="modal-body bg-light">
                     <div id="missingRecordWarning" class="alert alert-danger d-none">
-                        <i class="fa-solid fa-triangle-exclamation me-2"></i>Vui lòng bấm <strong>"Lưu Tạm Bệnh Án"</strong> ở bên ngoài để tạo hồ sơ gốc trước khi ra chỉ định dịch vụ!
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>Please clicks <strong>"Save draft"</strong> before creating a new form!
                     </div>
 
                     <div class="row g-4" id="labCheckboxesArea">
@@ -513,9 +513,9 @@
     </div>
 
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-        <button type="submit" class="btn btn-warning fw-bold" id="btnSubmitLabOrder">
-            <i class="fa-solid fa-file-signature me-2"></i>Tạo Phiếu Ngay
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary fw-bold" id="btnSubmitLabOrder">
+            <i class="fa-solid fa-file-signature me-2"></i>Create
         </button>
     </div>
 </form>
@@ -662,7 +662,7 @@
 </style>
 
 <select id="medicineSource" style="display:none;">
-    <option value="">-- Chọn thuốc --</option>
+    <option value="">-- Choose medicine --</option>
     <c:forEach var="m" items="${medicines}">
         <option value="${m.medicineId}"
                 data-ingredients="${fn:escapeXml(m.ingredients)}" 
@@ -798,7 +798,7 @@
 
     // --- 3. Hàm xử lý Hủy Lô Xét Nghiệm (Giữ nguyên của bạn) ---
     function submitCancelBatch(batchId, appointmentId) {
-        if (confirm('Bạn có chắc chắn muốn hủy toàn bộ chỉ định trong Lô #' + batchId + ' này? Việc này sẽ tự động xóa các khoản thu tiền tương ứng.')) {
+        if (confirm('Are you sure you want to cancel all assignments in the Batch? #' + batchId + ' This will automatically delete the corresponding payments.')) {
             let f = document.createElement('form');
             f.action = '${basePath}/lab-order/cancel';
             f.method = 'POST';
@@ -835,8 +835,8 @@
 
         document.getElementById('labOrderForm').action = contextPath + '/lab-order/create';
         document.getElementById('modalBatchId').value = '';
-        document.querySelector('#addLabOrderModal .modal-title').innerHTML = '<i class="fa-solid fa-microscope me-2"></i>Tạo Phiếu Chỉ Định Mới';
-        document.getElementById('btnSubmitLabOrder').innerHTML = '<i class="fa-solid fa-file-signature me-2"></i>Tạo Phiếu Ngay';
+        document.querySelector('#addLabOrderModal .modal-title').innerHTML = '<i class="fa-solid fa-microscope me-2"></i>Create new form';
+        document.getElementById('btnSubmitLabOrder').innerHTML = '<i class="fa-solid fa-file-signature me-2"></i>Create';
 
         let checkboxes = document.querySelectorAll('.lab-test-checkbox');
         checkboxes.forEach(cb => {
@@ -882,8 +882,8 @@
 
         document.getElementById('labOrderForm').action = contextPath + '/lab-order/edit';
         document.getElementById('modalBatchId').value = batchId;
-        document.querySelector('#addLabOrderModal .modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Cập Nhật Phiếu Chỉ Định (Lô #' + batchId + ')';
-        document.getElementById('btnSubmitLabOrder').innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu Thay Đổi';
+        document.querySelector('#addLabOrderModal .modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Edit form (Batch #' + batchId + ')';
+        document.getElementById('btnSubmitLabOrder').innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save';
 
         let checkboxes = document.querySelectorAll('.lab-test-checkbox');
         checkboxes.forEach(cb => {

@@ -13,6 +13,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+
+/**
+ *
+ * @author Truong Thinh
+ */
 @WebServlet(name = "PrintPrescriptionServlet", urlPatterns = {"/doctor/prescription/print", "/admin/prescription/print"})
 public class PrintPrescriptionServlet extends HttpServlet {
 

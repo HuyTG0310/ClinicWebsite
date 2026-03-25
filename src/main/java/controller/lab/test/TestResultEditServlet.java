@@ -18,7 +18,7 @@ import model.TestResultDetail;
 
 /**
  *
- * @author huytr
+ * @author Gia Huy
  */
 @WebServlet(name = "LabTestEditServlet", urlPatterns = {"/lab/lab-test/edit", "/admin/lab-test/edit"})
 public class TestResultEditServlet extends HttpServlet {
@@ -66,7 +66,7 @@ public class TestResultEditServlet extends HttpServlet {
             boolean isForceEdit = "true".equals(request.getParameter("forceEdit"));
             request.setAttribute("isForceEdit", isForceEdit);
 
-            // 🔥 CỜ BÁO HIỆU CHO JSP: ĐÂY LÀ CHẾ ĐỘ NHẬP LIỆU
+            // CHẾ ĐỘ NHẬP LIỆU
             request.setAttribute("isViewMode", false);
             request.setAttribute("pageTitle", "Update Result");
             request.setAttribute("activePage", "manageTest");

@@ -16,7 +16,7 @@ import java.util.*;
 
 /**
  *
- * @author huytr
+ * @author Tai Loi
  */
 @WebServlet(name = "ServiceOrderDetailServlet", urlPatterns = {"/receptionist/service-order/detail", "/doctor/service-order/detail", "/admin/service-order/detail", "/lab/service-order/detail"})
 public class ServiceOrderDetailServlet extends HttpServlet {
@@ -84,15 +84,14 @@ public class ServiceOrderDetailServlet extends HttpServlet {
             java.util.Date paidAt = null;
             String cashierName = "Hệ thống";
 
-            // ==============================================================
-            // 2. PHÂN NHÁNH LOGIC TÌM KIẾM THEO LOẠI HÓA ĐƠN
-            // ==============================================================
+
+            // 2. TÌM KIẾM THEO LOẠI HÓA ĐƠN
             if (mrId > 0) {
-                // NHÁNH 1: THANH TOÁN CHÙM XÉT NGHIỆM (Đã có Bệnh án)
+                // THANH TOÁN CHÙM XÉT NGHIỆM (Đã có Bệnh án)
                 details = dao.getServiceDetailsByMrId(mrId, patientId, status, formattedTime);
                 patientInfo = patientDao.getPatientById(patientId); // Lấy FULL thông tin Bệnh nhân
 
-                // Trích xuất Giờ thu & Người thu từ hàm DAO đã được nâng cấp
+
                 if (!details.isEmpty() && ("PAID".equals(status) || "REFUNDED".equals(status))) {
                     if (details.get(0).get("paidAt") != null) {
                         paidAt = (java.util.Date) details.get(0).get("paidAt");
@@ -103,7 +102,7 @@ public class ServiceOrderDetailServlet extends HttpServlet {
                 }
 
             } else if (soId > 0) {
-                // NHÁNH 2: THANH TOÁN PHÍ KHÁM BAN ĐẦU (Chưa có Bệnh án)
+                // THANH TOÁN PHÍ KHÁM BAN ĐẦU (Chưa có Bệnh án)
                 model.ServiceOrder order = dao.getServiceOrderById(soId);
                 if (order != null) {
                     Map<String, Object> item = new java.util.HashMap<>();
@@ -117,7 +116,6 @@ public class ServiceOrderDetailServlet extends HttpServlet {
                     // Nếu đã thanh toán, móc thông tin Giờ thu & Người thu
                     if ("PAID".equals(status) || "REFUNDED".equals(status)) {
                         paidAt = order.getPaidAt();
-                        // Tận dụng hàm getAppointmentDetailById siêu xịn của bạn để lôi tên Lễ tân ra
                         dao.AppointmentDAO appDao = new dao.AppointmentDAO();
                         model.Appointment app = appDao.getAppointmentDetailById(order.getAppointmentId());
                         if (app != null && app.getReceptionistName() != null) {
@@ -127,13 +125,13 @@ public class ServiceOrderDetailServlet extends HttpServlet {
                 }
             }
 
-            // 3. Tính tổng tiền ngay trên Server cho an toàn
+            // 3. Tính tổng tiền
             double totalAmount = 0;
             for (Map<String, Object> item : details) {
                 totalAmount += (Double) item.get("price");
             }
 
-            // 4. Đóng gói toàn bộ dữ liệu (ĐÃ BỔ SUNG ĐẦY ĐỦ) ném sang JSP
+            // 4. Đóng gói toàn bộ dữ liệu
             request.setAttribute("details", details);
             request.setAttribute("totalAmount", totalAmount);
             request.setAttribute("mrId", mrId);
@@ -156,7 +154,7 @@ public class ServiceOrderDetailServlet extends HttpServlet {
                 request.setAttribute("cashierName", cashierName);
             }
 
-            // 5. Chuyển hướng sang trang Giao diện Chi tiết
+            // 5. Chuyển hướng
             request.setAttribute("pageTitle", "Chi tiết khoản thu");
             request.setAttribute("activePage", "manageServiceOrder");
             request.setAttribute("contentPage", "/WEB-INF/receptionist/serviceorder/billingDetail.jsp");

@@ -10,6 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
+/**
+ *
+ * @author Chi Duong
+ */
+
 @WebServlet(name = "EditRoomServlet", urlPatterns = {"/admin/room/edit", "/receptionist/room/edit", "/doctor/room/edit", "/lab/room/edit"})
 public class EditRoomServlet extends HttpServlet {
 

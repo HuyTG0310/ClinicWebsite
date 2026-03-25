@@ -8,6 +8,10 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet("/reset-password")
 public class ResetPasswordServlet extends HttpServlet {
 

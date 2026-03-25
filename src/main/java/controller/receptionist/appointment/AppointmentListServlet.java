@@ -17,6 +17,11 @@ import java.time.LocalDate;
 import java.util.List;
 import model.Appointment;
 
+
+/**
+ *
+ * @author Chi Duong
+ */
 @WebServlet(name = "AppointmentListServlet", urlPatterns = {"/receptionist/appointment/list", "/doctor/appointment/list", "/admin/appointment/list", "/lab/appointment/list"})
 public class AppointmentListServlet extends HttpServlet {
 

@@ -60,8 +60,6 @@ public class CertificationDAO extends DBContext {
                 c.setExpiryDate(rs.getDate("ExpiryDate"));
                 c.setFilePath(rs.getString("FilePath"));
                 c.setStatus(rs.getString("Status"));
-
-                // 🔥 THÊM DÒNG NÀY VÀO LÀ CHẠY NGON NGAY
                 c.setRejectionNote(rs.getString("RejectionNote"));
 
                 list.add(c);
@@ -129,8 +127,6 @@ public class CertificationDAO extends DBContext {
                 c.setFilePath(rs.getString("FilePath"));
                 c.setStatus(rs.getString("Status"));
                 c.setRejectionNote(rs.getString("RejectionNote"));
-
-                // 🔥 QUAN TRỌNG
                 c.setFullName(rs.getString("FullName"));
                 c.setPhoneNumber(rs.getString("Phone"));
                 c.setRoleName(rs.getString("RoleName"));
@@ -147,7 +143,6 @@ public class CertificationDAO extends DBContext {
 
     public List<Certification> searchCertifications(String name, String phone) {
         List<Certification> list = new ArrayList<>();
-        // Sử dụng [User] và Phone đúng theo Database của bạn
         String sql = "SELECT c.*, u.FullName, u.Phone, r.RoleName "
                 + "FROM [Certifications] c "
                 + "LEFT JOIN [User] u ON c.UserId = u.UserId "
@@ -216,8 +211,6 @@ public class CertificationDAO extends DBContext {
 
     // REJECT CERTIFICATION
     public void reject(int id, String reason) throws Exception {
-        // Lưu ý: Tên cột là RejectionNote (vừa thêm ở Bước 1)
-        // Tên cột ID là CertificationId (theo ảnh SSMS của bạn)
         String sql = "UPDATE Certifications SET Status = 'REJECTED', RejectionNote = ? WHERE CertificationId = ?";
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -233,7 +226,7 @@ public class CertificationDAO extends DBContext {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw e; // Ném lỗi ra để Servlet biết mà báo lên giao diện
+            throw e; 
         }
     }
 

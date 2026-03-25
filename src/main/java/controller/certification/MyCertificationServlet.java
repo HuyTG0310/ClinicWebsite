@@ -7,6 +7,10 @@ import jakarta.servlet.http.*;
 import model.User;
 import java.io.IOException;
 
+/**
+ *
+ * @author Tai Loi
+ */
 @WebServlet({
     "/doctor/certification/my",
     "/receptionist/certification/my",
