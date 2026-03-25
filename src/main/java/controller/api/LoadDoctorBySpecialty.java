@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 
 /**
  *
- * @author Tan Vinh
+ * @author Chi Duong
  */
 @WebServlet(name = "LoadDoctorBySpecialty", urlPatterns = {"/api/doctors-by-specialty"})
 public class LoadDoctorBySpecialty extends HttpServlet {

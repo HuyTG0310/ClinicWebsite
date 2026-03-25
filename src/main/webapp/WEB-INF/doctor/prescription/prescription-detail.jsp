@@ -565,10 +565,10 @@
                 </td>
                 <td class="unit-display text-center fw-bold text-muted py-2">--</td>
                 <td class="py-2">
-                    <input type="text" class="form-control usage-input" name="dosages" placeholder="Ex: Sáng 1, Tối 1..." required>
+                    <input type="text" class="form-control usage-input" name="dosages" required placeholder="Ex: Sáng 1, Tối 1..." required pattern=".*\\S+.*" title="Please enter a valid dosage">
                 </td>
                 <td class="py-2">
-                    <input type="text" class="form-control" name="notes" placeholder="Note...">
+                    <input type="text" class="form-control" name="notes" placeholder="Note..." required pattern=".*\\S+.*" title="Please enter a valid note">
                 </td>
                 <td class="text-center py-2">
                     <button type="button" class="btn btn-sm btn-outline-danger border-0 btn-remove"><i class="fas fa-times fs-5"></i></button>

@@ -406,8 +406,8 @@
                                                             </div>
                                                         </td>
                                                         <td class="py-2"><input type="number" class="form-control text-center" name="quantity" min="1" value="${pre.quantity}" required></td>
-                                                        <td class="py-2"><input type="text" class="form-control" name="dosage" value="${pre.dosage}" required></td>
-                                                        <td class="py-2"><input type="text" class="form-control" name="note" value="${pre.note}"></td>
+                                                        <td class="py-2"><input type="text" class="form-control" name="dosage" value="${pre.dosage}" required pattern=".*\S+.*" title="Please enter valid dosage"></td>
+                                                        <td class="py-2"><input type="text" class="form-control" name="note" value="${pre.note}" required pattern=".*\S+.*" title="Please enter valid note"></td>
                                                         <td class="text-center py-2"><button type="button" class="btn btn-sm btn-outline-danger border-0 btn-remove-row"><i class="fa-solid fa-trash-can"></i></button></td>
                                                     </tr>
                                                 </c:forEach>
@@ -433,7 +433,7 @@
                                 </button>
                             </c:when>
                             <c:otherwise>
-                                <button type="submit" name="action" value="save_draft" class="btn btn-warning fw-bold shadow-sm me-2" formnovalidate>
+                                <button type="submit" name="action" value="save_draft" class="btn btn-warning fw-bold shadow-sm me-2">
                                     <i class="fa-solid fa-floppy-disk me-2"></i>Save draft
                                 </button>
 
@@ -751,8 +751,8 @@
                 '   </div>' +
                 '</td>' +
                 '<td class="py-2"><input type="number" class="form-control text-center" name="quantity" min="1" value="1" required></td>' +
-                '<td class="py-2"><input type="text" class="form-control" name="dosage" placeholder="Sáng 1, Tối 1" required></td>' +
-                '<td class="py-2"><input type="text" class="form-control" name="note" placeholder="Uống sau ăn..."></td>' +
+                '<td class="py-2"><input type="text" class="form-control" name="dosage" placeholder="Sáng 1, Tối 1" required  pattern=".*\\S+.*" title="Please enter a valid dosage"></td>' +
+                '<td class="py-2"><input type="text" class="form-control" name="note" placeholder="Uống sau ăn..." required  pattern=".*\\S+.*" title="Please enter a valid note"></td>' +
                 '<td class="text-center py-2"><button type="button" class="btn btn-sm btn-outline-danger border-0 btn-remove-row"><i class="fa-solid fa-trash-can"></i></button></td>';
 
         tbody.appendChild(tr);

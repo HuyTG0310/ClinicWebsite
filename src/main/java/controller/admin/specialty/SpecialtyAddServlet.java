@@ -1,3 +1,4 @@
+package controller.admin.specialty;
 
 import dao.SpecialtyDAO;
 import jakarta.servlet.ServletException;
@@ -11,7 +12,7 @@ import model.Specialty;
 
 /**
  *
- * @author Gia Huy
+ * @author Tan Vinh
  */
 @WebServlet("/admin/specialty/add")
 public class SpecialtyAddServlet extends HttpServlet {
