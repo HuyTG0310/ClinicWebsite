@@ -214,23 +214,6 @@
                     </div>
 
 
-
-                    <!-- MEDICAL HISTORY -->
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Medical History
-                        </label>
-
-                        <textarea class="form-control"
-                                  id="medicalHistory"
-                                  name="medicalHistory"
-                                  rows="2">${patient.medicalHistory}</textarea>
-
-                    </div>
-
-
-
                     <!-- ALLERGY -->
                     <div class="col-md-6">
 

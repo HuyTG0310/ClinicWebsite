@@ -90,7 +90,14 @@
                     <div class="row g-2 small">
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Blood pressure</label>
-                            <input type="text" class="form-control form-control-sm" name="bloodPressure" value="${mr.bloodPressure}" placeholder="120/80">
+                            <input type="text" 
+                                   class="form-control form-control-sm" 
+                                   name="bloodPressure" 
+                                   value="${mr.bloodPressure}" 
+                                   placeholder="120/80"
+                                   pattern="\d{2,3}/\d{2,3}"
+                                   title="Vui lòng nhập đúng định dạng Huyết áp (Ví dụ: 120/80)"
+                                   maxlength="7">
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Heart beat</label>

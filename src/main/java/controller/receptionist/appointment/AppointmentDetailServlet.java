@@ -69,8 +69,8 @@ public class AppointmentDetailServlet extends HttpServlet {
                 dao.RoomDAO roomDAO = new dao.RoomDAO();
                 dao.SpecialtyDAO specialtyDAO = new dao.SpecialtyDAO();
 
-                request.setAttribute("rooms", roomDAO.getAllView());
-                request.setAttribute("specialties", specialtyDAO.getAll());
+                request.setAttribute("rooms", roomDAO.getAllActiveRoomsForAppointment());
+                request.setAttribute("specialties", specialtyDAO.getAllActiveRoom());
             }
 
             request.setAttribute("app", app);

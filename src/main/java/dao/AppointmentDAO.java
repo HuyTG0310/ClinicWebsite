@@ -19,7 +19,10 @@ public class AppointmentDAO extends DBContext {
         sql.append("       p.FullName AS PatientName, p.Phone AS PatientPhone, ");
         sql.append("       r.RoomName, ");
         sql.append("       u.FullName AS DoctorName, ");
-        sql.append("       so.Status AS PaymentStatus, ");
+        sql.append("       CASE ");
+        sql.append("           WHEN so.PaidAt IS NOT NULL AND so.Status = 'CANCELLED' THEN 'REFUNDED' ");
+        sql.append("           ELSE so.Status ");
+        sql.append("       END AS PaymentStatus, ");
         sql.append("       so.PaymentMethod ");
         sql.append("FROM Appointment a ");
         sql.append("JOIN Patient p ON a.PatientId = p.PatientId ");
