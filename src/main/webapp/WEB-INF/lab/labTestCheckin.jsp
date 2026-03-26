@@ -274,7 +274,7 @@
                 <div class="card-footer bg-white text-end py-4">
 
                     <button type="button"
-                            class="btn btn-primary btn-lg fw-bold px-5"
+                            class="btn btn-primary fw-bold px-5"
                             onclick="confirmAcceptAll()">
 
                         <i class="fa-solid fa-check-double me-2"></i>

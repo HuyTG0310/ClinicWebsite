@@ -149,6 +149,11 @@
                                             <i class="fa-solid fa-ban me-1"></i> CANCELLED
                                         </span>
                                     </c:when>
+                                    <c:when test="${app.paymentStatus == 'REFUNDED'}">
+                                        <span class="badge bg-danger">
+                                            <i class="fa-solid fa-ban me-1"></i> REFUNDED
+                                        </span>
+                                    </c:when>
                                     <c:otherwise>
                                         <span class="badge bg-danger">ERROR</span>
                                     </c:otherwise>

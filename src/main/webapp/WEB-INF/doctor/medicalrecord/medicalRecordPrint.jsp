@@ -114,8 +114,6 @@
             </div>
             <div class="row mb-4">
                 <div class="col-4">Cân nặng: <strong class="ms-1">${mr.weight != null ? mr.weight : '___'}</strong> kg</div>
-                <div class="col-4">Chiều cao: <strong class="ms-1">${mr.height != null ? mr.height : '___'}</strong> cm</div>
-                <div class="col-4"></div>
             </div>
 
             <h5 class="fw-bold text-uppercase mt-3 mb-2">II. Khám Lâm Sàng:</h5>
