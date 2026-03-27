@@ -86,14 +86,14 @@ public class AuthorizationFilter implements Filter {
         // --- 2. Kiểm tra Login ---
         HttpSession session = req.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
-        System.out.println("🔍 KIỂM TRA SESSION: ID = " + (session != null ? session.getId() : "NULL") + " | User = " + user);
+        System.out.println("KIỂM TRA SESSION: ID = " + (session != null ? session.getId() : "NULL") + " | User = " + user);
 
         if (user == null) {
             res.sendRedirect(ctx + "/login");
             return;
         }
-        System.out.println("🚀 FILTER CHECK: Path = " + path);
-        System.out.println("👤 User: " + user.getFullName() + " | Role: " + user.getRoleName());
+        System.out.println("FILTER CHECK: Path = " + path);
+        System.out.println("User: " + user.getFullName() + " | Role: " + user.getRoleName());
 
         // --- 3. Tải & Làm sạch danh sách quyền ---
         List<String> rawPrivileges = privilegeDAO.getPrivilegeCodesByUserId(user.getUserId());
@@ -110,7 +110,7 @@ public class AuthorizationFilter implements Filter {
         Role currentRole = roleDAO.getRoleById(user.getRoleId());
 
         if (currentRole == null || !currentRole.isIsActive()) {
-            System.out.println("⛔ CẢNH BÁO: Role '" + user.getRoleName() + "' đã bị vô hiệu hóa!");
+            System.out.println("CẢNH BÁO: Role '" + user.getRoleName() + "' đã bị vô hiệu hóa!");
 
             // Hủy session để user phải log out
             session.invalidate();
@@ -120,7 +120,7 @@ public class AuthorizationFilter implements Filter {
             return;
         }
 
-        System.out.println("🔑 Quyền đã xử lý (Cleaned): " + privileges);
+        System.out.println("Quyền đã xử lý (Cleaned): " + privileges);
 
         // QUYỀN CERTIFICATION DO ADMIN CẤP
         req.setAttribute("hasCertView", privileges.contains("CERTIFICATION_VIEW"));
@@ -228,10 +228,10 @@ public class AuthorizationFilter implements Filter {
         }
 
         if (requiredPriv != null) {
-            System.out.println("🔍 Hệ thống nhận diện Module cần quyền: " + requiredPriv);
+            System.out.println("Hệ thống nhận diện Module cần quyền: " + requiredPriv);
 
             if (!privileges.contains(requiredPriv)) {
-                System.out.println("❌ THIẾU QUYỀN! User " + user.getUsername() + " không có: " + requiredPriv);
+                System.out.println("THIẾU QUYỀN! User " + user.getUsername() + " không có: " + requiredPriv);
                 res.sendError(403);
                 return;
             }

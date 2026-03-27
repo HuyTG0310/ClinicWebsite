@@ -32,9 +32,7 @@ public class MedicalRecordDAO extends DBContext {
             + "JOIN Appointment a ON a.MedicalRecordId = mr.MedicalRecordId "
             + "WHERE a.Status = 'COMPLETED' ";
 
-    // =========================================================================
     // 1. HÀM LẤY TẤT CẢ (GET ALL)
-    // =========================================================================
     public java.util.List<java.util.Map<String, Object>> getAllMedicalRecords(int currentUserId) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
         String sql = BASE_MR_SQL + "ORDER BY mr.MedicalRecordId DESC";
@@ -54,9 +52,7 @@ public class MedicalRecordDAO extends DBContext {
         return list;
     }
 
-    // =========================================================================
     // 2. HÀM TÌM KIẾM (SEARCH THEO TỪ KHÓA & NGÀY)
-    // =========================================================================
     public java.util.List<java.util.Map<String, Object>> searchMedicalRecords(String keyword, String dateStr, int currentUserId) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
         StringBuilder sql = new StringBuilder(BASE_MR_SQL);
@@ -196,7 +192,7 @@ public class MedicalRecordDAO extends DBContext {
         PreparedStatement stApp = null;
 
         try {
-            conn = new DBContext().conn; // Nhớ dùng getConnection()
+            conn = new DBContext().conn; // dùng getConnection()
             conn.setAutoCommit(false);
 
             // 1. LƯU BỆNH ÁN
@@ -274,7 +270,7 @@ public class MedicalRecordDAO extends DBContext {
             String sqlApp = "UPDATE Appointment SET Status = ?, MedicalRecordId = ? WHERE AppointmentId = ?";
             stApp = conn.prepareStatement(sqlApp);
             stApp.setString(1, nextStatus);
-            stApp.setInt(2, newMedicalRecordId); // 🔥 BỔ SUNG DÒNG NÀY ĐỂ LIÊN KẾT
+            stApp.setInt(2, newMedicalRecordId); 
             stApp.setInt(3, appointmentId);
 
             if (stApp.executeUpdate() == 0) {

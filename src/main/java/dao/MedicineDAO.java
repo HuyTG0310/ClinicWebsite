@@ -16,9 +16,6 @@ import util.DBContext;
  */
 public class MedicineDAO extends DBContext {
 
-    /* =====================================================
-       1. VIEW + SEARCH MEDICINE LIST
-       ===================================================== */
     public List<Medicine> search(String keyword, String status) {
         List<Medicine> list = new ArrayList<>();
 
@@ -87,9 +84,7 @@ public class MedicineDAO extends DBContext {
         return list;
     }
 
-    /* =====================================================
-       2. ADD MEDICINE
-       ===================================================== */
+
     public void insert(Medicine m) {
 
         String sql = "INSERT INTO Medicine\n"
@@ -109,9 +104,7 @@ public class MedicineDAO extends DBContext {
         }
     }
 
-    /* =====================================================
-       3. GET MEDICINE BY ID (DETAIL + EDIT)
-       ===================================================== */
+
     public Medicine getById(int id) {
 
         String sql = "SELECT *\n"
@@ -141,9 +134,7 @@ public class MedicineDAO extends DBContext {
         return null;
     }
 
-    /* =====================================================
-       4. UPDATE MEDICINE
-       ===================================================== */
+
     public void update(Medicine m) {
 
         String sql = " UPDATE Medicine\n"

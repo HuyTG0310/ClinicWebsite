@@ -10,7 +10,7 @@ import util.DBContext;
 
 /**
  *
- * @author huytr
+ * @author Tan Vinh
  */
 public class DoctorSpecialtyDAO extends DBContext {
 

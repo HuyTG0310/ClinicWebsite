@@ -6,7 +6,7 @@ package model;
 
 /**
  *
- * @author ADMIN
+ * @author Tan Vinh
  */
 public class Specialty {
 

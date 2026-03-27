@@ -235,14 +235,14 @@ public class MedicalRecordEditServlet extends HttpServlet {
              String action = request.getParameter("action");
             dao.MedicalRecordDAO mrDAO = new dao.MedicalRecordDAO();
             
-            // 🔥 THAY ĐỔI 1: Không dùng MedicineDAO nữa, gọi trực tiếp PrescriptionDAO đã được tối ưu
+            //1: Không dùng MedicineDAO nữa, gọi trực tiếp PrescriptionDAO đã được tối ưu
             dao.PrescriptionDAO presDAO = new dao.PrescriptionDAO(); 
 
-            // 🔥 XỬ LÝ RIÊNG CHO LUỒNG "LƯU THAY ĐỔI BỆNH ÁN CŨ"
+            //XỬ LÝ RIÊNG CHO LUỒNG "LƯU THAY ĐỔI BỆNH ÁN CŨ"
             if ("update_only".equals(action)) {
                 mrDAO.updateCompletedMedicalRecord(mr); 
                 
-                // 🔥 THAY ĐỔI 2: Truyền thẳng cái Model prescriptionList vào
+                //2: Truyền thẳng cái Model prescriptionList vào
                 presDAO.savePrescription(medicalRecordId, prescriptionList);
 
                 request.getSession().setAttribute("success", "Update medical record successful!");
@@ -276,7 +276,7 @@ public class MedicalRecordEditServlet extends HttpServlet {
                 }
             }
 
-            // 🔥 THAY ĐỔI 3: Xử lý gán ID nếu là Bệnh án tạo mới
+            //3: Xử lý gán ID nếu là Bệnh án tạo mới
             if (medicalRecordId > 0) {
                 mrDAO.updateMedicalRecord(mr, appointmentId, nextStatus);
             } else {
@@ -291,7 +291,7 @@ public class MedicalRecordEditServlet extends HttpServlet {
                 }
             }
             
-            // 🔥 THAY ĐỔI 4: Truyền thẳng Model xuống DAO
+            //4: Truyền thẳng Model xuống DAO
             presDAO.savePrescription(medicalRecordId, prescriptionList);
 
             if ("complete".equals(action)) {

@@ -10,17 +10,17 @@ import java.util.List;
 
 public class LabTestBatch {
 
-    // 1. CÁC BIẾN CHÍNH (Ánh xạ 1-1 với các cột trong Database)
+    // 1. CÁC BIẾN CHÍNH
     private int batchId;
     private int patientId;
     private int medicalRecordId;
     private int createdByDoctorId;
     private String status;
-    private Date createdAt; // Tương ứng cột Thời gian tạo nếu DB bạn có
+    private Date createdAt; 
     private List<Integer> testIds;
     private Timestamp orderTime;
 
-    // 2. CÁC BIẾN MỞ RỘNG (Dùng để hiển thị lên UI cho đẹp)
+    // 2. CÁC BIẾN MỞ RỘNG
     private String doctorName;         // Tên bác sĩ chỉ định
     private List<String> testNames;    // Danh sách tên các xét nghiệm trong Lô này (VD: [Hồng cầu, Bạch cầu, ALT])
     private String patientName;

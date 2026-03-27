@@ -77,8 +77,8 @@ public class MedicalRecordDetailServlet extends HttpServlet {
             boolean canEdit = perms[1];
 
             if (!canView) {
-                // Ai đó cố tình gõ URL lụi -> Đá văng ra ngoài!
-                request.getSession().setAttribute("error", "⛔ SECURITY: You have no permission to view this medical record!");
+                // Ai đó cố tình gõ URL văng ra ngoài!
+                request.getSession().setAttribute("error", "SECURITY: You have no permission to view this medical record!");
                 response.sendRedirect(basePath + "/medical-record/list");
                 return;
             }
@@ -87,14 +87,14 @@ public class MedicalRecordDetailServlet extends HttpServlet {
             request.setAttribute("canEdit", canEdit);
             // ==========================================
 
-            // 4. Lấy danh sách kết quả Xét nghiệm (Như code cũ của bạn)
+            // 4. Lấy danh sách kết quả Xét nghiệm
             dao.LabTestDAO labDao = new dao.LabTestDAO();
             java.util.List<java.util.Map<String, Object>> consolidatedResults = labDao.getConsolidatedLabResults(mr.getMedicalRecordId());
 
             request.setAttribute("consolidatedResults", consolidatedResults);
             request.setAttribute("mr", mr);
 
-            // Giữ nguyên các attribute template của bạn
+            //các attribute
             request.setAttribute("pageTitle", "Medical Record Detail");
             request.setAttribute("activePage", "manageMedicalRecord");
             request.setAttribute("contentPage", "/WEB-INF/doctor/medicalrecord/medicalRecordDetail.jsp");

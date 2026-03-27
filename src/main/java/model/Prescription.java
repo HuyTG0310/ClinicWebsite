@@ -13,7 +13,7 @@ public class Prescription {
     private String dosage;
     private String note;
 
-    // Thuộc tính mở rộng để hiển thị tên thuốc ra màn hình Detail sau này
+    // Thuộc tính mở rộng
     private String medicineName;
     private String unit;
     private String usage;

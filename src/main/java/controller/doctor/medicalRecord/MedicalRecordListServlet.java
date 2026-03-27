@@ -44,13 +44,13 @@ public class MedicalRecordListServlet extends HttpServlet {
         boolean hasKeyword = searchKeyword != null && !searchKeyword.trim().isEmpty();
         boolean hasDate = searchDate != null && !searchDate.trim().isEmpty();
 
-// 2. PHÂN LUỒNG LOGIC: Nếu có lọc thì gọi Search, nếu không thì gọi GetAll
+        // 2. PHÂN LUỒNG LOGIC: Nếu có lọc thì gọi Search, nếu không thì gọi GetAll
         if (hasKeyword || hasDate) {
             recordList = dao.searchMedicalRecords(searchKeyword, searchDate, currentUserId);
         } else {
             recordList = dao.getAllMedicalRecords(currentUserId);
         }
-        // BỘ NÃO PHÂN QUYỀN
+        
         for (Map<String, Object> map : recordList) {
             boolean isOwner = (boolean) map.get("isOwner");
             boolean isPastCaregiver = (boolean) map.get("isPastCaregiver");
