@@ -41,7 +41,6 @@ public class DBContext {
     }
 
     public static Connection getConnection() throws Exception {
-        // Thêm encrypt và trustServerCertificate vào đây nè!
         String url = "jdbc:sqlserver://localhost:1433;"
                 + "databaseName=DB_07_03;"
                 + "encrypt=true;trustServerCertificate=true;";

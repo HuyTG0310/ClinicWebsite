@@ -129,7 +129,7 @@ public class PrescriptionDetailServlet extends HttpServlet {
         try {
             int medicalRecordId = Integer.parseInt(mrIdStr);
 
-            // 🔥 ĐÓNG GÓI DỮ LIỆU THÀNH MODEL
+            // ĐÓNG GÓI DỮ LIỆU THÀNH MODEL
             java.util.List<model.Prescription> prescriptionList = new java.util.ArrayList<>();
 
             if (medicineIds != null && medicineIds.length > 0) {

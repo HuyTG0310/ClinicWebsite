@@ -17,12 +17,10 @@ public class ServiceOrderDAO extends DBContext {
 
         StringBuilder sql = new StringBuilder();
 
-        // Dùng kỹ thuật CTE (WITH) để tạo 3 khối dữ liệu (Sổ cái kế toán)
+        // tạo 3 khối dữ liệu
         sql.append("WITH BaseData AS ( ");
 
-        // =========================================================================
-        // KHỐI 1: CÁC HÓA ĐƠN CHƯA THU TIỀN (UNPAID hoặc Hủy trước khi thu)
-        // =========================================================================
+        //1: CÁC HÓA ĐƠN CHƯA THU TIỀN (UNPAID hoặc Hủy trước khi thu)
         sql.append("  SELECT so.MedicalRecordId, MAX(so.ServiceOrderId) AS ServiceOrderId, so.PatientId, p.FullName AS PatientName, ");
         sql.append("         so.Status AS DBStatus, so.PaymentMethod, so.PaidAt, MAX(so.OrderTime) AS OrderTime, ");
         sql.append("         MAX(u.FullName) AS CashierName, COUNT(so.ServiceOrderId) AS TotalServices, SUM(so.PriceAtTime) AS TotalAmount ");
@@ -39,9 +37,8 @@ public class ServiceOrderDAO extends DBContext {
 
         sql.append("  UNION ALL ");
 
-        // =========================================================================
-        // KHỐI 2: BIÊN LAI GỐC ĐÃ THU TIỀN (Gộp tất cả PAID và CANCELLED để ra 160k)
-        // =========================================================================
+
+        //2: BIÊN LAI GỐC ĐÃ THU TIỀN
         sql.append("  SELECT so.MedicalRecordId, MAX(so.ServiceOrderId) AS ServiceOrderId, so.PatientId, p.FullName AS PatientName, ");
         sql.append("         'PAID' AS DBStatus, so.PaymentMethod, so.PaidAt, MAX(so.OrderTime) AS OrderTime, ");
         sql.append("         MAX(u.FullName) AS CashierName, COUNT(so.ServiceOrderId) AS TotalServices, SUM(so.PriceAtTime) AS TotalAmount ");
@@ -58,9 +55,7 @@ public class ServiceOrderDAO extends DBContext {
 
         sql.append("  UNION ALL ");
 
-        // =========================================================================
-        // KHỐI 3: PHIẾU HOÀN TIỀN (Chỉ bóc tách phần 60k bị CANCELLED ra thành 1 dòng)
-        // =========================================================================
+        //3: PHIẾU HOÀN TIỀN
         sql.append("  SELECT so.MedicalRecordId, MAX(so.ServiceOrderId) AS ServiceOrderId, so.PatientId, p.FullName AS PatientName, ");
         sql.append("         'REFUNDED' AS DBStatus, so.PaymentMethod, so.PaidAt, MAX(so.OrderTime) AS OrderTime, ");
         sql.append("         MAX(u.FullName) AS CashierName, COUNT(so.ServiceOrderId) AS TotalServices, SUM(so.PriceAtTime) AS TotalAmount ");
@@ -77,9 +72,7 @@ public class ServiceOrderDAO extends DBContext {
 
         sql.append(") ");
 
-        // =========================================================================
         // TỔNG HỢP VÀ LỌC THEO STATUS Ở BÊN NGOÀI CÙNG
-        // =========================================================================
         sql.append("SELECT * FROM BaseData WHERE 1=1 ");
 
         if (status != null && !status.trim().isEmpty() && !status.equals("ALL")) {
@@ -149,7 +142,7 @@ public class ServiceOrderDAO extends DBContext {
     public java.util.List<java.util.Map<String, Object>> getServiceDetailsByMrId(int medicalRecordId, int patientId, String status, String formattedTime) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
 
-        // Lấy thêm so.Status AS CurrentStatus để biết món nào bị hủy
+        // Lấy thêm so.Status AS CurrentStatus để biết nào bị hủy
         StringBuilder sql = new StringBuilder("SELECT s.ServiceName, so.PriceAtTime, "
                 + "so.PaymentMethod, so.PaidAt, u.FullName AS CashierName, so.Status AS CurrentStatus "
                 + "FROM ServiceOrder so "
@@ -163,27 +156,25 @@ public class ServiceOrderDAO extends DBContext {
             sql.append(" AND so.MedicalRecordId IS NULL AND so.PatientId = ? ");
         }
 
-        // ====================================================================
         // PHÂN NHÁNH NGHIỆP VỤ KẾ TOÁN
-        // ====================================================================
         if ("UNPAID".equals(status)) {
             // 1. CHỜ THU TIỀN
             sql.append(" AND so.Status = 'UNPAID' AND so.PaidAt IS NULL ");
 
         } else if ("PAID".equals(status) && formattedTime != null && !formattedTime.isEmpty()) {
-            // 2. BIÊN LAI GỐC (Lấy cả món sống và món chết để giữ nguyên tổng tiền 160k)
+            // 2. BIÊN LAI GỐC
             sql.append(" AND (so.Status = 'PAID' OR so.Status = 'CANCELLED') ");
             sql.append(" AND CONVERT(VARCHAR(19), so.PaidAt, 120) = ? ");
 
         } else if ("REFUNDED".equals(status)) {
-            // 3. CHI TIẾT HOÀN TIỀN (Đã đóng tiền nhưng bị Lab/Bác sĩ hủy)
+            // 3. CHI TIẾT HOÀN TIỀN
             sql.append(" AND so.Status = 'CANCELLED' AND so.PaidAt IS NOT NULL ");
             if (formattedTime != null && !formattedTime.isEmpty()) {
                 sql.append(" AND CONVERT(VARCHAR(19), so.PaidAt, 120) = ? ");
             }
 
         } else if ("CANCELLED".equals(status)) {
-            // 4. CHI TIẾT HỦY TRẮNG (Bị hủy khi chưa đóng 1 đồng nào)
+            // 4. CHI TIẾT HỦY TRẮNG
             sql.append(" AND so.Status = 'CANCELLED' AND so.PaidAt IS NULL ");
         }
 
@@ -210,7 +201,7 @@ public class ServiceOrderDAO extends DBContext {
                     item.put("paidAt", rs.getTimestamp("PaidAt"));
                     item.put("cashierName", rs.getString("CashierName") != null ? rs.getString("CashierName") : "Hệ thống");
 
-                    // Bỏ thêm trạng thái hiện tại vào túi xách để mang ra UI
+                    // Bỏ thêm trạng thái hiện tại để mang ra UI
                     item.put("currentStatus", rs.getString("CurrentStatus"));
 
                     list.add(item);
@@ -280,7 +271,6 @@ public class ServiceOrderDAO extends DBContext {
         java.sql.PreparedStatement stBatch = null;
 
         try {
-            // Lưu ý: Nếu DBContext của bạn dùng getConnection() thì đổi lại nhé
             conn = new DBContext().conn;
             conn.setAutoCommit(false); // Bật Transaction: Đảm bảo Kế toán và Lab đồng bộ 100%
 

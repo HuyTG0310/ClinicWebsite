@@ -100,7 +100,6 @@ public class LabCheckinServlet extends HttpServlet {
                 request.getSession().setAttribute("success", "Samples received! Please enter results.");
                 
             } else if ("REJECT_SINGLE".equals(action)) {
-                // 🔥 Đã Mở Comment
                 model.User currentUser = (model.User) request.getSession().getAttribute("user");
                 int technicianId = currentUser.getUserId(); // Lấy ID cho Reject
                 

@@ -99,7 +99,7 @@ public class PrivilegeDAO extends DBContext {
                 }
             }
 
-            // BƯỚC 3: Chốt đơn (Commit)
+            // BƯỚC 3: (Commit)
             conn.commit();
 
         } catch (SQLException e) {

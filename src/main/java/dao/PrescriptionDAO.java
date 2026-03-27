@@ -14,7 +14,7 @@ import util.DBContext;
  */
 public class PrescriptionDAO extends DBContext {
 
-    // KHUNG SQL GỐC (Tránh lặp code)
+    // SQL GỐC
     private final String BASE_PR_SQL = "SELECT "
             + "mr.MedicalRecordId, p.PatientId, p.FullName AS PatientName, p.Gender, "
             + "(YEAR(GETDATE()) - YEAR(p.DateOfBirth)) AS Age, "
@@ -35,9 +35,7 @@ public class PrescriptionDAO extends DBContext {
 
     private final String GROUP_BY_SQL = " GROUP BY mr.MedicalRecordId, mr.PatientId, p.PatientId, p.FullName, p.Gender, p.DateOfBirth, u.FullName, mr.Diagnosis, mr.CompletedAt, mr.ResponsibleDoctorId ";
 
-    // =========================================================================
     // 1. HÀM LẤY TẤT CẢ (GET ALL)
-    // =========================================================================
     public java.util.List<java.util.Map<String, Object>> getAllPrescriptions(int currentUserId) {
         java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
         String sql = BASE_PR_SQL + GROUP_BY_SQL + "ORDER BY mr.MedicalRecordId DESC";
@@ -223,7 +221,7 @@ public class PrescriptionDAO extends DBContext {
             if (prescriptionList != null && !prescriptionList.isEmpty()) {
                 try (java.sql.PreparedStatement psIns = conn.prepareStatement(sqlInsert)) {
 
-                    // Dùng vòng lặp for-each siêu gọn
+                    // Dùng vòng lặp for-each
                     for (model.Prescription p : prescriptionList) {
                         psIns.setInt(1, medicalRecordId);
                         psIns.setInt(2, p.getMedicineId());

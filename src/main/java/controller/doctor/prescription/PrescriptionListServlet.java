@@ -44,7 +44,7 @@ public class PrescriptionListServlet extends HttpServlet {
         
         // 2. Nhận tham số tìm kiếm từ JSP
         String searchKeyword = request.getParameter("searchKeyword");
-        String searchDate = request.getParameter("searchDate"); // 🔥 Hứng thêm Ngày
+        String searchDate = request.getParameter("searchDate"); // thêm Ngày
 
         PrescriptionDAO dao = new PrescriptionDAO();
         List<Map<String, Object>> rawList;
