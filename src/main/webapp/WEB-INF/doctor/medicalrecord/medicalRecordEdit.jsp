@@ -97,26 +97,26 @@
                                    placeholder="120/80"
                                    pattern="\d{2,3}/\d{2,3}"
                                    title="Vui lòng nhập đúng định dạng Huyết áp (Ví dụ: 120/80)"
-                                   maxlength="7">
+                                   maxlength="7" required>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Heart beat</label>
                             <div class="input-group input-group-sm">
-                                <input type="number" class="form-control" name="heartRate" value="${mr.heartRate}" placeholder="80" min="0">
+                                <input type="number" class="form-control" name="heartRate" value="${mr.heartRate}" placeholder="80" min="0" required>
                                 <span class="input-group-text">bpm</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Temp</label>
                             <div class="input-group input-group-sm">
-                                <input type="number" step="0.1" class="form-control" name="temperature" value="${mr.temperature}" placeholder="37.0" min="0">
+                                <input type="number" step="0.1" class="form-control" name="temperature" value="${mr.temperature}" placeholder="37.0" min="0" required>
                                 <span class="input-group-text">°C</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold text-muted mb-1">Weight</label>
                             <div class="input-group input-group-sm">
-                                <input type="number" step="0.1" class="form-control" name="weight" value="${mr.weight}" min="0">
+                                <input type="number" step="0.1" class="form-control" name="weight" value="${mr.weight}" min="0" required>
                                 <span class="input-group-text">kg</span>
                             </div>
                         </div>
