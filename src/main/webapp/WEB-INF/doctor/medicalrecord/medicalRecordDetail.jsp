@@ -160,10 +160,9 @@
                 </div>
 
                 <div class="col-md-3 mb-3">
-                    <label class="text-muted small">Weight / Height</label>
+                    <label class="text-muted small">Weight</label>
                     <div class="fw-semibold">
-                        ${mr.weight != null ? mr.weight : 'N/A'} kg /
-                        ${mr.height != null ? mr.height : 'N/A'} cm
+                        ${mr.weight != null ? mr.weight : 'N/A'} kg
                     </div>
                 </div>
 

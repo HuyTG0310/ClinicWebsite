@@ -100,9 +100,8 @@
             <div class="row">
 
                 <div class="col-md-6">
-                    <label class="text-muted small">Height / Weight</label>
+                    <label class="text-muted small">Weight</label>
                     <div class="fw-semibold">
-                        ${not empty record.height ? record.height : '--'} cm /
                         ${not empty record.weight ? record.weight : '--'} kg
                     </div>
                 </div>
