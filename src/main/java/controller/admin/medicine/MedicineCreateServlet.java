@@ -116,6 +116,29 @@ public class MedicineCreateServlet extends HttpServlet {
             return;
         }
 
+        MedicineDAO dao = new MedicineDAO();
+
+        if (dao.checkExistName(name)) {
+            Medicine m = new Medicine();
+            m.setMedicineName(name);
+            m.setUnit(unit);
+            m.setIngredients(ingredients);
+            m.setUsage(usage);
+            m.setContraindication(contra);
+
+            request.setAttribute("medicine", m);
+            // Báo lỗi đích danh tên thuốc cho người dùng biết
+            request.setAttribute("error", "Medicine '" + name + "' already exists in the system!");
+
+            request.setAttribute("basePath", basePath);
+            request.setAttribute("pageTitle", "Add medicine");
+            request.setAttribute("activePage", "manageMedicine");
+            request.setAttribute("contentPage", "/WEB-INF/admin/medicine/medicineForm.jsp");
+
+            request.getRequestDispatcher(layout).forward(request, response);
+            return; // Dừng ngay luồng thực thi, không cho insert
+        }
+
         Medicine m = new Medicine();
         m.setMedicineName(name);
         m.setUnit(unit);
@@ -123,8 +146,9 @@ public class MedicineCreateServlet extends HttpServlet {
         m.setUsage(usage);
         m.setContraindication(contra);
 
-        MedicineDAO dao = new MedicineDAO();
         dao.insert(m);
+
+        request.getSession().setAttribute("success", "Add new medicine successfully");
 
         response.sendRedirect(basePath + "/medicine/list");
     }

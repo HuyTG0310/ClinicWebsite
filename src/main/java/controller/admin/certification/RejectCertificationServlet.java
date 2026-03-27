@@ -32,14 +32,11 @@ public class RejectCertificationServlet extends HttpServlet {
             String reason = request.getParameter("rejectionNote");
 
             if (reason == null || reason.trim().isEmpty()) {
-                throw new Exception("Vui lòng nhập lý do từ chối");
+                throw new Exception("Please enter reject reason");
             }
 
             CertificationDAO dao = new CertificationDAO();
-            // Lưu ý: Bạn cần cập nhật hàm reject trong DAO để nhận thêm String reason nhé
             dao.reject(certificationId, reason.trim());
-
-            // Trả về thành công cho AJAX
             response.getWriter().write("SUCCESS");
 
         } catch (Exception e) {

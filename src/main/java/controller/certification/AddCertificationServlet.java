@@ -126,31 +126,31 @@ public class AddCertificationServlet extends HttpServlet {
             if (name == null || name.trim().isEmpty()
                     || number == null || number.trim().isEmpty()
                     || issueDateStr == null || expiryDateStr == null) {
-                throw new Exception("Vui lòng nhập đầy đủ thông tin");
+                throw new Exception("Please fill all information");
             }
             if (!issueDateStr.matches("^\\d{4}-\\d{2}-\\d{2}$")
                     || !expiryDateStr.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
-                throw new Exception("Ngày không hợp lệ (định dạng yyyy-MM-dd)");
+                throw new Exception("Invalid date (format yyyy-MM-dd)");
             }
             Date issueDate = Date.valueOf(issueDateStr);
             Date expiryDate = Date.valueOf(expiryDateStr);
             Date today = new Date(System.currentTimeMillis());
             if (expiryDate.before(today)) {
-                throw new Exception("Chứng chỉ đã hết hạn");
+                throw new Exception("Certification was expired");
             }
 
             if (issueDate.after(today)) {
-                throw new Exception("Chứng chỉ chưa được cấp");
+                throw new Exception("Certificate not yet issued");
             }
 
             if (expiryDate.before(issueDate)) {
-                throw new Exception("Ngày hết hạn phải sau ngày cấp");
+                throw new Exception("The expiration date must be after the issuance date.");
             }
 
             CertificationDAO dao = new CertificationDAO();
 
             if (dao.isCertificateNumberExist(number)) {
-                throw new Exception("Số chứng chỉ đã tồn tại");
+                throw new Exception("Certification number was exist");
             }
 
             // =========================
@@ -159,14 +159,14 @@ public class AddCertificationServlet extends HttpServlet {
             Part filePart = request.getPart("certificateFile");
 
             if (filePart == null || filePart.getSize() == 0) {
-                throw new Exception("Vui lòng chọn file chứng chỉ");
+                throw new Exception("Please choose certification file");
             }
 
             // Validate content type
             String contentType = filePart.getContentType();
             if (!contentType.startsWith("image/")
                     && !contentType.equals("application/pdf")) {
-                throw new Exception("Chỉ chấp nhận file ảnh hoặc PDF");
+                throw new Exception("Only accept IMAGE or PDF");
             }
 
             // Tạo folder nếu chưa có

@@ -16,7 +16,6 @@ import model.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-
 /**
  *
  * @author Gia Huy
@@ -96,6 +95,13 @@ public class ServiceAddServlet extends HttpServlet {
             String category = request.getParameter("category");
             String priceRaw = request.getParameter("price");
             java.math.BigDecimal price = new java.math.BigDecimal(priceRaw != null && !priceRaw.isEmpty() ? priceRaw : "0");
+
+            // KIỂM TRA TRÙNG TÊN 
+            if (name != null && serviceDAO.checkExistName(name)) {
+                request.getSession().setAttribute("error", "Service '" + name.trim() + "' already exists!");
+                response.sendRedirect(basePath + "/service/add");
+                return;
+            }
 
             model.Service s = new model.Service();
             s.setServiceName(name.trim());

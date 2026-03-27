@@ -170,8 +170,6 @@ public class MedicineDAO extends DBContext {
         }
     }
 
-    
-
     public java.util.List<model.Prescription> getPrescriptionsByRecordId(int medicalRecordId) {
         java.util.List<model.Prescription> list = new java.util.ArrayList<>();
         String sql = "SELECT MedicineId, Quantity, Dosage, Note "
@@ -215,18 +213,17 @@ public class MedicineDAO extends DBContext {
         }
         return list;
     }
-    
-    
+
     public java.util.List<model.PrescriptionItem> getPrescriptionItems(int medicalRecordId) {
         java.util.List<model.PrescriptionItem> list = new java.util.ArrayList<>();
 
         String sql = "SELECT m.MedicineName, m.Unit, pd.Quantity, pd.Dosage, pd.Note "
                 + "FROM Prescription pd "
                 + "JOIN Medicine m ON pd.MedicineId = m.MedicineId "
-                + "WHERE pd.MedicalRecordId = ?"; 
+                + "WHERE pd.MedicalRecordId = ?";
 
         try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement st = conn.prepareStatement(sql)) {
-            
+
             st.setInt(1, medicalRecordId);
             try (java.sql.ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
@@ -243,6 +240,21 @@ public class MedicineDAO extends DBContext {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public boolean checkExistName(String medicineName) {
+        String sql = "SELECT 1 FROM Medicine WHERE MedicineName = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, medicineName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static void main(String[] args) {
