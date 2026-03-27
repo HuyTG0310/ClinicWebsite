@@ -85,7 +85,7 @@ public class MyCertificationServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Không thể tải danh sách chứng chỉ");
+            request.setAttribute("error", "Can not load certification list");
 
             // Xử lý quay về dashboard tương ứng khi lỗi
             String role = user.getRoleName().trim().toLowerCase();

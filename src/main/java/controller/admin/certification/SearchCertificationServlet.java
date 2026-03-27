@@ -36,7 +36,7 @@ public class SearchCertificationServlet extends HttpServlet {
 
             //  Validate số điện thoại chỉ chứa số
             if (!phone.isEmpty() && !phone.matches("\\d+")) {
-                request.setAttribute("error", "Số điện thoại chỉ được chứa chữ số!");
+                request.setAttribute("error", "Phone number only contains digits!");
                 request.getRequestDispatcher("/WEB-INF/admin/certification/certificationApproval.jsp")
                         .forward(request, response);
                 return;

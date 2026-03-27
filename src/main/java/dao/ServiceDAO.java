@@ -164,6 +164,22 @@ public class ServiceDAO extends DBContext {
         return list;
     }
 
+    public boolean checkExistName(String serviceName) {
+        String sql = "SELECT 1 FROM Service WHERE ServiceName = ?";
+        try (java.sql.Connection conn = new DBContext().conn; java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, serviceName.trim());
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         Service s = new Service();
         s.setServiceName("ABC");

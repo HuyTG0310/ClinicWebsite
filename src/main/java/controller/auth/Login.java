@@ -70,7 +70,7 @@ public class Login extends HttpServlet {
             }
         } else {
             // 3. Thất bại: Gửi thông báo lỗi về trang login
-            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng, hoặc tài khoản bị khóa!");
+            request.setAttribute("error", "Incorrect username/password, or account was locked!");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }

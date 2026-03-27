@@ -46,18 +46,18 @@ public class DeleteCertificationServlet extends HttpServlet {
             Certification c = dao.getById(id);
 
             if (c == null) {
-                throw new Exception("Không tìm thấy chứng chỉ");
+                throw new Exception("Certification not found!");
             }
 
             boolean isAdmin = "Admin".equalsIgnoreCase(user.getRoleName());
 
             if (isAdmin) {
                 if ("PENDING".equalsIgnoreCase(c.getStatus())) {
-                    throw new Exception("Admin không được xóa chứng chỉ đang chờ duyệt!");
+                    throw new Exception("Admins are not allowed to delete certificates that are awaiting approval!");
                 }
             } else {
                 if (!"PENDING".equalsIgnoreCase(c.getStatus())) {
-                    throw new Exception("Bạn không thể xóa chứng chỉ đã qua xử lý!");
+                    throw new Exception("You cannot delete a processed certificate!");
                 }
             }
 

@@ -66,7 +66,7 @@ public class SpecialtyDetailServlet extends HttpServlet {
                 || description == null || description.trim().isEmpty()) {
 
             request.setAttribute("error", "Name and Description not null or only contain spaces.");
-            request.setAttribute("openModal", true); // ⚠️ QUAN TRỌNG
+            request.setAttribute("openModal", true); // ️ QUAN TRỌNG
             request.setAttribute("specialty", dao.getById(id));
             request.setAttribute("pageTitle", "Manage speiclaty");
             request.setAttribute("activePage", "manageSpecialty");
@@ -79,7 +79,7 @@ public class SpecialtyDetailServlet extends HttpServlet {
 
         // ===== DUPLICATE CHECK (TRỪ CHÍNH NÓ) =====
         if (dao.existsByNameExceptId(name.trim(), id)) {
-            request.setAttribute("error", "Specialty name đã tồn tại.");
+            request.setAttribute("error", "Specialty name was exist.");
             request.setAttribute("openModal", true);
             request.setAttribute("specialty", dao.getById(id));
             request.setAttribute("pageTitle", "Manage speiclaty");

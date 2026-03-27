@@ -45,7 +45,7 @@ public class EditCertificationServlet extends HttpServlet {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.");
+            response.getWriter().write("Your session has expired. Please log in again");
             return;
         }
 
@@ -55,20 +55,20 @@ public class EditCertificationServlet extends HttpServlet {
         try {
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.isEmpty()) {
-                throw new Exception("ID không hợp lệ");
+                throw new Exception("Invalid ID");
             }
 
             int id = Integer.parseInt(idParam);
             c = dao.getById(id);
 
             if (c == null) {
-                throw new Exception("Chứng chỉ không tồn tại trong hệ thống");
+                throw new Exception("Certification not exist in system");
             }
 
             // Kiểm tra quyền sửa (Chỉ Admin hoặc chứng chỉ PENDING mới được sửa)
             boolean isAdmin = user.getRoleName().equalsIgnoreCase("Admin");
             if (!isAdmin && !"PENDING".equalsIgnoreCase(c.getStatus())) {
-                throw new Exception("Chứng chỉ đã được xử lý, bạn không có quyền chỉnh sửa");
+                throw new Exception("The certificate has been processed; you do not have permission to edit it.");
             }
 
             // ===== LẤY DỮ LIỆU =====
@@ -82,15 +82,15 @@ public class EditCertificationServlet extends HttpServlet {
                     || number == null || number.trim().isEmpty()
                     || issueDateStr == null || issueDateStr.trim().isEmpty()
                     || expiryDateStr == null || expiryDateStr.trim().isEmpty()) {
-                throw new Exception("Vui lòng nhập đầy đủ thông tin bắt buộc");
+                throw new Exception("Please fill all required information");
             }
 
             // ===== VALIDATE ĐỘ DÀI =====
             if (name.length() > 255) {
-                throw new Exception("Tên chứng chỉ quá dài (tối đa 255 ký tự)");
+                throw new Exception("The certificate name is too long (maximum 255 characters)");
             }
             if (number.length() > 100) {
-                throw new Exception("Số chứng chỉ quá dài (tối đa 100 ký tự)");
+                throw new Exception("The certificate number is too long (maximum 100 characters).");
             }
 
             // ===== VALIDATE NGÀY THÁNG (Dùng LocalDate để chính xác tuyệt đối) =====
@@ -102,21 +102,21 @@ public class EditCertificationServlet extends HttpServlet {
             LocalDate ldExpiry = expiryDate.toLocalDate();
 
             if (ldIssue.isAfter(today)) {
-                throw new Exception("Ngày cấp không được vượt quá ngày hiện tại");
+                throw new Exception("The date of issue must not exceed the current date");
             }
 
             if(ldExpiry.isBefore(today)){
-                throw new Exception("Chứng chỉ đã hết hạn");
+                throw new Exception("Cerification was expired");
             }
             
             if (ldExpiry.isBefore(ldIssue)) {
-                throw new Exception("Ngày hết hạn phải sau ngày cấp chứng chỉ");
+                throw new Exception("The expiration date must be after the certificate issuance date.");
             }
 
             // ===== KIỂM TRA TRÙNG SỐ CHỨNG CHỈ =====
             if (dao.isCertificateNumberExist(number)
                     && !number.equals(c.getCertificateNumber())) {
-                throw new Exception("Số chứng chỉ này đã tồn tại trên hệ thống");
+                throw new Exception("This certificate number already exists in the system.");
             }
 
             // ===== CẬP NHẬT THÔNG TIN =====
@@ -131,7 +131,7 @@ public class EditCertificationServlet extends HttpServlet {
 
                 String contentType = filePart.getContentType();
                 if (!contentType.startsWith("image/") && !contentType.equals("application/pdf")) {
-                    throw new Exception("Chỉ chấp nhận định dạng file ảnh hoặc PDF");
+                    throw new Exception("Only accept IMAGE or PDF");
                 }
 
                 File uploadDir = new File(UPLOAD_DIR);
